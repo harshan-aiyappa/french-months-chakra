@@ -62,7 +62,7 @@ const ResultsScreen = ({ results, restartGame }) => {
   return (
     <VStack as={motion.div} spacing={8} variants={containerVariants} initial="hidden" animate="visible">
       <VStack spacing={2}>
-        <Heading as="h2" size="2xl" fontWeight="bold">Game Complete!</Heading>
+        <Heading as="h2" size="2xl" fontWeight="bold">Unit Complete!</Heading>
         <Text fontSize="lg" color="slate.500">Here's your performance breakdown:</Text>
       </VStack>
 

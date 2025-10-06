@@ -1,38 +1,12 @@
 import { extendTheme } from '@chakra-ui/react';
-import { mode } from '@chakra-ui/theme-tools';
-
-// Define the keyframes for our animated gradient background
-const keyframes = `
-  @keyframes gradient-animation {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-`;
 
 const theme = extendTheme({
-  config: {
-    initialColorMode: 'light',
-    useSystemColorMode: false,
-  },
   styles: {
-    global: (props) => ({
-      // Inject keyframes globally
-      "body::before": {
-        content: `""`,
-        display: "none",
-        animation: "gradient-animation 15s ease infinite",
-      },
+    global: {
       body: {
-        // A beautiful, subtle animated gradient for the background
-        bg: mode(
-          'linear-gradient(-45deg, #e0c3fc, #8ec5fc, #e0c3fc, #8ec5fc)',
-          'linear-gradient(-45deg, #09203f, #537895, #09203f, #537895)'
-        )(props),
-        backgroundSize: '400% 400%',
-        animation: 'gradient-animation 15s ease infinite',
+        bg: 'slate.50',
       },
-    }),
+    },
   },
   fonts: {
     heading: `-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif`,
@@ -45,20 +19,23 @@ const theme = extendTheme({
       800: '#381680', 900: '#200A4D',
     },
     accent: {
-      400: '#00D9C0', // A vibrant teal for VAD and indicators
-      500: '#00C4AD',
+      400: '#31C48D',
+      500: '#2DB67F',
     },
     slate: {
       50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1',
       400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155',
       800: '#1e293b', 900: '#0f172a',
     },
+    success: { 50: '#F0FFF4', 200: '#9AE6B4', 500: '#38A169' },
+    warning: { 50: '#FFFAF0', 200: '#FBD38D', 500: '#D69E2E' },
+    error: { 50: '#FFF5F5', 200: '#FEB2B2', 500: '#C53030' },
   },
   shadows: {
-    'lg': '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.04)',
-    'xl': '0 20px 25px -5px rgba(0, 0, 0, 0.07), 0 10px 10px -5px rgba(0, 0, 0, 0.03)',
-    '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
-    'glow-accent': '0 0 25px 0px rgba(0, 217, 192, 0.7)',
+    'lg': '0 10px 15px -3px rgba(15, 23, 42, 0.07), 0 4px 6px -2px rgba(15, 23, 42, 0.04)',
+    'xl': '0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 10px 10px -5px rgba(15, 23, 42, 0.03)',
+    '2xl': '0 25px 50px -12px rgba(15, 23, 42, 0.15)',
+    'glow-green': '0 0 20px 0px rgba(49, 196, 141, 0.5)',
   },
   components: {
     Button: {
@@ -66,22 +43,87 @@ const theme = extendTheme({
         borderRadius: 'xl',
         fontWeight: 'semibold',
       },
+      variants: {
+        solid: (props) => {
+          if (props.colorScheme === 'brand') {
+            return {
+              bg: 'brand.500', color: 'white',
+              _hover: { bg: 'brand.600', boxShadow: 'xl', transform: 'translateY(-2px)' },
+              _active: { bg: 'brand.700', transform: 'translateY(0)' },
+            };
+          }
+          return {};
+        },
+        ghost: (props) => {
+          if (props.colorScheme === 'brand') {
+            return { color: 'brand.600', _hover: { bg: 'brand.50' } };
+          }
+          return {};
+        },
+      },
     },
     Alert: {
       baseStyle: {
         borderRadius: 'xl',
       },
+      variants: {
+        subtle: (props) => {
+          const { colorScheme } = props;
+          if (colorScheme === 'green') {
+            return {
+              container: { bg: 'success.50' },
+              title: { color: 'slate.800', fontWeight: 'semibold' },
+              description: { color: 'slate.700' },
+              icon: { color: 'success.500' },
+            };
+          }
+          if (colorScheme === 'yellow') {
+            return {
+              container: { bg: 'warning.50' },
+              title: { color: 'slate.800', fontWeight: 'semibold' },
+              description: { color: 'slate.700' },
+              icon: { color: 'warning.500' },
+            };
+          }
+          if (colorScheme === 'red') {
+            return {
+              container: { bg: 'error.50' },
+              title: { color: 'slate.800', fontWeight: 'semibold' },
+              description: { color: 'slate.700' },
+              icon: { color: 'error.500' },
+            };
+          }
+          return {};
+        },
+      },
     },
-    // Define the style for our main container
+
+    Heading: {
+      baseStyle: {
+        color: 'slate.800',
+        fontWeight: 'bold',
+      },
+    },
+    Text: {
+      baseStyle: {
+        color: 'slate.700',
+      },
+    },
+    Progress: {
+      baseStyle: {
+        track: {
+          bg: 'slate.200',
+        },
+      },
+    },
     Container: {
-      baseStyle: (props) => ({
-        backdropFilter: 'blur(15px) saturate(180%)',
-        bg: mode('rgba(255, 255, 255, 0.75)', 'rgba(29, 39, 53, 0.75)')(props),
+      baseStyle: {
+        bg: 'white',
         borderRadius: '2xl',
         boxShadow: 'xl',
-        border: '1px solid',
-        borderColor: mode('rgba(255, 255, 255, 0.4)', 'rgba(255, 255, 255, 0.1)')(props),
-      }),
+        border: '1px',
+        borderColor: 'slate.200',
+      },
     },
   },
 });

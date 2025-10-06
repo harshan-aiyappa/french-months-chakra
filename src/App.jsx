@@ -7,7 +7,8 @@ import StartScreen from './components/StartScreen';
 import GameScreen from './components/GameScreen';
 import ResultsScreen from './components/ResultsScreen';
 import useSpeechRecognition from './hooks/useSpeechRecognition';
-import { MONTHS_DATA, calculateSimilarity } from './constants';
+import { UNIT_DATA, calculateSimilarity } from './constants';
+import MCQScreen from './components/MCQScreen';
 
 const MAX_RETRIES = 3;
 
@@ -18,6 +19,12 @@ function App() {
   const [retryCount, setRetryCount] = useState(0);
   const [feedback, setFeedback] = useState({ message: '', type: '' });
   const [appError, setAppError] = useState(null);
+  
+  const [isCalibrated, setIsCalibrated] = useState(false);
+  const [dynamicThreshold, setDynamicThreshold] = useState(30);
+  const [needsRecalibration, setNeedsRecalibration] = useState(false);
+  const [calibrationKey, setCalibrationKey] = useState(0);
+
   const toast = useToast();
 
   const showToast = useCallback((status, title, description) => {
@@ -43,34 +50,36 @@ function App() {
     }
   }, [toast]);
 
-  const currentMonth = useMemo(() => MONTHS_DATA[currentIndex], [currentIndex]);
+  const currentActivity = useMemo(() => UNIT_DATA[currentIndex], [currentIndex]);
   const score = useMemo(() => sessionResults.filter(r => r.status === 'correct').length, [sessionResults]);
-  const progress = useMemo(() => (sessionResults.length / MONTHS_DATA.length) * 100, [sessionResults]);
-
+  const progress = useMemo(() => (sessionResults.length / UNIT_DATA.length) * 100, [sessionResults]);
+  
   const resetFeedback = useCallback(() => setFeedback({ message: '', type: '' }), []);
 
   const handleSpeechResult = useCallback((transcript) => {
-    const expected = currentMonth.answer.toLowerCase();
+    const expected = currentActivity.answer.toLowerCase();
     const isCorrect = transcript === expected;
     const similarity = calculateSimilarity(transcript, expected);
     let status, message;
-    if (isCorrect) { status = 'correct'; message = `Correct! "${currentMonth.question}" → "${currentMonth.answer}"`; } 
-    else if (similarity >= 0.7) { status = 'partial'; message = `Close! You said "${transcript}". Correct answer: "${currentMonth.answer}"`; } 
-    else { status = 'incorrect'; message = `Incorrect. You said "${transcript}". Correct answer: "${currentMonth.answer}"`; }
+    if (isCorrect) { status = 'correct'; message = `Correct! "${currentActivity.question}" → "${currentActivity.answer}"`; } 
+    else if (similarity >= 0.7) { status = 'partial'; message = `Close! You said "${transcript}". Correct answer: "${currentActivity.answer}"`; } 
+    else { status = 'incorrect'; message = `Incorrect. You said "${transcript}". Correct answer: "${currentActivity.answer}"`; }
     setFeedback({ message, type: status });
-    setSessionResults(prev => [...prev, { ...currentMonth, transcript, status, retries: retryCount }]);
-  }, [currentMonth, retryCount]);
+    setSessionResults(prev => [...prev, { ...currentActivity, transcript, status, retries: retryCount }]);
+  }, [currentActivity, retryCount]);
 
   const handleNoSpeech = useCallback(() => {
     showToast('warning', 'No Speech Detected (R-1)', 'The system did not hear anything.');
+    resetFeedback();
+    setCalibrationKey(prevKey => prevKey + 1);
+    setNeedsRecalibration(true); 
     if (retryCount + 1 >= MAX_RETRIES) {
       setFeedback({ message: `No speech detected after ${MAX_RETRIES} attempts. Moving on.`, type: 'warning' });
-      setSessionResults(prev => [...prev, { ...currentMonth, transcript: '', status: 'skipped', retries: retryCount + 1 }]);
+      setSessionResults(prev => [...prev, { ...currentActivity, transcript: '', status: 'skipped', retries: retryCount + 1 }]);
     } else {
       setRetryCount(prev => prev + 1);
-      setFeedback({ message: `No speech detected. Try again (${retryCount + 1}/${MAX_RETRIES})`, type: 'warning' });
     }
-  }, [retryCount, currentMonth, showToast]);
+  }, [retryCount, currentActivity, showToast, resetFeedback]);
   
   const handleGenericError = useCallback((error) => {
     const errorMap = {
@@ -86,9 +95,11 @@ function App() {
   }, [showToast]);
 
   const { isListening, error: speechRecognitionError, startListening } = useSpeechRecognition({
-    onResult: handleSpeechResult, onNoSpeech: handleNoSpeech, onError: handleGenericError,
-    onStart: () => showToast('info', 'Listening... (L-1)', 'The engine has started.'),
-    onSpeechStart: () => showToast('info', 'Speech Detected! (L-2)', 'Your voice is being picked up.'),
+    onResult: handleSpeechResult,
+    onNoSpeech: handleNoSpeech,
+    onError: handleGenericError,
+    onStart: () => showToast('info', 'Listening... (L-1)', 'Engine started.'),
+    onSpeechStart: () => showToast('info', 'Speech Detected! (L-2)', 'Voice detected.'),
   });
   
   useEffect(() => {
@@ -99,15 +110,34 @@ function App() {
     }
   }, [speechRecognitionError, showToast]);
 
-  const startGame = useCallback(() => {
-    setCurrentIndex(0); setSessionResults([]); setRetryCount(0); resetFeedback(); setGameState('playing');
+  const startUnit = useCallback(() => {
+    setCurrentIndex(0); setSessionResults([]); setRetryCount(0); resetFeedback();
+    setCalibrationKey(prevKey => prevKey + 1);
+    setGameState('calibrating');
+    setIsCalibrated(false);
   }, [resetFeedback]);
 
-  const nextPrompt = useCallback(() => {
-    resetFeedback(); setRetryCount(0);
-    if (currentIndex < MONTHS_DATA.length - 1) { setCurrentIndex(prev => prev + 1); } 
-    else { setGameState('results'); }
+  const nextActivity = useCallback(() => {
+    resetFeedback(); setRetryCount(0); setNeedsRecalibration(false);
+    if (currentIndex < UNIT_DATA.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+    } else {
+      setGameState('results');
+    }
   }, [resetFeedback, currentIndex]);
+
+  const handleMCQAnswer = (isCorrect) => {
+    const status = isCorrect ? 'correct' : 'incorrect';
+    setSessionResults(prev => [...prev, { ...currentActivity, status, transcript: isCorrect ? 'Correct' : 'Incorrect' }]);
+    setTimeout(() => { nextActivity(); }, 1000);
+  };
+
+  const handleCalibrationComplete = useCallback((newThreshold) => {
+    setDynamicThreshold(newThreshold);
+    setIsCalibrated(true);
+    setNeedsRecalibration(false);
+    setGameState('playing');
+  }, []);
 
   const renderContent = () => {
     if (appError) {
@@ -120,23 +150,50 @@ function App() {
       );
     }
 
+    let content;
+    switch (gameState) {
+      case 'start':
+        content = <StartScreen onBegin={startUnit} />;
+        break;
+      case 'calibrating':
+      case 'playing':
+        if (currentActivity.type === 'MCQ') {
+          content = <MCQScreen activity={currentActivity} onAnswer={handleMCQAnswer} />;
+        } else {
+          content = (
+            <GameScreen
+              month={currentActivity}
+              isListening={isListening}
+              startListening={startListening}
+              nextPrompt={nextActivity}
+              feedback={feedback}
+              showNextButton={!!sessionResults[currentIndex]}
+              showToast={showToast}
+              isCalibrated={isCalibrated}
+              needsRecalibration={needsRecalibration}
+              calibrationKey={calibrationKey}
+              onCalibrationComplete={handleCalibrationComplete}
+            />
+          );
+        }
+        break;
+      case 'results':
+        content = <ResultsScreen results={sessionResults} restartGame={startUnit} />;
+        break;
+      default:
+        content = null;
+    }
+    
     return (
       <AnimatePresence mode="wait">
         <motion.div
-          key={gameState}
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.98 }}
-          transition={{ duration: 0.3, ease: 'easeInOut' }}
+          key={currentIndex}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
         >
-          {gameState === 'start' && <StartScreen onBegin={startGame} />}
-          {gameState === 'playing' && (
-            <GameScreen
-              month={currentMonth} isListening={isListening} startListening={startListening} nextPrompt={nextPrompt}
-              feedback={feedback} showNextButton={!!sessionResults[currentIndex]} showToast={showToast}
-            />
-          )}
-          {gameState === 'results' && <ResultsScreen results={sessionResults} restartGame={startGame} />}
+          {content}
         </motion.div>
       </AnimatePresence>
     );
@@ -144,17 +201,9 @@ function App() {
   
   return (
     <Flex align="center" justify="center" minH="100vh" w="100vw" p={4}>
-      <Container
-        maxW="container.sm"
-        bg="white"
-        borderRadius="2xl"
-        boxShadow="xl"
-        p={{ base: 6, md: 8 }}
-        border="1px"
-        borderColor="slate.200"
-      >
+      <Container maxW="container.sm" bg="white" borderRadius="2xl" boxShadow="xl" p={{ base: 6, md: 8 }} border="1px" borderColor="slate.200">
         <VStack spacing={8} w="100%">
-          <Header score={score} total={MONTHS_DATA.length} progress={progress} />
+          <Header score={score} total={UNIT_DATA.length} progress={progress} />
           <Box as="main" w="100%" minH={{ base: "420px", md: "450px" }}>
             {renderContent()}
           </Box>
