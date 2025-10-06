@@ -1,12 +1,16 @@
 import React from 'react';
 import { Box, Flex, Heading, Text, Progress, Image } from '@chakra-ui/react';
-import logo from '../assets/favicon1.png';
+// THE FIX (Part 1): The logo imports are REMOVED from here.
 
 const Header = ({ score, total, progress }) => {
+  // THE FIX (Part 2): We now use a direct, absolute path to the image in the 'public' folder.
+  // This path works for both development and the final Vercel build.
+  const logoSrc = '/assets/favicon1.png';
+
   return (
     <Box as="header" textAlign="center" w="100%">
       <Flex justify="center" align="center" mb={4}>
-        <Image src={logo} alt="Lingotran Logo" boxSize="40px" mr={3} />
+        <Image src={logoSrc} alt="Lingotran Logo" boxSize="40px" mr={3} />
         <Box textAlign="left">
           <Heading as="h1" size="md" color="slate.800">French Months Unit</Heading>
           <Text fontSize="xs" color="slate.500">
