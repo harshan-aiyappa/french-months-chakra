@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import MicVisualizer from './MicVisualizer';
 import Feedback from './Feedback';
 
-const GameScreen = ({ 
+const GameScreenComponent = ({ 
   month, isListening, startListening, nextPrompt, feedback, showNextButton, showToast,
   isCalibrated, needsRecalibration, calibrationKey, onCalibrationComplete, dynamicThreshold
 }) => {
@@ -87,4 +87,5 @@ const GameScreen = ({
   );
 };
 
+const GameScreen = React.memo(GameScreenComponent);
 export default GameScreen;

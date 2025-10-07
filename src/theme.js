@@ -62,41 +62,7 @@ const theme = extendTheme({
         },
       },
     },
-    Alert: {
-      baseStyle: {
-        borderRadius: 'xl',
-      },
-      variants: {
-        subtle: (props) => {
-          const { colorScheme } = props;
-          if (colorScheme === 'green') {
-            return {
-              container: { bg: 'success.50' },
-              title: { color: 'slate.800', fontWeight: 'semibold' },
-              description: { color: 'slate.700' },
-              icon: { color: 'success.500' },
-            };
-          }
-          if (colorScheme === 'yellow') {
-            return {
-              container: { bg: 'warning.50' },
-              title: { color: 'slate.800', fontWeight: 'semibold' },
-              description: { color: 'slate.700' },
-              icon: { color: 'warning.500' },
-            };
-          }
-          if (colorScheme === 'red') {
-            return {
-              container: { bg: 'error.50' },
-              title: { color: 'slate.800', fontWeight: 'semibold' },
-              description: { color: 'slate.700' },
-              icon: { color: 'error.500' },
-            };
-          }
-          return {};
-        },
-      },
-    },
+
 
     Heading: {
       baseStyle: {
@@ -123,6 +89,45 @@ const theme = extendTheme({
         boxShadow: 'xl',
         border: '1px',
         borderColor: 'slate.200',
+      },
+    },
+    Alert: {
+      variants: {
+        glass: (props) => {
+          const { status } = props;
+          const isDark = props.colorMode === 'dark';
+          const bg = isDark
+            ? status === 'success' ? 'rgba(49, 151, 105, 0.8)' :
+              status === 'error' ? 'rgba(197, 48, 48, 0.8)' :
+                status === 'warning' ? 'rgba(180, 131, 28, 0.8)' :
+                  'rgba(43, 108, 176, 0.8)'
+            : status === 'success' ? 'rgba(76, 175, 80, 0.8)' :
+              status === 'error' ? 'rgba(229, 62, 62, 0.8)' :
+                status === 'warning' ? 'rgba(237, 137, 54, 0.8)' :
+                  'rgba(49, 130, 206, 0.8)';
+
+          return {
+            container: {
+              backdropFilter: 'blur(10px)',
+              bg: bg,
+              color: 'white',
+              borderRadius: 'xl',
+              boxShadow: 'lg',
+              border: '1px solid',
+              borderColor: 'whiteAlpha.300',
+              p: 4,
+            },
+            icon: {
+              color: 'white',
+            },
+            title: {
+              fontWeight: 'bold',
+            },
+            description: {
+              fontSize: 'sm',
+            },
+          };
+        },
       },
     },
   },

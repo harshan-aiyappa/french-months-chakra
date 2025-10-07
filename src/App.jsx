@@ -27,7 +27,6 @@ function App() {
   const [calibrationKey, setCalibrationKey] = useState(0);
 
   const toast = useToast();
-
   const showToast = useCallback((status, title, description) => {
     const id = title + description;
     if (!toast.isActive(id)) {
@@ -61,44 +60,19 @@ function App() {
     const targetPhrase = currentActivity.answer;
     const sourcePhrase = transcript;
     
-    let evaluationResult = {};
-    let newStatus, message;
-
+    let evaluationResult;
     if (currentActivity.evaluationMode === 'EXACT') {
       const isCorrect = targetPhrase.toLowerCase() === sourcePhrase.toLowerCase();
-      if (isCorrect) {
-        newStatus = 'correct';
-        message = `Perfect! You said "${transcript}".`;
-        evaluationResult = { status: 'success', highlightedPhrase: [] };
-      } else {
-        newStatus = 'incorrect';
-        message = `Not quite. You said "${transcript}", but the answer is "${targetPhrase}".`;
-        evaluationResult = { status: 'fail', highlightedPhrase: [] };
-      }
+      if (isCorrect) { evaluationResult = { status: 'success', message: `Perfect! You said "${transcript}".`, highlightedPhrase: [] }; } 
+      else { evaluationResult = { status: 'fail', message: `Not quite. You said "${transcript}", but the answer is "${targetPhrase}".`, highlightedPhrase: [] }; }
     } else {
       const useLevenshtein = currentActivity.evaluationMode === 'LEVENSHTEIN';
       evaluationResult = evaluatePronunciation(targetPhrase, sourcePhrase, useLevenshtein, 'en-US');
-      
-      if (evaluationResult.status === 'success') {
-        newStatus = 'correct';
-        message = `Perfect! You said "${transcript}".`;
-      } else if (evaluationResult.status === 'partial') {
-        newStatus = 'partial';
-        message = `Good try! Let's review the pronunciation.`;
-      } else { // 'fail'
-        newStatus = 'incorrect';
-        message = `Not quite. The correct answer is "${targetPhrase}".`;
-      }
     }
 
-    setFeedback({ message, type: newStatus, highlightedPhrase: evaluationResult.highlightedPhrase });
-    setSessionResults(prev => [...prev, {
-      ...currentActivity,
-      transcript,
-      status: newStatus,
-      retries: retryCount,
-      evaluation: evaluationResult,
-    }]);
+    const newStatus = evaluationResult.status === 'success' ? 'correct' : evaluationResult.status === 'partial' ? 'partial' : 'incorrect';
+    setFeedback({ message: evaluationResult.message, type: newStatus, highlightedPhrase: evaluationResult.highlightedPhrase });
+    setSessionResults(prev => [...prev, { ...currentActivity, transcript, status: newStatus, retries: retryCount, evaluation: evaluationResult }]);
   }, [currentActivity, retryCount]);
 
   const handleNoSpeech = useCallback(() => {
