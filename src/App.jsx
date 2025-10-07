@@ -7,8 +7,9 @@ import StartScreen from './components/StartScreen';
 import GameScreen from './components/GameScreen';
 import ResultsScreen from './components/ResultsScreen';
 import useSpeechRecognition from './hooks/useSpeechRecognition';
-import { UNIT_DATA, calculateSimilarity } from './constants';
+import { UNIT_DATA } from './constants';
 import MCQScreen from './components/MCQScreen';
+import evaluatePronunciation from './utils/pronunciationEvaluator';
 
 const MAX_RETRIES = 3;
 
@@ -17,7 +18,7 @@ function App() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [sessionResults, setSessionResults] = useState([]);
   const [retryCount, setRetryCount] = useState(0);
-  const [feedback, setFeedback] = useState({ message: '', type: '' });
+  const [feedback, setFeedback] = useState({ message: '', type: '', highlightedPhrase: [] });
   const [appError, setAppError] = useState(null);
   
   const [isCalibrated, setIsCalibrated] = useState(false);
@@ -54,18 +55,50 @@ function App() {
   const score = useMemo(() => sessionResults.filter(r => r.status === 'correct').length, [sessionResults]);
   const progress = useMemo(() => (sessionResults.length / UNIT_DATA.length) * 100, [sessionResults]);
   
-  const resetFeedback = useCallback(() => setFeedback({ message: '', type: '' }), []);
+  const resetFeedback = useCallback(() => setFeedback({ message: '', type: '', highlightedPhrase: [] }), []);
 
   const handleSpeechResult = useCallback((transcript) => {
-    const expected = currentActivity.answer.toLowerCase();
-    const isCorrect = transcript === expected;
-    const similarity = calculateSimilarity(transcript, expected);
-    let status, message;
-    if (isCorrect) { status = 'correct'; message = `Correct! "${currentActivity.question}" → "${currentActivity.answer}"`; } 
-    else if (similarity >= 0.7) { status = 'partial'; message = `Close! You said "${transcript}". Correct answer: "${currentActivity.answer}"`; } 
-    else { status = 'incorrect'; message = `Incorrect. You said "${transcript}". Correct answer: "${currentActivity.answer}"`; }
-    setFeedback({ message, type: status });
-    setSessionResults(prev => [...prev, { ...currentActivity, transcript, status, retries: retryCount }]);
+    const targetPhrase = currentActivity.answer;
+    const sourcePhrase = transcript;
+    
+    let evaluationResult = {};
+    let newStatus, message;
+
+    if (currentActivity.evaluationMode === 'EXACT') {
+      const isCorrect = targetPhrase.toLowerCase() === sourcePhrase.toLowerCase();
+      if (isCorrect) {
+        newStatus = 'correct';
+        message = `Perfect! You said "${transcript}".`;
+        evaluationResult = { status: 'success', highlightedPhrase: [] };
+      } else {
+        newStatus = 'incorrect';
+        message = `Not quite. You said "${transcript}", but the answer is "${targetPhrase}".`;
+        evaluationResult = { status: 'fail', highlightedPhrase: [] };
+      }
+    } else {
+      const useLevenshtein = currentActivity.evaluationMode === 'LEVENSHTEIN';
+      evaluationResult = evaluatePronunciation(targetPhrase, sourcePhrase, useLevenshtein, 'en-US');
+      
+      if (evaluationResult.status === 'success') {
+        newStatus = 'correct';
+        message = `Perfect! You said "${transcript}".`;
+      } else if (evaluationResult.status === 'partial') {
+        newStatus = 'partial';
+        message = `Good try! Let's review the pronunciation.`;
+      } else { // 'fail'
+        newStatus = 'incorrect';
+        message = `Not quite. The correct answer is "${targetPhrase}".`;
+      }
+    }
+
+    setFeedback({ message, type: newStatus, highlightedPhrase: evaluationResult.highlightedPhrase });
+    setSessionResults(prev => [...prev, {
+      ...currentActivity,
+      transcript,
+      status: newStatus,
+      retries: retryCount,
+      evaluation: evaluationResult,
+    }]);
   }, [currentActivity, retryCount]);
 
   const handleNoSpeech = useCallback(() => {
@@ -173,6 +206,7 @@ function App() {
               needsRecalibration={needsRecalibration}
               calibrationKey={calibrationKey}
               onCalibrationComplete={handleCalibrationComplete}
+              dynamicThreshold={dynamicThreshold}
             />
           );
         }

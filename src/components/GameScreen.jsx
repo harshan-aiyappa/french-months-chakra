@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import MicVisualizer from './MicVisualizer';
 import Feedback from './Feedback';
 
-const GameScreenComponent = ({ 
+const GameScreen = ({ 
   month, isListening, startListening, nextPrompt, feedback, showNextButton, showToast,
   isCalibrated, needsRecalibration, calibrationKey, onCalibrationComplete, dynamicThreshold
 }) => {
@@ -76,12 +76,15 @@ const GameScreenComponent = ({
         )}
       </VStack>
 
-      <Box h="70px" mt={2}>
-        <Feedback message={feedback.message} type={feedback.type} />
+      <Box minH={{ base: '90px', md: '70px' }} mt={2}>
+        <Feedback 
+          message={feedback.message} 
+          type={feedback.type} 
+          highlightedPhrase={feedback.highlightedPhrase} 
+        />
       </Box>
     </VStack>
   );
 };
 
-const GameScreen = React.memo(GameScreenComponent);
 export default GameScreen;
