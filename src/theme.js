@@ -27,9 +27,9 @@ const theme = extendTheme({
       400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155',
       800: '#1e293b', 900: '#0f172a',
     },
-    success: { 50: '#F0FFF4', 200: '#9AE6B4', 500: '#38A169' },
-    warning: { 50: '#FFFAF0', 200: '#FBD38D', 500: '#D69E2E' },
-    error: { 50: '#FFF5F5', 200: '#FEB2B2', 500: '#C53030' },
+    success: { 50: '#F0FFF4', 500: '#38A169' },
+    warning: { 50: '#FFFAF0', 500: '#D69E2E' },
+    error: { 50: '#FFF5F5', 500: '#C53030' },
   },
   shadows: {
     'lg': '0 10px 15px -3px rgba(15, 23, 42, 0.07), 0 4px 6px -2px rgba(15, 23, 42, 0.04)',
@@ -43,90 +43,18 @@ const theme = extendTheme({
         borderRadius: 'xl',
         fontWeight: 'semibold',
       },
-      variants: {
-        solid: (props) => {
-          if (props.colorScheme === 'brand') {
-            return {
-              bg: 'brand.500', color: 'white',
-              _hover: { bg: 'brand.600', boxShadow: 'xl', transform: 'translateY(-2px)' },
-              _active: { bg: 'brand.700', transform: 'translateY(0)' },
-            };
-          }
-          return {};
-        },
-        ghost: (props) => {
-          if (props.colorScheme === 'brand') {
-            return { color: 'brand.600', _hover: { bg: 'brand.50' } };
-          }
-          return {};
-        },
-      },
-    },
-
-
-    Heading: {
-      baseStyle: {
-        color: 'slate.800',
-        fontWeight: 'bold',
-      },
-    },
-    Text: {
-      baseStyle: {
-        color: 'slate.700',
-      },
-    },
-    Progress: {
-      baseStyle: {
-        track: {
-          bg: 'slate.200',
-        },
-      },
-    },
-    Container: {
-      baseStyle: {
-        bg: 'white',
-        borderRadius: '2xl',
-        boxShadow: 'xl',
-        border: '1px',
-        borderColor: 'slate.200',
-      },
     },
     Alert: {
+      baseStyle: {
+        borderRadius: 'xl',
+      },
       variants: {
-        glass: (props) => {
+        subtle: (props) => {
           const { status } = props;
-          const isDark = props.colorMode === 'dark';
-          const bg = isDark
-            ? status === 'success' ? 'rgba(49, 151, 105, 0.8)' :
-              status === 'error' ? 'rgba(197, 48, 48, 0.8)' :
-                status === 'warning' ? 'rgba(180, 131, 28, 0.8)' :
-                  'rgba(43, 108, 176, 0.8)'
-            : status === 'success' ? 'rgba(76, 175, 80, 0.8)' :
-              status === 'error' ? 'rgba(229, 62, 62, 0.8)' :
-                status === 'warning' ? 'rgba(237, 137, 54, 0.8)' :
-                  'rgba(49, 130, 206, 0.8)';
-
-          return {
-            container: {
-              backdropFilter: 'blur(10px)',
-              bg: bg,
-              color: 'white',
-              borderRadius: 'xl',
-              boxShadow: 'lg',
-              border: '1px solid',
-              borderColor: 'whiteAlpha.300',
-              p: 4,
-            },
-            icon: {
-              color: 'white',
-            },
-            title: {
-              fontWeight: 'bold',
-            },
-            description: {
-              fontSize: 'sm',
-            },
-          };
+          if (status === 'success') { return { container: { bg: 'success.50', color: 'success.500' } }; }
+          if (status === 'warning') { return { container: { bg: 'warning.50', color: 'warning.500' } }; }
+          if (status === 'error') { return { container: { bg: 'error.50', color: 'error.500' } }; }
+          return { container: { bg: 'blue.50', color: 'blue.500' } };
         },
       },
     },

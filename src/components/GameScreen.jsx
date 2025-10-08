@@ -6,58 +6,42 @@ import Feedback from './Feedback';
 
 const GameScreenComponent = ({ 
   month, isListening, startListening, nextPrompt, feedback, showNextButton, showToast,
-  isCalibrated, needsRecalibration, calibrationKey, onCalibrationComplete, dynamicThreshold
+  dynamicThreshold
 }) => {
   const [micError, setMicError] = useState(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
 
   useEffect(() => { setMicError(null); }, [month]);
   
-  const showCalibration = !isCalibrated || needsRecalibration;
-  
   return (
     <VStack spacing={8} align="stretch">
-      {showCalibration ? (
-        <VStack h={{ base: "200px", md: "220px" }} justify="center" spacing={4} p={6} bg="slate.50" borderRadius="2xl">
-          <Heading size="md" color="slate.600">Preparing Microphone...</Heading>
-          <MicVisualizer 
-            key={calibrationKey}
-            setMicError={setMicError} 
-            showToast={showToast}
-            onCalibrationComplete={onCalibrationComplete}
-          />
-        </VStack>
-      ) : (
-        <Box
-          p={{ base: 6, md: 8 }} bg="white" borderRadius="2xl" border="1px" borderColor="slate.200"
-          textAlign="center" boxShadow={isSpeaking ? 'glow-green' : 'lg'} transition="box-shadow 0.3s ease-in-out"
-        >
-          <Heading as="h2" size={{ base: 'xl', md: '2xl' }} color="brand.500" fontWeight="bold">
-            {month.question}
-          </Heading>
-          <Text fontStyle="italic" color="slate.500" mt={2}>
-            {month.pronunciation}
-          </Text>
-        </Box>
-      )}
+      <Box
+        p={{ base: 6, md: 8 }} bg="white" borderRadius="2xl" border="1px" borderColor="slate.200"
+        textAlign="center" boxShadow={isSpeaking ? 'glow-green' : 'lg'} transition="box-shadow 0.3s ease-in-out"
+      >
+        <Heading as="h2" size={{ base: 'xl', md: '2xl' }} color="brand.500" fontWeight="bold">
+          {month.question}
+        </Heading>
+        <Text fontStyle="italic" color="slate.500" mt={2}>
+          {month.pronunciation}
+        </Text>
+      </Box>
 
       <VStack spacing={4} align="center">
-        {!showCalibration && (
-            <MicVisualizer 
-              isListening={isListening} 
-              setIsSpeaking={setIsSpeaking} 
-              setMicError={setMicError}
-              dynamicThreshold={dynamicThreshold}
-            />
-        )}
+        <MicVisualizer 
+          isListening={isListening} 
+          setIsSpeaking={setIsSpeaking} 
+          setMicError={setMicError}
+          dynamicThreshold={dynamicThreshold}
+        />
         <Text my={2} color={micError ? 'red.500' : 'slate.500'} h="24px" fontWeight="medium" fontSize="sm">
-          {showCalibration ? 'Calibrating...' : micError || (isListening ? 'Listening...' : 'Mic ready - Click to speak')}
+          {micError || (isListening ? 'Listening...' : 'Mic ready - Click to speak')}
         </Text>
         
         {!showNextButton ? (
           <Button
             size="lg" h="60px" px={12} minW="240px" onClick={startListening}
-            isDisabled={showCalibration || !!micError || isListening}
+            isDisabled={!!micError || isListening}
             as={motion.button} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
             bg="brand.500" color="white" boxShadow="lg"
             _hover={{ bg: 'brand.600', boxShadow: 'xl' }}
