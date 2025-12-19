@@ -8,4 +8,10 @@ export default defineConfig({
     react(),
     basicSsl() // This enables HTTPS
   ],
+  server: {
+    https: true,
+    host: true,
+    port: 5173,
+    strictPort: true,
+  }
 });
