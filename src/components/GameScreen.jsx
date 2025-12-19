@@ -15,7 +15,7 @@ const GameScreenComponent = ({
   useEffect(() => { setMicError(null); }, [month]);
 
   return (
-    <VStack spacing={10} align="stretch" py={4}>
+    <VStack spacing={{ base: 6, md: 10 }} align="stretch" py={{ base: 2, md: 4 }}>
       <motion.div
         key={month.question}
         initial={{ opacity: 0, y: 10 }}
@@ -36,10 +36,10 @@ const GameScreenComponent = ({
           overflow="hidden"
         >
           <Box position="absolute" top={0} left={0} right={0} h="4px" bg="brand.500" />
-          <Heading as="h2" size="3xl" color="slate.800" fontWeight="black" letterSpacing="tight">
+          <Heading as="h2" size={{ base: "2xl", md: "3xl" }} color="slate.800" fontWeight="black" letterSpacing="tight">
             {month.question}
           </Heading>
-          <Text fontSize="xl" fontWeight="semibold" color="brand.500" mt={3} letterSpacing="wide" textTransform="uppercase">
+          <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="semibold" color="brand.500" mt={3} letterSpacing="wide" textTransform="uppercase">
             {month.pronunciation}
           </Text>
         </Box>
@@ -51,7 +51,7 @@ const GameScreenComponent = ({
           setIsSpeaking={setIsSpeaking}
           setMicError={setMicError}
           dynamicThreshold={dynamicThreshold}
-          onSilence={nextPrompt ? () => stopListening && stopListening() : undefined} // Logic: stop ASR after silence
+          onSilence={isListening && stopListening ? stopListening : undefined}
         />
         <Text my={2} color={micError ? 'error.500' : 'slate.500'} h="24px" fontWeight="bold" fontSize="xs" textTransform="uppercase" letterSpacing="widest">
           {micError || (isListening ? 'Voice Detected' : 'Ready Capturing')}
@@ -60,8 +60,8 @@ const GameScreenComponent = ({
         {!showNextButton ? (
           <Button
             leftIcon={!isListening ? <Icon as={FaMicrophone} /> : null}
-            size="lg"
-            h="65px"
+            size={{ base: "md", md: "lg" }}
+            h={{ base: "55px", md: "65px" }}
             w="100%"
             maxW="280px"
             onClick={startListening}
@@ -86,8 +86,8 @@ const GameScreenComponent = ({
         ) : (
           <Button
             rightIcon={<Icon as={FaArrowRight} />}
-            size="lg"
-            h="60px"
+            size={{ base: "md", md: "lg" }}
+            h={{ base: "50px", md: "60px" }}
             w="100%"
             maxW="200px"
             onClick={nextPrompt}

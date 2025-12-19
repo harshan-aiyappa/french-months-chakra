@@ -20,7 +20,7 @@ const StatCard = ({ label, value, color = "slate.800" }) => (
     transition={{ type: "spring", stiffness: 300 }}
   >
     <Text fontSize="xs" color="slate.500" fontWeight="bold" textTransform="uppercase" mb={2}>{label}</Text>
-    <Heading size="xl" color={color} fontWeight="black">{value}</Heading>
+    <Heading size={{ base: "lg", md: "xl" }} color={color} fontWeight="black">{value}</Heading>
   </MotionBox>
 );
 
@@ -108,7 +108,7 @@ const ResultsScreen = ({ results, restartGame }) => {
   return (
     <VStack as={motion.div} spacing={10} variants={containerVariants} initial="hidden" animate="visible" py={6}>
       <VStack spacing={3} textAlign="center">
-        <Heading as="h2" size="2xl" fontWeight="black" color="slate.800">
+        <Heading as="h2" size={{ base: "xl", md: "2xl" }} fontWeight="black" color="slate.800">
           {percentage >= 85 ? "Magnifique! 🎉" : percentage >= 60 ? "Great Progress! 👍" : "Keep Practicing! 💪"}
         </Heading>
         <Text fontSize="lg" color="slate.500" maxW="md">
@@ -125,7 +125,7 @@ const ResultsScreen = ({ results, restartGame }) => {
 
       <Box w="100%">
         <HStack justify="space-between" mb={6}>
-          <Heading size="md" color="slate.800">Review Summary</Heading>
+          <Heading size={{ base: "sm", md: "md" }} color="slate.800">Review Summary</Heading>
           <Text fontSize="xs" fontWeight="bold" bg="slate.100" px={2} py={1} borderRadius="md" color="slate.500">
             {results.length} ITEMS
           </Text>
@@ -142,7 +142,8 @@ const ResultsScreen = ({ results, restartGame }) => {
       <Button
         bg="brand.500"
         color="white"
-        size="lg"
+        size={{ base: "md", md: "lg" }}
+        h={{ base: "55px", md: "65px" }}
         h="60px"
         w="100%"
         maxW="xs"

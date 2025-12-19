@@ -46,7 +46,9 @@ const MicVisualizer = ({
     const setupAudio = async () => {
       if (!window.micStream) {
         try {
+          console.log('[MicVisualizer] Requesting microphone access...');
           window.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          console.log('[MicVisualizer] Microphone access granted');
         } catch (err) {
           if (setMicError) {
             let errorDetails = { desc: 'Could not access the microphone.' };
@@ -64,6 +66,7 @@ const MicVisualizer = ({
         if (audioContext.state === 'suspended') {
           await audioContext.resume();
         }
+        console.log('[MicVisualizer] AudioContext created, state:', audioContext.state);
         audioContextRef.current = audioContext;
         analyser = audioContext.createAnalyser();
         analyser.fftSize = 256;
@@ -72,6 +75,7 @@ const MicVisualizer = ({
         source.connect(analyser);
         dataArray = new Uint8Array(analyser.frequencyBinCount);
         setIsMicReady(true);
+        console.log('[MicVisualizer] Audio setup complete, starting visualization');
         visualize();
       } catch (e) {
         console.error("Audio context error", e);

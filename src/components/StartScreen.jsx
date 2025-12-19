@@ -5,28 +5,28 @@ import { motion } from 'framer-motion';
 
 const StartScreen = ({ onBegin }) => {
   return (
-    <VStack spacing={10} textAlign="center" py={12} px={6}>
+    <VStack spacing={{ base: 6, md: 10 }} textAlign="center" py={{ base: 6, md: 12 }} px={{ base: 4, md: 6 }}>
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.6, type: "spring" }}
       >
         <Box
-          p={6}
+          p={{ base: 4, md: 6 }}
           bg="brand.50"
           borderRadius="full"
           display="inline-block"
           boxShadow="inner"
         >
-          <Image src="/assets/favicon1.png" boxSize="80px" />
+          <Image src="/assets/favicon1.png" boxSize={{ base: "60px", md: "80px" }} />
         </Box>
       </motion.div>
 
       <Box>
-        <Heading as="h2" size="2xl" fontWeight="black" color="slate.800" mb={3}>
+        <Heading as="h2" size={{ base: "xl", md: "2xl" }} fontWeight="black" color="slate.800" mb={3}>
           Ready to Practice?
         </Heading>
-        <Text fontSize="lg" color="slate.500" maxW="md" mx="auto" lineHeight="tall">
+        <Text fontSize={{ base: "md", md: "lg" }} color="slate.500" maxW="md" mx="auto" lineHeight="tall">
           Master the French months through interactive speaking and logic activities.
         </Text>
       </Box>
@@ -44,7 +44,7 @@ const StartScreen = ({ onBegin }) => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 + i * 0.1 }}
             bg="slate.50"
-            p={3}
+            p={{ base: 2, md: 3 }}
             borderRadius="xl"
             border="1px solid"
             borderColor="slate.100"
@@ -56,8 +56,8 @@ const StartScreen = ({ onBegin }) => {
       </VStack>
 
       <Button
-        size="lg"
-        h="65px"
+        size={{ base: "md", md: "lg" }}
+        h={{ base: "55px", md: "65px" }}
         w="100%"
         maxW="xs"
         onClick={onBegin}

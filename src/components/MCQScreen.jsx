@@ -28,7 +28,7 @@ const MCQScreen = ({ activity, onAnswer }) => {
   };
 
   return (
-    <VStack spacing={10} align="stretch" py={4}>
+    <VStack spacing={{ base: 6, md: 10 }} align="stretch" py={{ base: 2, md: 4 }}>
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -45,7 +45,7 @@ const MCQScreen = ({ activity, onAnswer }) => {
           <Text fontSize="sm" color="brand.500" fontWeight="bold" mb={2} textTransform="uppercase" letterSpacing="widest">
             Multiple Choice
           </Text>
-          <Heading as="h2" size="xl" color="slate.800" lineHeight="base">
+          <Heading as="h2" size={{ base: "lg", md: "xl" }} color="slate.800" lineHeight="base">
             {activity.question}
           </Heading>
         </Box>
@@ -55,8 +55,8 @@ const MCQScreen = ({ activity, onAnswer }) => {
         {activity.options.map((option, i) => (
           <Button
             key={option}
-            size="lg"
-            h="64px"
+            size={{ base: "md", md: "lg" }}
+            h={{ base: "56px", md: "64px" }}
             w="100%"
             onClick={() => handleSelect(option)}
             isDisabled={isAnswered}
