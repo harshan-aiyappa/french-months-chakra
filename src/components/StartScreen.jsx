@@ -1,5 +1,5 @@
 import React from 'react';
-import { VStack, Heading, Text, Button, List, ListItem, ListIcon, Box, HStack, Image } from '@chakra-ui/react';
+import { VStack, Heading, Text, Button, Icon, Box, HStack, Image } from '@chakra-ui/react';
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import { motion } from 'framer-motion';
 
@@ -49,7 +49,7 @@ const StartScreen = ({ onBegin }) => {
             border="1px solid"
             borderColor="slate.100"
           >
-            <ListIcon as={item.icon} color="accent.500" />
+            <Icon as={item.icon} color="accent.500" boxSize={5} />
             <Text fontSize="sm" fontWeight="medium" color="slate.700">{item.text}</Text>
           </HStack>
         ))}
