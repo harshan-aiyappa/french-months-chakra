@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 const MotionBox = motion(Box);
 
 // A small, dedicated component to render a single colored word.
-const HighlightedWord = ({ word, color }) => {
+const HighlightedWord = React.memo(({ word, color }) => {
   const colorMap = {
     green: 'green.500',
     orange: 'orange.500',
@@ -16,9 +16,9 @@ const HighlightedWord = ({ word, color }) => {
       {word}{' '}
     </Text>
   );
-};
+});
 
-const Feedback = ({ message, type, highlightedPhrase }) => {
+const Feedback = React.memo(({ message, type, highlightedPhrase }) => {
   const getStatus = (type) => {
     switch (type) {
       case 'correct': return 'success';
@@ -45,23 +45,17 @@ const Feedback = ({ message, type, highlightedPhrase }) => {
             alignItems="start"
             p={4}
           >
-            {/* This is the main feedback message (e.g., "Good try!") */}
             <HStack>
               <AlertIcon />
               <AlertDescription fontWeight="semibold">{message}</AlertDescription>
             </HStack>
-            
-            {/* 
-              THIS IS THE RESTORED LOGIC THAT DISPLAYS THE HIGHLIGHTED WORDS.
-              It renders only when the evaluation provides word-by-word feedback.
-            */}
+
             {highlightedPhrase && highlightedPhrase.length > 0 && type !== 'correct' && (
               <Box mt={3} p={3} bg="blackAlpha.50" borderRadius="md" w="100%">
                 <Text fontSize="sm" color="slate.600" mb={1} fontWeight="medium">
                   Pronunciation Analysis:
                 </Text>
                 <HStack wrap="wrap">
-                  {/* We map over the array and render each word with its specific color */}
                   {highlightedPhrase.map((wordInfo, index) => (
                     <HighlightedWord key={index} word={wordInfo.word} color={wordInfo.color} />
                   ))}
@@ -73,6 +67,6 @@ const Feedback = ({ message, type, highlightedPhrase }) => {
       )}
     </AnimatePresence>
   );
-};
+});
 
 export default Feedback;

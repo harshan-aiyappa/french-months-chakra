@@ -6,7 +6,7 @@ const NUM_BARS = 7;
 const CALIBRATION_TIME = 2000;
 const CALIBRATION_SPEECH_THRESHOLD = 40;
 
-const MotionBar = ({ height }) => (
+const MotionBar = React.memo(({ height }) => (
   <Box
     as={motion.div}
     animate={{ height: `${height}%` }}
@@ -16,7 +16,7 @@ const MotionBar = ({ height }) => (
     bg="slate.200"
     borderRadius="full"
   />
-);
+));
 
 const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
   const animationFrameRef = useRef(null);
@@ -32,12 +32,13 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
   useEffect(() => {
     let analyser;
     let dataArray;
+    let animationId;
 
     const setupAudio = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        streamRef.current = stream; // Store the stream to clean it up
-        
+        streamRef.current = stream;
+
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         audioContextRef.current = audioContext;
         analyser = audioContext.createAnalyser();
@@ -62,6 +63,7 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
       showToast('info', 'Calibrating...', 'Please stay quiet.');
       let calibrationStart = Date.now();
       const noiseSamples = [];
+      const sliceWidth = Math.floor(dataArray.length / NUM_BARS);
 
       const calibrationLoop = () => {
         const elapsed = Date.now() - calibrationStart;
@@ -77,27 +79,26 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
           calibrationStart = Date.now();
           calibrationTimerRef.current = setTimeout(finishCalibration, CALIBRATION_TIME);
         }
-        
+
         noiseSamples.push(average);
-        
+
         const newHeights = [];
-        const sliceWidth = Math.floor(dataArray.length / NUM_BARS);
         for (let i = 0; i < NUM_BARS; i++) {
           newHeights.push(10 + (dataArray[i * sliceWidth] / 255) * 50);
         }
         setBarHeights(newHeights);
-        
-        animationFrameRef.current = requestAnimationFrame(calibrationLoop);
+
+        animationId = requestAnimationFrame(calibrationLoop);
       };
 
       const finishCalibration = () => {
-        cancelAnimationFrame(animationFrameRef.current);
+        cancelAnimationFrame(animationId);
         const averageNoise = noiseSamples.length > 0 ? noiseSamples.reduce((sum, val) => sum + val, 0) / noiseSamples.length : 10;
         const newThreshold = Math.max(20, averageNoise + 15);
         showToast('success', 'Calibration Complete!', `Threshold set to ${newThreshold.toFixed(0)}.`);
         onCalibrationComplete(newThreshold);
       };
-      
+
       calibrationTimerRef.current = setTimeout(finishCalibration, CALIBRATION_TIME);
       calibrationLoop();
     };
@@ -105,7 +106,7 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
     setupAudio();
 
     return () => {
-      cancelAnimationFrame(animationFrameRef.current);
+      cancelAnimationFrame(animationId);
       clearTimeout(calibrationTimerRef.current);
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());

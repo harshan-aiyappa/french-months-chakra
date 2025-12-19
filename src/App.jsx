@@ -22,7 +22,14 @@ import MCQScreen from "./components/MCQScreen";
 import evaluatePronunciation from "./utils/pronunciationEvaluator";
 import CalibrationScreen from "./components/CalibrationScreen";
 
-const MAX_RETRIES = 3;
+const ERROR_MAP = {
+  network: { id: "R-2", title: "Network Error", desc: "A network issue prevented recognition." },
+  "audio-capture": { id: "R-3", title: "Microphone Disconnected", desc: "The audio source was lost." },
+  "not-allowed": { id: "R-4", title: "Service Not Allowed", desc: "Recognition was blocked." },
+  "service-not-allowed": { id: "R-4", title: "Service Not Allowed", desc: "Recognition was blocked." },
+  aborted: { id: "R-5", title: "Recognition Canceled", desc: "The session was canceled." },
+  "start-failed": { id: "L-3", title: "Recognition Failed to Start", desc: "There was an internal issue." },
+};
 
 function App() {
   const [gameState, setGameState] = useState("start");
@@ -127,8 +134,8 @@ function App() {
         evaluationResult.status === "success"
           ? "correct"
           : evaluationResult.status === "partial"
-          ? "partial"
-          : "incorrect";
+            ? "partial"
+            : "incorrect";
 
       setFeedback({
         message: evaluationResult.message,
@@ -150,50 +157,6 @@ function App() {
     [currentActivity, retryCount]
   );
 
-  const handleGenericError = useCallback(
-    (error) => {
-      const errorMap = {
-        network: {
-          id: "R-2",
-          title: "Network Error",
-          desc: "A network issue prevented recognition.",
-        },
-        "audio-capture": {
-          id: "R-3",
-          title: "Microphone Disconnected",
-          desc: "The audio source was lost.",
-        },
-        "not-allowed": {
-          id: "R-4",
-          title: "Service Not Allowed",
-          desc: "Recognition was blocked.",
-        },
-        "service-not-allowed": {
-          id: "R-4",
-          title: "Service Not Allowed",
-          desc: "Recognition was blocked.",
-        },
-        aborted: {
-          id: "R-5",
-          title: "Recognition Canceled",
-          desc: "The session was canceled.",
-        },
-        "start-failed": {
-          id: "L-3",
-          title: "Recognition Failed to Start",
-          desc: "There was an internal issue.",
-        },
-      };
-      const err = errorMap[error] || {
-        id: "E-X",
-        title: "Unknown Error",
-        desc: "An unexpected error occurred.",
-      };
-      showToast("error", `${err.title} (${err.id})`, err.desc);
-    },
-    [showToast]
-  );
-
   const {
     isListening,
     error: speechRecognitionError,
@@ -210,7 +173,12 @@ function App() {
     },
     onError: (error) => {
       stopListening();
-      handleGenericError(error);
+      const err = ERROR_MAP[error] || {
+        id: "E-X",
+        title: "Unknown Error",
+        desc: "An unexpected error occurred.",
+      };
+      showToast("error", `${err.title} (${err.id})`, err.desc);
     },
     onStart: () => showToast("info", "Listening... (L-1)", "Engine started."),
     onSpeechStart: () =>
@@ -239,9 +207,6 @@ function App() {
           retries: retryCount + 1,
         },
       ]);
-      // If max retries are hit, we still need to decide where to go next.
-      // For now, we let calibration run and then it will move to the next activity if the user clicks next.
-      // A more advanced flow could auto-skip.
     } else {
       setRetryCount((prev) => prev + 1);
     }
