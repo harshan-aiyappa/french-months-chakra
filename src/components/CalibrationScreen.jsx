@@ -35,8 +35,14 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
     let animationId;
 
     const setupAudio = async () => {
+      if (window.isSecureContext === false) {
+        showToastOnce('error', 'Insecure Context (M-5)', 'Microphone access is disabled on non-secure (HTTP) pages.');
+        return;
+      }
+
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const stream = window.micStream || await navigator.mediaDevices.getUserMedia({ audio: true });
+        window.micStream = stream;
         streamRef.current = stream;
 
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -48,19 +54,21 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
         source.connect(analyser);
         dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-        showToastOnce('success', 'Microphone Connected! (M-1)', 'Ready to listen.');
+        showToastOnce('success', 'Microphone Connected (M-1)', 'The application has successfully accessed your microphone and is ready.');
         calibrate();
       } catch (err) {
-        let errorDetails = { id: 'M-3', title: 'No Microphone Found', desc: 'Please connect a mic.' };
+        let errorDetails = { id: 'M-3', title: 'No Microphone Found', desc: 'We could not find a microphone connected to your device. Please connect one and refresh the page.' };
         if (err.name === 'NotAllowedError') {
-          errorDetails = { id: 'M-2', title: 'Access Denied', desc: 'Please allow mic access.' };
+          errorDetails = { id: 'M-2', title: 'Microphone Access Denied', desc: 'You have denied microphone access. Please allow it in your browser\'s site settings to continue.' };
+        } else if (err.name === 'SecurityError' || err.name === 'AbortError') {
+          errorDetails = { id: 'M-4', title: 'Could Not Access Microphone', desc: 'Access was blocked at the browser or OS level.' };
         }
         showToastOnce('error', `${errorDetails.title} (${errorDetails.id})`, errorDetails.desc);
       }
     };
 
     const calibrate = () => {
-      showToast('info', 'Calibrating...', 'Please stay quiet.');
+      showToast('info', 'Calibrating... (C-1)', 'Please stay quiet.');
       let calibrationStart = Date.now();
       const noiseSamples = [];
       const sliceWidth = Math.floor(dataArray.length / NUM_BARS);
@@ -73,7 +81,7 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
         const average = dataArray.reduce((sum, val) => sum + val, 0) / dataArray.length;
 
         if (average > CALIBRATION_SPEECH_THRESHOLD) {
-          showToast('warning', 'Noise Detected!', 'Restarting calibration.');
+          showToast('warning', 'Noise Detected! (C-2)', 'Restarting calibration.');
           clearTimeout(calibrationTimerRef.current);
           noiseSamples.length = 0;
           calibrationStart = Date.now();
@@ -95,7 +103,7 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
         cancelAnimationFrame(animationId);
         const averageNoise = noiseSamples.length > 0 ? noiseSamples.reduce((sum, val) => sum + val, 0) / noiseSamples.length : 10;
         const newThreshold = Math.max(20, averageNoise + 15);
-        showToast('success', 'Calibration Complete!', `Threshold set to ${newThreshold.toFixed(0)}.`);
+        showToast('success', 'Calibration Complete (C-3)', `Calibration Complete! - Threshold set to ${newThreshold.toFixed(0)}.`);
         onCalibrationComplete(newThreshold);
       };
 
@@ -108,9 +116,7 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
     return () => {
       cancelAnimationFrame(animationId);
       clearTimeout(calibrationTimerRef.current);
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
+      // We don't stop tracks here if we want to share window.micStream
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
         audioContextRef.current.close().catch(e => console.error("Error closing audio context", e));
       }

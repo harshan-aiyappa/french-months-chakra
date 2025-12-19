@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 const MCQScreen = ({ activity, onAnswer }) => {
   const [selected, setSelected] = useState(null);
   const isAnswered = selected !== null;
-  
+
   const handleSelect = (option) => {
     if (isAnswered) return;
     setSelected(option);
@@ -16,46 +16,60 @@ const MCQScreen = ({ activity, onAnswer }) => {
 
   const getButtonProps = (option) => {
     if (!isAnswered) {
-      return { variant: 'outline', colorScheme: 'slate' };
+      return { variant: 'outline', colorScheme: 'brand', borderColor: 'slate.200' };
     }
     if (option === activity.answer) {
-      return { variant: 'solid', colorScheme: 'green' };
+      return { variant: 'solid', bg: 'success.500', color: 'white', _hover: { bg: 'success.600' } };
     }
     if (option === selected && option !== activity.answer) {
-      return { variant: 'solid', colorScheme: 'red' };
+      return { variant: 'solid', bg: 'error.500', color: 'white', _hover: { bg: 'error.600' } };
     }
-    return { variant: 'outline', colorScheme: 'gray', _disabled: { opacity: 0.5 } };
+    return { variant: 'outline', opacity: 0.4, borderColor: 'slate.100' };
   };
 
   return (
-    <VStack spacing={8} align="stretch">
-      <Box
-        p={{ base: 6, md: 8 }}
-        bg="white"
-        borderRadius="2xl"
-        border="1px"
-        borderColor="slate.200"
-        textAlign="center"
-        boxShadow="lg"
+    <VStack spacing={10} align="stretch" py={4}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
       >
-        <Heading as="h2" size="lg" color="slate.800">
-          {activity.question}
-        </Heading>
-      </Box>
-      
+        <Box
+          p={{ base: 8, md: 10 }}
+          bg="white"
+          borderRadius="3xl"
+          border="1px"
+          borderColor="slate.100"
+          textAlign="center"
+          boxSize="border-box"
+        >
+          <Text fontSize="sm" color="brand.500" fontWeight="bold" mb={2} textTransform="uppercase" letterSpacing="widest">
+            Multiple Choice
+          </Text>
+          <Heading as="h2" size="xl" color="slate.800" lineHeight="base">
+            {activity.question}
+          </Heading>
+        </Box>
+      </motion.div>
+
       <VStack spacing={4}>
-        {activity.options.map((option) => (
+        {activity.options.map((option, i) => (
           <Button
             key={option}
             size="lg"
-            h="56px"
+            h="64px"
             w="100%"
             onClick={() => handleSelect(option)}
             isDisabled={isAnswered}
             {...getButtonProps(option)}
             as={motion.button}
-            whileHover={!isAnswered ? { scale: 1.03 } : {}}
-            whileTap={!isAnswered ? { scale: 0.97 } : {}}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 * i }}
+            whileHover={!isAnswered ? { scale: 1.02, x: 5 } : {}}
+            whileTap={!isAnswered ? { scale: 0.98 } : {}}
+            borderRadius="2xl"
+            fontSize="lg"
+            boxShadow={!isAnswered ? "sm" : "none"}
           >
             {option}
           </Button>

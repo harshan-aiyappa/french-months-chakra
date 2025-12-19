@@ -16,9 +16,11 @@
     "@chakra-ui/theme-tools": "^2.1.2",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
+    "canvas-confetti": "^1.9.4",
     "framer-motion": "^11.2.10",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-icons": "^5.5.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",

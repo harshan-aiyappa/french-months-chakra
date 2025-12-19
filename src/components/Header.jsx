@@ -3,24 +3,49 @@ import { Box, Flex, Heading, Text, Progress, Image } from '@chakra-ui/react';
 // THE FIX (Part 1): The logo imports are REMOVED from here.
 
 const Header = ({ score, total, progress }) => {
-  // THE FIX (Part 2): We now use a direct, absolute path to the image in the 'public' folder.
-  // This path works for both development and the final Vercel build.
   const logoSrc = '/assets/favicon1.png';
 
   return (
-    <Box as="header" textAlign="center" w="100%">
+    <Box
+      as={motion.header}
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      textAlign="center"
+      w="100%"
+      p={4}
+      bg="whiteAlpha.100"
+      backdropFilter="blur(10px)"
+      borderRadius="2xl"
+      border="1px solid"
+      borderColor="whiteAlpha.300"
+      boxShadow="glass"
+      mb={6}
+    >
       <Flex justify="center" align="center" mb={4}>
-        <Image src={logoSrc} alt="Lingotran Logo" boxSize="40px" mr={3} />
+        <motion.div whileHover={{ rotate: 10, scale: 1.1 }}>
+          <Image src={logoSrc} alt="Lingotran Logo" boxSize="45px" mr={4} borderRadius="xl" />
+        </motion.div>
         <Box textAlign="left">
-          <Heading as="h1" size="md" color="slate.800">French Months Unit</Heading>
-          <Text fontSize="xs" color="slate.500">
+          <Heading as="h1" size="md" color="slate.800" letterSpacing="tight">French Months Unit</Heading>
+          <Text fontSize="xs" color="slate.500" fontWeight="medium">
             Powered by <Text as="span" color="brand.500" fontWeight="bold">Lingotran</Text>
           </Text>
         </Box>
       </Flex>
-      <Text color="slate.600" mb={4} fontSize="sm">Complete all activities in the unit.</Text>
-      <Progress value={progress} size="sm" colorScheme="brand" borderRadius="full" mb={2} />
-      <Text fontWeight="bold" color="brand.500" fontSize="sm">Score: {score}/{total}</Text>
+      <Progress
+        value={progress}
+        size="xs"
+        colorScheme="brand"
+        borderRadius="full"
+        mb={3}
+        hasStripe
+        isAnimated
+      />
+      <Flex justify="space-between" align="center">
+        <Text color="slate.500" fontSize="xs" fontWeight="semibold">Progress</Text>
+        <Text fontWeight="bold" color="brand.600" fontSize="sm">Accuracy: {score}/{total}</Text>
+      </Flex>
     </Box>
   );
 };

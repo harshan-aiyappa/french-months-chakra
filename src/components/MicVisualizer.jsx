@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { HStack, Box, useToken } from '@chakra-ui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -16,10 +16,18 @@ const MotionBar = React.memo(({ height, background, boxShadow, delay }) => (
   />
 ));
 
-const MicVisualizer = ({ isListening, setIsSpeaking, setMicError, dynamicThreshold = VOICE_THRESHOLD }) => {
+const MicVisualizer = ({
+  isListening,
+  setIsSpeaking,
+  setMicError,
+  dynamicThreshold = VOICE_THRESHOLD,
+  onSilence // NEW: Triggered when user stops speaking for a duration
+}) => {
   const animationFrameRef = useRef(null);
   const audioContextRef = useRef(null);
   const streamRef = useRef(null);
+  const silenceTimerRef = useRef(null);
+  const hasSpokenRef = useRef(false);
 
   const [barHeights, setBarHeights] = useState(Array(NUM_BARS).fill(5));
   const [isVisuallySpeaking, setIsVisuallySpeaking] = useState(false);
@@ -53,10 +61,13 @@ const MicVisualizer = ({ isListening, setIsSpeaking, setMicError, dynamicThresho
 
       try {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioContext.state === 'suspended') {
+          await audioContext.resume();
+        }
         audioContextRef.current = audioContext;
         analyser = audioContext.createAnalyser();
         analyser.fftSize = 256;
-        analyser.smoothingTimeConstant = 0.7;
+        analyser.smoothingTimeConstant = 0.8; // Smoother transitions
         const source = audioContext.createMediaStreamSource(streamRef.current);
         source.connect(analyser);
         dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -79,6 +90,30 @@ const MicVisualizer = ({ isListening, setIsSpeaking, setMicError, dynamicThresho
         if (setIsSpeaking) setIsSpeaking(isCurrentlySpeaking && isListening);
         setIsVisuallySpeaking(isCurrentlySpeaking);
 
+        // Intelligent VAD Completion Logic
+        if (isListening) {
+          if (isCurrentlySpeaking) {
+            hasSpokenRef.current = true;
+            if (silenceTimerRef.current) {
+              clearTimeout(silenceTimerRef.current);
+              silenceTimerRef.current = null;
+            }
+          } else if (hasSpokenRef.current && !silenceTimerRef.current) {
+            // User was speaking, but now silent. Start the 1.5s completion timer.
+            silenceTimerRef.current = setTimeout(() => {
+              if (onSilence) onSilence();
+              hasSpokenRef.current = false;
+              silenceTimerRef.current = null;
+            }, 1500);
+          }
+        } else {
+          hasSpokenRef.current = false;
+          if (silenceTimerRef.current) {
+            clearTimeout(silenceTimerRef.current);
+            silenceTimerRef.current = null;
+          }
+        }
+
         const newHeights = [];
         for (let i = 0; i < NUM_BARS; i++) {
           const baseHeight = (dataArray[i * sliceWidth] / 255) * 80;
@@ -95,6 +130,7 @@ const MicVisualizer = ({ isListening, setIsSpeaking, setMicError, dynamicThresho
 
     return () => {
       cancelAnimationFrame(animationId);
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
         audioContextRef.current.close().catch(e => console.error("Error closing audio context", e));
       }
@@ -108,10 +144,11 @@ const MicVisualizer = ({ isListening, setIsSpeaking, setMicError, dynamicThresho
           let background = inactiveColor;
           let boxShadow = 'none';
           if (isMicReady) {
-            const isThresholdMet = height > (dynamicThreshold * 2.5);
+            // Synchronize the "speaking" glow with the true average volume
+            const isThresholdMet = isVisuallySpeaking && isListening;
             if (isListening && isVisuallySpeaking) { background = activeGradient; }
             else { background = readyColor; }
-            if (isThresholdMet) { boxShadow = `inset 0 6px 8px -2px ${indicatorColor}`; }
+            if (isThresholdMet) { boxShadow = `0 0 15px 2px ${indicatorColor}`; }
           }
           return (<MotionBar key={i} height={height} background={background} boxShadow={boxShadow} delay={`${i * 15}ms`} isCalibrating={false} />);
         })}

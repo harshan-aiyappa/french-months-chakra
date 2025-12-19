@@ -14,7 +14,7 @@ const useSpeechRecognition = ({ onResult, onNoSpeech, onError, onStart, onSpeech
     const recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
-    recognition.lang = 'en-US';
+    recognition.lang = 'fr-FR';
 
     recognition.onstart = () => { setIsListening(true); if (onStart) onStart(); };
     recognition.onend = () => { setIsListening(false); };
@@ -27,7 +27,7 @@ const useSpeechRecognition = ({ onResult, onNoSpeech, onError, onStart, onSpeech
     };
     recognition.onerror = (event) => {
       setIsListening(false);
-      if (event.error === 'no-speech') { if (onNoSpeech) onNoSpeech(); } 
+      if (event.error === 'no-speech') { if (onNoSpeech) onNoSpeech(); }
       else { setError(event.error); if (onError) onError(event.error); }
     };
     recognitionRef.current = recognition;
@@ -35,7 +35,7 @@ const useSpeechRecognition = ({ onResult, onNoSpeech, onError, onStart, onSpeech
 
   const startListening = () => {
     if (recognitionRef.current && !isListening) {
-      try { recognitionRef.current.start(); } 
+      try { recognitionRef.current.start(); }
       catch (err) {
         console.error("Error starting recognition:", err);
         setError('start-failed');

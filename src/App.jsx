@@ -22,13 +22,15 @@ import MCQScreen from "./components/MCQScreen";
 import evaluatePronunciation from "./utils/pronunciationEvaluator";
 import CalibrationScreen from "./components/CalibrationScreen";
 
+const MAX_RETRIES = 3;
+
 const ERROR_MAP = {
-  network: { id: "R-2", title: "Network Error", desc: "A network issue prevented recognition." },
-  "audio-capture": { id: "R-3", title: "Microphone Disconnected", desc: "The audio source was lost." },
-  "not-allowed": { id: "R-4", title: "Service Not Allowed", desc: "Recognition was blocked." },
-  "service-not-allowed": { id: "R-4", title: "Service Not Allowed", desc: "Recognition was blocked." },
-  aborted: { id: "R-5", title: "Recognition Canceled", desc: "The session was canceled." },
-  "start-failed": { id: "L-3", title: "Recognition Failed to Start", desc: "There was an internal issue." },
+  network: { id: "R-2", title: "Network Error", desc: "A network issue prevented the speech from being recognized." },
+  "audio-capture": { id: "R-3", title: "Microphone Disconnected", desc: "The audio source was lost during recognition." },
+  "not-allowed": { id: "R-4", title: "Service Not Allowed", desc: "The speech recognition service was blocked." },
+  "service-not-allowed": { id: "R-4", title: "Service Not Allowed", desc: "The speech recognition service was blocked." },
+  aborted: { id: "R-5", title: "Recognition Canceled", desc: "The listening session was canceled because the page became inactive." },
+  "start-failed": { id: "L-3", title: "Recognition Failed to Start", desc: "There was an issue initializing the speech recognition engine." },
 };
 
 function App() {
@@ -126,7 +128,7 @@ function App() {
           targetPhrase,
           sourcePhrase,
           useLevenshtein,
-          "en-US"
+          "fr-FR"
         );
       }
 
@@ -180,19 +182,22 @@ function App() {
       };
       showToast("error", `${err.title} (${err.id})`, err.desc);
     },
-    onStart: () => showToast("info", "Listening... (L-1)", "Engine started."),
+    onStart: () => showToast("info", "Listening... (L-1)", "The speech recognition engine has started."),
     onSpeechStart: () =>
-      showToast("info", "Speech Detected! (L-2)", "Voice detected."),
+      showToast("info", "Speech Detected! (L-2)", "Your voice is being picked up by the microphone. Keep going!"),
   });
 
   const handleNoSpeech = useCallback(() => {
     showToast(
       "warning",
       "No Speech Detected (R-1)",
-      "The system did not hear anything."
+      "The system did not hear anything. Please make sure to speak after clicking the button."
     );
     resetFeedback();
-    setGameState("calibrating"); // Go back to calibration state on failure
+
+    // As per doc: Failure triggers re-calibration flow
+    setGameState("calibrating");
+
     if (retryCount + 1 >= MAX_RETRIES) {
       setFeedback({
         message: `No speech detected after ${MAX_RETRIES} attempts. Moving on.`,
@@ -305,6 +310,7 @@ function App() {
               month={currentActivity}
               isListening={isListening}
               startListening={startListening}
+              stopListening={stopListening}
               nextPrompt={nextActivity}
               feedback={feedback}
               showNextButton={!!sessionResults[currentIndex]}

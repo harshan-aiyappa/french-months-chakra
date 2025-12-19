@@ -2,7 +2,7 @@ import React from 'react';
 import { Alert, AlertIcon, AlertDescription, Box, HStack, Text } from '@chakra-ui/react';
 import { AnimatePresence, motion } from 'framer-motion';
 
-const MotionBox = motion(Box);
+const MotionBox = motion.create(Box);
 
 // A small, dedicated component to render a single colored word.
 const HighlightedWord = React.memo(({ word, color }) => {
