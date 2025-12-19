@@ -125,7 +125,7 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
 
   return (
     <VStack h={{ base: "200px", md: "220px" }} justify="center" spacing={4} p={6}>
-      <Heading size="md" color="slate.600">Preparing Microphone...</Heading>
+      <Heading size={{ base: "sm", md: "md" }} color="slate.600">Preparing Microphone...</Heading>
       <Center position="relative" h="100px" w="100px">
         <CircularProgress
           value={calibrationProgress}
@@ -140,7 +140,7 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
           ))}
         </HStack>
       </Center>
-      <Text color="slate.500" fontSize="sm">Calibrating...</Text>
+      <Text color="slate.500" fontSize={{ base: "xs", md: "sm" }}>Calibrating...</Text>
     </VStack>
   );
 };

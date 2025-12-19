@@ -52,7 +52,7 @@ const Feedback = React.memo(({ message, type, highlightedPhrase }) => {
 
             {highlightedPhrase && highlightedPhrase.length > 0 && type !== 'correct' && (
               <Box mt={3} p={3} bg="blackAlpha.50" borderRadius="md" w="100%">
-                <Text fontSize="sm" color="slate.600" mb={1} fontWeight="medium">
+                <Text fontSize={{ base: "xs", md: "sm" }} color="slate.600" mb={1} fontWeight="medium">
                   Pronunciation Analysis:
                 </Text>
                 <HStack wrap="wrap">

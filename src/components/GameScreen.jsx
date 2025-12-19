@@ -53,7 +53,7 @@ const GameScreenComponent = ({
           dynamicThreshold={dynamicThreshold}
           onSilence={isListening && stopListening ? stopListening : undefined}
         />
-        <Text my={2} color={micError ? 'error.500' : 'slate.500'} h="24px" fontWeight="bold" fontSize="xs" textTransform="uppercase" letterSpacing="widest">
+        <Text my={2} color={micError ? 'error.500' : 'slate.500'} h="24px" fontWeight="bold" fontSize={{ base: "2xs", md: "xs" }} textTransform="uppercase" letterSpacing="widest">
           {micError || (isListening ? 'Voice Detected' : 'Ready Capturing')}
         </Text>
 

@@ -42,7 +42,7 @@ const MCQScreen = ({ activity, onAnswer }) => {
           textAlign="center"
           boxSize="border-box"
         >
-          <Text fontSize="sm" color="brand.500" fontWeight="bold" mb={2} textTransform="uppercase" letterSpacing="widest">
+          <Text fontSize={{ base: "xs", md: "sm" }} color="brand.500" fontWeight="bold" mb={2} textTransform="uppercase" letterSpacing="widest">
             Multiple Choice
           </Text>
           <Heading as="h2" size={{ base: "lg", md: "xl" }} color="slate.800" lineHeight="base">
@@ -68,7 +68,7 @@ const MCQScreen = ({ activity, onAnswer }) => {
             whileHover={!isAnswered ? { scale: 1.02, x: 5 } : {}}
             whileTap={!isAnswered ? { scale: 0.98 } : {}}
             borderRadius="2xl"
-            fontSize="lg"
+            fontSize={{ base: "md", md: "lg" }}
             boxShadow={!isAnswered ? "sm" : "none"}
           >
             {option}

@@ -50,7 +50,7 @@ const StartScreen = ({ onBegin }) => {
             borderColor="slate.100"
           >
             <Icon as={item.icon} color="accent.500" boxSize={5} />
-            <Text fontSize="sm" fontWeight="medium" color="slate.700">{item.text}</Text>
+            <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium" color="slate.700">{item.text}</Text>
           </HStack>
         ))}
       </VStack>
@@ -66,7 +66,7 @@ const StartScreen = ({ onBegin }) => {
         whileTap={{ scale: 0.95 }}
         bg="brand.500"
         color="white"
-        fontSize="xl"
+        fontSize={{ base: "lg", md: "xl" }}
         fontWeight="bold"
         borderRadius="2xl"
         _hover={{ bg: 'brand.600' }}

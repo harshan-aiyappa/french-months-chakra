@@ -27,8 +27,8 @@ const Header = ({ score, total, progress }) => {
           <Image src={logoSrc} alt="Lingotran Logo" boxSize="45px" mr={4} borderRadius="xl" />
         </motion.div>
         <Box textAlign="left">
-          <Heading as="h1" size="md" color="slate.800" letterSpacing="tight">French Months Unit</Heading>
-          <Text fontSize="xs" color="slate.500" fontWeight="medium">
+          <Heading as="h1" size={{ base: "sm", md: "md" }} color="slate.800" letterSpacing="tight">French Months Unit</Heading>
+          <Text fontSize={{ base: "2xs", md: "xs" }} color="slate.500" fontWeight="medium">
             Powered by <Text as="span" color="brand.500" fontWeight="bold">Lingotran</Text>
           </Text>
         </Box>
@@ -43,8 +43,8 @@ const Header = ({ score, total, progress }) => {
         isAnimated
       />
       <Flex justify="space-between" align="center">
-        <Text color="slate.500" fontSize="xs" fontWeight="semibold">Progress</Text>
-        <Text fontWeight="bold" color="brand.600" fontSize="sm">Accuracy: {score}/{total}</Text>
+        <Text color="slate.500" fontSize={{ base: "2xs", md: "xs" }} fontWeight="semibold">Progress</Text>
+        <Text fontWeight="bold" color="brand.600" fontSize={{ base: "xs", md: "sm" }}>Accuracy: {score}/{total}</Text>
       </Flex>
     </Box>
   );

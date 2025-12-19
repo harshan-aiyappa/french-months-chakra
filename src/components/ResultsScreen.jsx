@@ -19,7 +19,7 @@ const StatCard = ({ label, value, color = "slate.800" }) => (
     whileHover={{ translateY: -8, boxShadow: '2xl', borderColor: 'brand.200' }}
     transition={{ type: "spring", stiffness: 300 }}
   >
-    <Text fontSize="xs" color="slate.500" fontWeight="bold" textTransform="uppercase" mb={2}>{label}</Text>
+    <Text fontSize={{ base: "2xs", md: "xs" }} color="slate.500" fontWeight="bold" textTransform="uppercase" mb={2}>{label}</Text>
     <Heading size={{ base: "lg", md: "xl" }} color={color} fontWeight="black">{value}</Heading>
   </MotionBox>
 );
@@ -111,7 +111,7 @@ const ResultsScreen = ({ results, restartGame }) => {
         <Heading as="h2" size={{ base: "xl", md: "2xl" }} fontWeight="black" color="slate.800">
           {percentage >= 85 ? "Magnifique! 🎉" : percentage >= 60 ? "Great Progress! 👍" : "Keep Practicing! 💪"}
         </Heading>
-        <Text fontSize="lg" color="slate.500" maxW="md">
+        <Text fontSize={{ base: "md", md: "lg" }} color="slate.500" maxW="md">
           You've completed the French Months unit. Take a look at your stats below.
         </Text>
       </VStack>
@@ -126,7 +126,7 @@ const ResultsScreen = ({ results, restartGame }) => {
       <Box w="100%">
         <HStack justify="space-between" mb={6}>
           <Heading size={{ base: "sm", md: "md" }} color="slate.800">Review Summary</Heading>
-          <Text fontSize="xs" fontWeight="bold" bg="slate.100" px={2} py={1} borderRadius="md" color="slate.500">
+          <Text fontSize={{ base: "2xs", md: "xs" }} fontWeight="bold" bg="slate.100" px={2} py={1} borderRadius="md" color="slate.500">
             {results.length} ITEMS
           </Text>
         </HStack>
