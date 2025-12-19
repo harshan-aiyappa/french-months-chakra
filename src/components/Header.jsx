@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Flex, Heading, Text, Progress, Image } from '@chakra-ui/react';
-// THE FIX (Part 1): The logo imports are REMOVED from here.
+import { motion } from 'framer-motion';
 
 const Header = ({ score, total, progress }) => {
   const logoSrc = '/assets/favicon1.png';

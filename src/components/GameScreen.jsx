@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { Box, VStack, Heading, Text, Button, Spinner, HStack, Icon } from '@chakra-ui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaMicrophone, FaArrowRight } from 'react-icons/fa';
