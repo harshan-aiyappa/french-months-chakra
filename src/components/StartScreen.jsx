@@ -1,5 +1,5 @@
 import React from 'react';
-import { VStack, Heading, Text, Button, List, ListItem, ListIcon } from '@chakra-ui/react';
+import { VStack, Heading, Text, Button, List, ListItem, ListIcon, Box, HStack, Image } from '@chakra-ui/react';
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import { motion } from 'framer-motion';
 
