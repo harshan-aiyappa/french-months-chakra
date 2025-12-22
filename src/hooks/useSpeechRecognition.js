@@ -25,15 +25,18 @@ const useSpeechRecognition = ({ onResult, onNoSpeech, onError, onStart, onSpeech
       recognition.lang = 'fr-FR';
 
       recognition.onstart = () => {
+        console.log("[ASR] Service started - Listening...");
         setIsListening(true);
         if (callbacks.current.onStart) callbacks.current.onStart();
       };
 
       recognition.onend = () => {
+        console.log("[ASR] Service ended.");
         setIsListening(false);
       };
 
       recognition.onspeechstart = () => {
+        console.log("[ASR] Speech detected by OS/Browser engine.");
         if (callbacks.current.onSpeechStart) callbacks.current.onSpeechStart();
       };
 
@@ -43,6 +46,8 @@ const useSpeechRecognition = ({ onResult, onNoSpeech, onError, onStart, onSpeech
           .map(result => result.transcript)
           .join('');
 
+        console.log(`[ASR] Result received: "${transcript}" (Final: ${event.results[0].isFinal})`);
+
         if (event.results[0].isFinal) {
           if (callbacks.current.onResult) {
             callbacks.current.onResult(transcript.toLowerCase().trim());
@@ -51,6 +56,7 @@ const useSpeechRecognition = ({ onResult, onNoSpeech, onError, onStart, onSpeech
       };
 
       recognition.onerror = (event) => {
+        console.error("[ASR] Error event:", event.error);
         setIsListening(false);
         if (event.error === 'no-speech') {
           if (callbacks.current.onNoSpeech) callbacks.current.onNoSpeech();

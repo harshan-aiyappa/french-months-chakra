@@ -157,6 +157,8 @@ function App() {
         );
       }
 
+      console.log(`[Game] Evaluation: ${evaluationResult.status.toUpperCase()} - Final confidence impact: ${evaluationResult.message}`);
+
       const newStatus =
         evaluationResult.status === "success"
           ? "correct"
@@ -214,17 +216,34 @@ function App() {
   });
 
   const handleNoSpeech = useCallback(() => {
-    showToast(
-      "warning",
-      "No Speech Detected (R-1)",
-      "The system did not hear anything. Please make sure to speak after clicking the button."
-    );
-    resetFeedback();
+    console.log(`[Game] No speech detected. Failure count: ${retryCount + 1}`);
 
-    // As per doc: Failure triggers re-calibration flow
-    setGameState("calibrating");
-
-    if (retryCount + 1 >= MAX_RETRIES) {
+    if (retryCount === 0) {
+      // First failure: Just a warning toast and simple retry
+      showToast(
+        "warning",
+        "Didn't catch that (R-1)",
+        "Try speaking a bit louder or closer to the mic."
+      );
+      setRetryCount(1);
+      resetFeedback();
+      // We STAY in "playing" state
+    } else if (retryCount === 1) {
+      // Second failure: Trigger re-calibration
+      showToast(
+        "info",
+        "adjusting Mic... (C-4)",
+        "Let's recalibrate to make sure I can hear you clearly."
+      );
+      setGameState("calibrating");
+      setRetryCount(2); // Progress to final retry attempt
+    } else {
+      // Final failure: Move on
+      showToast(
+        "error",
+        "Moving On (R-1)",
+        "Still couldn't hear you. Let's try the next one."
+      );
       setFeedback({
         message: `No speech detected after ${MAX_RETRIES} attempts. Moving on.`,
         type: "warning",
@@ -235,13 +254,14 @@ function App() {
           ...currentActivity,
           transcript: "",
           status: "skipped",
-          retries: retryCount + 1,
+          retries: MAX_RETRIES,
         },
       ]);
-    } else {
-      setRetryCount((prev) => prev + 1);
+      setRetryCount(0); // Reset for next activity
+      // Wait a moment so the user sees the feedback before skipping
+      setTimeout(nextActivity, 1500);
     }
-  }, [retryCount, currentActivity, showToast, resetFeedback]);
+  }, [retryCount, currentActivity, showToast, resetFeedback, nextActivity]);
 
   useEffect(() => {
     if (speechRecognitionError === "unsupported-browser") {
@@ -266,8 +286,10 @@ function App() {
     resetFeedback();
     setRetryCount(0);
     if (currentIndex < UNIT_DATA.length - 1) {
+      console.log(`[Game] Moving to activity index: ${currentIndex + 1}`);
       setCurrentIndex((prev) => prev + 1);
     } else {
+      console.log("[Game] Unit complete, moving to results.");
       setGameState("results");
     }
   }, [resetFeedback, currentIndex]);
@@ -356,7 +378,7 @@ function App() {
     }
 
     return (
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" onExitComplete={() => console.log(`[App] Transitioned to: ${gameState}`)}>
         <motion.div
           key={gameState === "playing" ? `playing-${currentIndex}` : gameState}
           initial={{ opacity: 0, x: 20, filter: "blur(10px)" }}

@@ -72,7 +72,9 @@ const MicVisualizer = ({
       if (!window.micStream) {
         try {
           window.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          console.log("[MicVisualizer] Microphone access granted.");
         } catch (err) {
+          console.error("[MicVisualizer] Mic access error:", err);
           if (setMicError) {
             let errorDetails = { desc: 'Could not access the microphone.' };
             if (err.name === 'NotFoundError') { errorDetails = { desc: 'Please connect a mic.' }; }
@@ -95,6 +97,7 @@ const MicVisualizer = ({
       }
 
       if (audioContextRef.current.state === 'suspended') {
+        console.log("[MicVisualizer] Resuming suspended AudioContext...");
         await audioContextRef.current.resume();
       }
 
@@ -136,6 +139,7 @@ const MicVisualizer = ({
 
         // Debounce the parent notification to prevent "flickering" or overlapping alerts
         if (currentSpeaking !== isVisuallySpeaking) {
+          console.log(`[VAD] Transition: ${currentSpeaking ? "Speaking" : "Quiet"}`);
           if (speakingDebounceRef.current) clearTimeout(speakingDebounceRef.current);
           speakingDebounceRef.current = setTimeout(() => {
             if (setIsSpeaking) setIsSpeaking(currentSpeaking && isListening);
@@ -150,7 +154,9 @@ const MicVisualizer = ({
               silenceTimerRef.current = null;
             }
           } else if (hasSpokenRef.current && !silenceTimerRef.current) {
+            console.log("[VAD] Silence detected while listening, starting timeout...");
             silenceTimerRef.current = setTimeout(() => {
+              console.log("[VAD] Silence timeout reached, stopping capture.");
               if (onSilence) onSilence();
               hasSpokenRef.current = false;
               silenceTimerRef.current = null;
