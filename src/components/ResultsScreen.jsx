@@ -155,6 +155,7 @@ const ResultsScreen = ({ results, restartGame }) => {
         borderRadius="2xl"
         fontSize={{ base: "md", md: "lg" }}
         fontWeight="bold"
+        aria-label="Practice the unit again"
       >
         Practice Again
       </Button>

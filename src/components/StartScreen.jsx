@@ -70,6 +70,7 @@ const StartScreen = ({ onBegin }) => {
         fontWeight="bold"
         borderRadius="2xl"
         _hover={{ bg: 'brand.600' }}
+        aria-label="Begin French Months Unit"
       >
         Begin Unit
       </Button>

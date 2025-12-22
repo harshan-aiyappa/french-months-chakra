@@ -22,6 +22,7 @@ import MCQScreen from "./components/MCQScreen";
 import evaluatePronunciation from "./utils/pronunciationEvaluator";
 import CalibrationScreen from "./components/CalibrationScreen";
 import NeuralBackground from "./components/NeuralBackground";
+import DeveloperAttribution from "./components/DeveloperAttribution";
 
 const MAX_RETRIES = 3;
 
@@ -47,6 +48,28 @@ function App() {
   const [appError, setAppError] = useState(null);
   const [dynamicThreshold, setDynamicThreshold] = useState(30);
   const toast = useToast();
+
+  // iOS Safari AudioContext fix: Resume AudioContext on first interaction
+  useEffect(() => {
+    const resumeAudio = () => {
+      if (window.AudioContext || window.webkitAudioContext) {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') {
+          ctx.resume().then(() => {
+            console.log('[App] AudioContext resumed');
+            window.removeEventListener('click', resumeAudio);
+            window.removeEventListener('touchstart', resumeAudio);
+          });
+        }
+      }
+    };
+    window.addEventListener('click', resumeAudio);
+    window.addEventListener('touchstart', resumeAudio);
+    return () => {
+      window.removeEventListener('click', resumeAudio);
+      window.removeEventListener('touchstart', resumeAudio);
+    };
+  }, []);
 
   const showToast = useCallback(
     (status, title, description) => {
@@ -349,10 +372,12 @@ function App() {
   return (
     <>
       <NeuralBackground />
+      <DeveloperAttribution />
       <Flex
         align="center"
         justify="center"
-        h={{ base: "100vh", md: "100dvh" }}
+        h={{ base: "100dvh", md: "100dvh" }}
+        className="full-h-mobile"
         w="100vw"
         position="fixed"
         top={0}

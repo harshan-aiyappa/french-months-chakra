@@ -17,6 +17,10 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #F8FAFC;
+  /* Prevent blue highlight on tap in mobile browsers */
+  -webkit-tap-highlight-color: transparent;
+  /* Improve touch responsiveness */
+  touch-action: manipulation;
 }
 
 /* VAD Speaking Glow Animation */
@@ -49,4 +53,11 @@ html {
 
 * {
   transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Fix for iOS 100vh issue */
+@supports (-webkit-touch-callout: none) {
+  .full-h-mobile {
+    height: -webkit-fill-available;
+  }
 }

@@ -70,6 +70,7 @@ const MCQScreen = ({ activity, onAnswer }) => {
             borderRadius="2xl"
             fontSize={{ base: "md", md: "lg" }}
             boxShadow={!isAnswered ? "sm" : "none"}
+            aria-label={`Option ${option}`}
           >
             {option}
           </Button>

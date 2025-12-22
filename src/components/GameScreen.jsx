@@ -77,6 +77,7 @@ const GameScreenComponent = ({
             fontSize="lg"
             fontWeight="black"
             boxShadow="lg"
+            aria-label="Start speaking practice"
           >
             <AnimatePresence mode="wait">
               {isListening ? (<motion.div key="spinner" initial={{ opacity: 0 }} animate={{ opacity: 1 }}> <Spinner size="sm" thickness="3px" mr={2} /> Listening... </motion.div>)
@@ -96,6 +97,7 @@ const GameScreenComponent = ({
             borderRadius="xl"
             fontWeight="bold"
             fontSize="lg"
+            aria-label="Continue to next task"
           >
             Continue
           </Button>
