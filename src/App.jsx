@@ -432,7 +432,7 @@ function App() {
         >
           <VStack spacing={{ base: 3, md: 5 }} w="100%">
             <Header score={score} total={UNIT_DATA.length} progress={progress} />
-            <Box as="main" w="100%" minH={{ base: "auto", md: "380px" }} flex="1">
+            <Box as="main" w="100%" minH="380px" flex="1">
               {renderContent()}
             </Box>
           </VStack>

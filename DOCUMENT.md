@@ -29,6 +29,7 @@ This document provides a comprehensive breakdown of all user-facing and technica
 ### 🎙️ Real-time Mic Visualization
 - **11-Bar Equalizer**: Visual representation of the mic's frequency spectrum.
 - **VAD (Voice Activity Detection)**: Intelligent logic that changes the UI color and triggers glows only when human speech is detected.
+- **Standardized Timing**: Optimized for a **1.4s silence timeout** and **200ms noise protection**, matching modern voice assistant latency (Siri/Google).
 - **Sync Logic**: Visualizer stays perfectly in sync with the ASR (Speech Recognition) state.
 
 ### ⚙️ Smart Calibration
@@ -62,6 +63,7 @@ This document provides a comprehensive breakdown of all user-facing and technica
 
 ### 🚀 Performance Architecture
 - **Persistent Refs**: Expensive audio nodes are stored in refs to prevent memory leaks and unnecessary re-renders.
+- **Layout Stability**: Optimized `minH` and transition physics ensure the UI stays rock-solid without jarring jumps during content changes.
 - **Debounced Interaction**: Click/Touch interactions are protected against "spamming" to ensure state stability.
 
 ---

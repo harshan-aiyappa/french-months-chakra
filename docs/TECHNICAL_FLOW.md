@@ -19,7 +19,7 @@ The application is built on three main pillars:
 1. **Idle**: Waiting for user to click "Start Practice".
 2. **Listening**: `SpeechRecognition` is active.
 3. **VAD Detection**: `MicVisualizer` detects signal > threshold and updates `isSpeaking` state.
-4. **Capture**: System waits for **2.5s** of silence after speech before closing the ASR window.
+4. **Capture**: System waits for **1.4s** of silence after speech before closing the ASR window.
 5. **Evaluation**: Resulting transcript is processed via `pronunciationEvaluator.js`.
 
 ### Phase C: Results
@@ -31,7 +31,7 @@ graph TD
     A[User Clicks Start] --> B[ASR Engine Starts]
     B --> C{VAD Logic}
     C -- "Signal > Threshold" --> D[Speaking State Active]
-    C -- "Silence > 2.5s" --> E[Stop ASR]
+    C -- "Silence > 1.4s" --> E[Stop ASR]
     E --> F[Capture Transcript]
     F --> G[Evaluate Pronunciation]
     G --> H[Display Feedback]
