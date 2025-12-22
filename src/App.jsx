@@ -186,34 +186,17 @@ function App() {
     [currentActivity, retryCount]
   );
 
-  const {
-    isListening,
-    error: speechRecognitionError,
-    startListening,
-    stopListening,
-  } = useSpeechRecognition({
-    onResult: (transcript) => {
-      stopListening();
-      showToast("success", "Speech Captured! (A-1)", `Captured: "${transcript}"`);
-      handleSpeechResult(transcript);
-    },
-    onNoSpeech: () => {
-      stopListening();
-      handleNoSpeech();
-    },
-    onError: (error) => {
-      stopListening();
-      const err = ERROR_MAP[error] || {
-        id: "E-X",
-        title: "Unknown Error",
-        desc: "An unexpected error occurred.",
-      };
-      showToast("error", `${err.title} (${err.id})`, err.desc);
-    },
-    onStart: () => showToast("info", "Listening... (L-1)", "The speech recognition engine has started."),
-    onSpeechStart: () =>
-      showToast("info", "Speech Detected! (L-2)", "Your voice is being picked up by the microphone. Keep going!"),
-  });
+  const nextActivity = useCallback(() => {
+    resetFeedback();
+    setRetryCount(0);
+    if (currentIndex < UNIT_DATA.length - 1) {
+      console.log(`[Game] Moving to activity index: ${currentIndex + 1}`);
+      setCurrentIndex((prev) => prev + 1);
+    } else {
+      console.log("[Game] Unit complete, moving to results.");
+      setGameState("results");
+    }
+  }, [resetFeedback, currentIndex]);
 
   const handleNoSpeech = useCallback(() => {
     console.log(`[Game] No speech detected. Failure count: ${retryCount + 1}`);
@@ -263,6 +246,35 @@ function App() {
     }
   }, [retryCount, currentActivity, showToast, resetFeedback, nextActivity]);
 
+  const {
+    isListening,
+    error: speechRecognitionError,
+    startListening,
+    stopListening,
+  } = useSpeechRecognition({
+    onResult: (transcript) => {
+      stopListening();
+      showToast("success", "Speech Captured! (A-1)", `Captured: "${transcript}"`);
+      handleSpeechResult(transcript);
+    },
+    onNoSpeech: () => {
+      stopListening();
+      handleNoSpeech();
+    },
+    onError: (error) => {
+      stopListening();
+      const err = ERROR_MAP[error] || {
+        id: "E-X",
+        title: "Unknown Error",
+        desc: "An unexpected error occurred.",
+      };
+      showToast("error", `${err.title} (${err.id})`, err.desc);
+    },
+    onStart: () => showToast("info", "Listening... (L-1)", "The speech recognition engine has started."),
+    onSpeechStart: () =>
+      showToast("info", "Speech Detected! (L-2)", "Your voice is being picked up by the microphone. Keep going!"),
+  });
+
   useEffect(() => {
     if (speechRecognitionError === "unsupported-browser") {
       const err = {
@@ -282,17 +294,6 @@ function App() {
     setGameState("calibrating");
   }, [resetFeedback]);
 
-  const nextActivity = useCallback(() => {
-    resetFeedback();
-    setRetryCount(0);
-    if (currentIndex < UNIT_DATA.length - 1) {
-      console.log(`[Game] Moving to activity index: ${currentIndex + 1}`);
-      setCurrentIndex((prev) => prev + 1);
-    } else {
-      console.log("[Game] Unit complete, moving to results.");
-      setGameState("results");
-    }
-  }, [resetFeedback, currentIndex]);
 
   const handleMCQAnswer = (isCorrect) => {
     const status = isCorrect ? "correct" : "incorrect";
