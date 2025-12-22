@@ -3,8 +3,8 @@ import { VStack, Heading, Text, Center, CircularProgress, HStack, Box, useToken 
 import { motion } from 'framer-motion';
 
 const NUM_BARS = 7;
-const CALIBRATION_TIME = 2000;
-const CALIBRATION_SPEECH_THRESHOLD = 40;
+const CALIBRATION_TIME = 2500; // Slightly longer for stability
+const CALIBRATION_SPEECH_THRESHOLD = 50; // Higher threshold during calibration
 
 const MotionBar = React.memo(({ height }) => (
   <Box
@@ -36,7 +36,7 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
 
     const setupAudio = async () => {
       if (window.isSecureContext === false) {
-        showToastOnce('error', 'Insecure Context (M-5)', 'Microphone access is disabled on non-secure (HTTP) pages. This app must be run on HTTPS.');
+        showToastOnce('error', 'Insecure Context (M-5)', 'Microphone access is disabled on non-secure (HTTP) pages.');
         return;
       }
 
@@ -57,38 +57,31 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
         source.connect(analyser);
         dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-        showToastOnce('success', 'Microphone Connected (M-1)', 'The application has successfully accessed your microphone and is ready.');
+        showToastOnce('success', 'Microphone Ready (M-1)', 'Starting background noise calibration.');
         calibrate();
       } catch (err) {
-        let errorDetails = { id: 'M-3', title: 'No Microphone Found', desc: 'We could not find a microphone connected to your device. Please connect one and refresh the page.' };
-        if (err.name === 'NotAllowedError') {
-          errorDetails = { id: 'M-2', title: 'Microphone Access Denied', desc: 'You have denied microphone access. Please allow it in your browser\'s site settings to continue.' };
-        } else if (err.name === 'SecurityError' || err.name === 'AbortError') {
-          errorDetails = { id: 'M-4', title: 'Could Not Access Microphone', desc: 'Access was blocked at the browser or OS level. Please check your system\'s privacy settings.' };
-        }
-        showToastOnce('error', `${errorDetails.title} (${errorDetails.id})`, errorDetails.desc);
+        console.error("[Calibration] Error:", err);
+        showToastOnce('error', 'Mic Error (M-3)', 'Could not access microphone.');
       }
     };
 
     const calibrate = () => {
-      showToast('info', 'Calibrating... (C-1)', 'Please stay quiet.');
       let calibrationStart = Date.now();
       const noiseSamples = [];
       const sliceWidth = Math.floor(dataArray.length / NUM_BARS);
 
       const calibrationLoop = () => {
         const elapsed = Date.now() - calibrationStart;
-        setCalibrationProgress((elapsed / CALIBRATION_TIME) * 100);
+        setCalibrationProgress(Math.min(100, (elapsed / CALIBRATION_TIME) * 100));
 
         analyser.getByteFrequencyData(dataArray);
         const average = dataArray.reduce((sum, val) => sum + val, 0) / dataArray.length;
 
+        // Reset if it's too noisy
         if (average > CALIBRATION_SPEECH_THRESHOLD) {
-          showToast('warning', 'Noise Detected! (C-2)', 'Restarting calibration.');
-          clearTimeout(calibrationTimerRef.current);
+          showToast('warning', 'Noise Detected!', 'Please stay quiet during calibration.');
           noiseSamples.length = 0;
           calibrationStart = Date.now();
-          calibrationTimerRef.current = setTimeout(finishCalibration, CALIBRATION_TIME);
         }
 
         noiseSamples.push(average);
@@ -99,18 +92,24 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
         }
         setBarHeights(newHeights);
 
-        animationId = requestAnimationFrame(calibrationLoop);
+        if (elapsed < CALIBRATION_TIME) {
+          animationId = requestAnimationFrame(calibrationLoop);
+        } else {
+          finishCalibration();
+        }
       };
 
       const finishCalibration = () => {
         cancelAnimationFrame(animationId);
-        const averageNoise = noiseSamples.length > 0 ? noiseSamples.reduce((sum, val) => sum + val, 0) / noiseSamples.length : 10;
-        const newThreshold = Math.max(20, averageNoise + 15);
-        showToast('success', 'Calibration Complete (C-3)', `Calibration Complete! - Threshold set to ${newThreshold.toFixed(0)}.`);
+        const averageNoise = noiseSamples.length > 0
+          ? noiseSamples.reduce((sum, val) => sum + val, 0) / noiseSamples.length
+          : 15;
+        // Ensure a healthy noise floor
+        const newThreshold = Math.max(30, averageNoise + 15);
+        showToast('success', 'Optimized!', `Background noise filtered. Threshold set to ${newThreshold.toFixed(0)}.`);
         onCalibrationComplete(newThreshold);
       };
 
-      calibrationTimerRef.current = setTimeout(finishCalibration, CALIBRATION_TIME);
       calibrationLoop();
     };
 
@@ -118,24 +117,23 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
 
     return () => {
       cancelAnimationFrame(animationId);
-      clearTimeout(calibrationTimerRef.current);
-      // We don't stop tracks here if we want to share window.micStream
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close().catch(e => console.error("Error closing audio context", e));
+        audioContextRef.current.close().catch(e => console.log(e));
       }
     };
   }, [onCalibrationComplete, showToast, showToastOnce]);
 
   return (
     <VStack h={{ base: "200px", md: "220px" }} justify="center" spacing={4} p={6}>
-      <Heading size={{ base: "sm", md: "md" }} color="slate.600">Preparing Microphone...</Heading>
+      <Heading size={{ base: "sm", md: "md" }} color="slate.600">Calibrating Audio...</Heading>
       <Center position="relative" h="100px" w="100px">
         <CircularProgress
           value={calibrationProgress}
           size="100px"
           thickness="4px"
           color="brand.400"
-          trackColor="slate.100"
+          trackColor="slate.500"
+          opacity={0.1}
         />
         <HStack spacing={1.5} h="60px" w="100px" align="center" justify="center" position="absolute">
           {barHeights.map((height, i) => (
@@ -143,7 +141,7 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
           ))}
         </HStack>
       </Center>
-      <Text color="slate.500" fontSize={{ base: "xs", md: "sm" }}>Calibrating...</Text>
+      <Text color="slate.400" fontSize={{ base: "xs", md: "sm" }} fontWeight="bold" letterSpacing="widest">SILENCE REQUIRED</Text>
     </VStack>
   );
 };

@@ -16,8 +16,13 @@ const StatCard = ({ label, value, color = "slate.800" }) => (
     borderRadius="2xl"
     textAlign="center"
     variants={{ hidden: { opacity: 0, scale: 0.9 }, visible: { opacity: 1, scale: 1 } }}
-    whileHover={{ translateY: -8, boxShadow: '2xl', borderColor: 'brand.200' }}
-    transition={{ type: "spring", stiffness: 300 }}
+    whileHover={{
+      translateY: -8,
+      scale: 1.02,
+      boxShadow: '0 20px 25px -5px rgba(99, 102, 241, 0.2), 0 10px 10px -5px rgba(99, 102, 241, 0.1)',
+      borderColor: 'brand.300'
+    }}
+    transition={{ type: "spring", stiffness: 400, damping: 10 }}
   >
     <Text fontSize={{ base: "2xs", md: "xs" }} color="slate.500" fontWeight="bold" textTransform="uppercase" mb={2}>{label}</Text>
     <Heading size={{ base: "lg", md: "xl" }} color={color} fontWeight="black">{value}</Heading>
@@ -101,8 +106,13 @@ const ResultsScreen = ({ results, restartGame }) => {
   };
 
   const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1 },
+    hidden: { y: 30, opacity: 0, filter: "blur(4px)" },
+    visible: {
+      y: 0,
+      opacity: 1,
+      filter: "blur(0px)",
+      transition: { type: "spring", stiffness: 300, damping: 20 }
+    },
   };
 
   return (

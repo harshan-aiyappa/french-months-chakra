@@ -3,12 +3,14 @@ import { HStack, Box, useToken } from '@chakra-ui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const NUM_BARS = 11;
-const VOICE_THRESHOLD = 25;
+const VOICE_THRESHOLD = 30; // Increased base threshold
+const SPEAKING_DEBOUNCE = 100; // ms
 
-const MotionBar = React.memo(({ height, background, boxShadow, delay }) => (
+const MotionBar = React.memo(({ height, backgroundColor, backgroundImage, boxShadow, delay }) => (
   <Box
     as={motion.div}
-    animate={{ height: `${height}%`, background, boxShadow }}
+    animate={{ height: `${height}%`, backgroundColor, boxShadow }}
+    style={{ backgroundImage }}
     transition={{ type: 'spring', stiffness: 500, damping: 25, delay }}
     w="8px"
     minH="5px"
@@ -21,13 +23,16 @@ const MicVisualizer = ({
   setIsSpeaking,
   setMicError,
   dynamicThreshold = VOICE_THRESHOLD,
-  onSilence // NEW: Triggered when user stops speaking for a duration
+  onSilence
 }) => {
-  const animationFrameRef = useRef(null);
   const audioContextRef = useRef(null);
-  const streamRef = useRef(null);
+  const analyserRef = useRef(null);
+  const sourceRef = useRef(null);
+  const dataArrayRef = useRef(null);
+  const animationFrameRef = useRef(null);
   const silenceTimerRef = useRef(null);
   const hasSpokenRef = useRef(false);
+  const speakingDebounceRef = useRef(null);
 
   const [barHeights, setBarHeights] = useState(Array(NUM_BARS).fill(5));
   const [isVisuallySpeaking, setIsVisuallySpeaking] = useState(false);
@@ -38,17 +43,35 @@ const MicVisualizer = ({
   ]);
   const activeGradient = useMemo(() => `linear-gradient(to top, ${activeColor1}, ${activeColor2})`, [activeColor1, activeColor2]);
 
-  useEffect(() => {
-    let analyser;
-    let dataArray;
-    let animationId;
+  // Clean up function to prevent overlapping audio nodes
+  const cleanupAudio = useCallback(() => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+    if (speakingDebounceRef.current) {
+      clearTimeout(speakingDebounceRef.current);
+      speakingDebounceRef.current = null;
+    }
+    // We don't close the Context here, but we disconnect the source
+    if (sourceRef.current) {
+      sourceRef.current.disconnect();
+      sourceRef.current = null;
+    }
+    if (analyserRef.current) {
+      analyserRef.current = null;
+    }
+  }, []);
 
+  useEffect(() => {
     const setupAudio = async () => {
       if (!window.micStream) {
         try {
-          console.log('[MicVisualizer] Requesting microphone access...');
           window.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          console.log('[MicVisualizer] Microphone access granted');
         } catch (err) {
           if (setMicError) {
             let errorDetails = { desc: 'Could not access the microphone.' };
@@ -59,56 +82,79 @@ const MicVisualizer = ({
           return;
         }
       }
-      streamRef.current = window.micStream;
 
-      try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioContext.state === 'suspended') {
-          await audioContext.resume();
+      if (!audioContextRef.current) {
+        try {
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          audioContextRef.current = audioContext;
+        } catch (e) {
+          console.error("[MicVisualizer] AudioContext error:", e);
+          if (setMicError) setMicError("Audio context failed to start.");
+          return;
         }
-        console.log('[MicVisualizer] AudioContext created, state:', audioContext.state);
-        audioContextRef.current = audioContext;
-        analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256;
-        analyser.smoothingTimeConstant = 0.8; // Smoother transitions
-        const source = audioContext.createMediaStreamSource(streamRef.current);
-        source.connect(analyser);
-        dataArray = new Uint8Array(analyser.frequencyBinCount);
-        setIsMicReady(true);
-        console.log('[MicVisualizer] Audio setup complete, starting visualization');
-        visualize();
-      } catch (e) {
-        console.error("Audio context error", e);
-        if (setMicError) setMicError("Audio context failed to start.");
       }
+
+      if (audioContextRef.current.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+
+      // Re-create analyzer chain ONLY if it doesn't exist
+      if (!analyserRef.current) {
+        const analyser = audioContextRef.current.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.8;
+
+        const source = audioContextRef.current.createMediaStreamSource(window.micStream);
+        source.connect(analyser);
+
+        analyserRef.current = analyser;
+        sourceRef.current = source;
+        dataArrayRef.current = new Uint8Array(analyser.frequencyBinCount);
+
+        setIsMicReady(true);
+      }
+
+      visualize();
     };
 
     const visualize = () => {
-      const sliceWidth = Math.floor(dataArray.length / NUM_BARS);
+      if (!analyserRef.current || !dataArrayRef.current) return;
+
+      const sliceWidth = Math.floor(dataArrayRef.current.length / NUM_BARS);
+
       const update = () => {
-        if (!analyser) return;
-        analyser.getByteFrequencyData(dataArray);
+        if (!analyserRef.current) return;
+
+        const dataArray = dataArrayRef.current;
+        analyserRef.current.getByteFrequencyData(dataArray);
+
         const average = dataArray.reduce((sum, val) => sum + val, 0) / dataArray.length;
-        const isCurrentlySpeaking = average > dynamicThreshold;
+        const currentSpeaking = average > Math.max(VOICE_THRESHOLD, dynamicThreshold);
 
-        if (setIsSpeaking) setIsSpeaking(isCurrentlySpeaking && isListening);
-        setIsVisuallySpeaking(isCurrentlySpeaking);
+        // Update visual state immediately for bars
+        setIsVisuallySpeaking(currentSpeaking);
 
-        // Intelligent VAD Completion Logic
+        // Debounce the parent notification to prevent "flickering" or overlapping alerts
+        if (currentSpeaking !== isVisuallySpeaking) {
+          if (speakingDebounceRef.current) clearTimeout(speakingDebounceRef.current);
+          speakingDebounceRef.current = setTimeout(() => {
+            if (setIsSpeaking) setIsSpeaking(currentSpeaking && isListening);
+          }, 50);
+        }
+
         if (isListening) {
-          if (isCurrentlySpeaking) {
+          if (currentSpeaking) {
             hasSpokenRef.current = true;
             if (silenceTimerRef.current) {
               clearTimeout(silenceTimerRef.current);
               silenceTimerRef.current = null;
             }
           } else if (hasSpokenRef.current && !silenceTimerRef.current) {
-            // User was speaking, but now silent. Start the 1.5s completion timer.
             silenceTimerRef.current = setTimeout(() => {
               if (onSilence) onSilence();
               hasSpokenRef.current = false;
               silenceTimerRef.current = null;
-            }, 1500);
+            }, 2500);
           }
         } else {
           hasSpokenRef.current = false;
@@ -121,40 +167,41 @@ const MicVisualizer = ({
         const newHeights = [];
         for (let i = 0; i < NUM_BARS; i++) {
           const baseHeight = (dataArray[i * sliceWidth] / 255) * 80;
-          const finalHeight = 5 + baseHeight + (isCurrentlySpeaking && isListening ? 15 : 0);
+          const finalHeight = 5 + baseHeight + (currentSpeaking && isListening ? 15 : 0);
           newHeights.push(Math.min(100, finalHeight));
         }
         setBarHeights(newHeights);
-        animationId = requestAnimationFrame(update);
+        animationFrameRef.current = requestAnimationFrame(update);
       };
+
       update();
     };
 
     setupAudio();
 
     return () => {
-      cancelAnimationFrame(animationId);
-      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close().catch(e => console.error("Error closing audio context", e));
-      }
+      cleanupAudio();
     };
-  }, [setMicError, setIsSpeaking, isListening, dynamicThreshold]);
+  }, [isListening, dynamicThreshold, onSilence, cleanupAudio, setIsSpeaking, setMicError, isVisuallySpeaking]);
 
   return (
-    <HStack spacing={1.5} h="60px" w="120px" mx="auto" align="flex-end" justify="center">
+    <HStack spacing={1.5} h="60px" w="120px" mx="auto" align="flex-end" justify="center" position="relative">
       <AnimatePresence>
         {barHeights.map((height, i) => {
-          let background = inactiveColor;
+          let backgroundColor = inactiveColor;
+          let backgroundImage = 'none';
           let boxShadow = 'none';
           if (isMicReady) {
-            // Synchronize the "speaking" glow with the true average volume
             const isThresholdMet = isVisuallySpeaking && isListening;
-            if (isListening && isVisuallySpeaking) { background = activeGradient; }
-            else { background = readyColor; }
+            if (isListening && isVisuallySpeaking) {
+              backgroundColor = activeColor1;
+              backgroundImage = activeGradient;
+            } else {
+              backgroundColor = readyColor;
+            }
             if (isThresholdMet) { boxShadow = `0 0 15px 2px ${indicatorColor}`; }
           }
-          return (<MotionBar key={i} height={height} background={background} boxShadow={boxShadow} delay={`${i * 15}ms`} isCalibrating={false} />);
+          return (<MotionBar key={i} height={height} backgroundColor={backgroundColor} backgroundImage={backgroundImage} boxShadow={boxShadow} delay={`${i * 15}ms`} />);
         })}
       </AnimatePresence>
     </HStack>

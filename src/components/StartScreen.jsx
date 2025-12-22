@@ -7,9 +7,14 @@ const StartScreen = ({ onBegin }) => {
   return (
     <VStack spacing={{ base: 4, md: 6 }} textAlign="center" py={{ base: 2, md: 4 }} px={{ base: 2, md: 4 }}>
       <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.6, type: "spring" }}
+        initial={{ scale: 0.5, opacity: 0, rotate: -15 }}
+        animate={{ scale: 1, opacity: 1, rotate: 0 }}
+        transition={{
+          type: "spring",
+          stiffness: 260,
+          damping: 20,
+          duration: 0.8
+        }}
       >
         <Box
           p={{ base: 3, md: 4 }}
@@ -40,9 +45,14 @@ const StartScreen = ({ onBegin }) => {
           <HStack
             key={i}
             as={motion.div}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 + i * 0.1 }}
+            initial={{ opacity: 0, x: -30, filter: "blur(4px)" }}
+            animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+            transition={{
+              delay: 0.4 + i * 0.12,
+              type: "spring",
+              stiffness: 100,
+              damping: 15
+            }}
             bg="slate.50"
             p={{ base: 2, md: 2.5 }}
             borderRadius="xl"

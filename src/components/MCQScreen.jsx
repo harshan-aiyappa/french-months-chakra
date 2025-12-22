@@ -62,11 +62,10 @@ const MCQScreen = ({ activity, onAnswer }) => {
             isDisabled={isAnswered}
             {...getButtonProps(option)}
             as={motion.button}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 * i }}
-            whileHover={!isAnswered ? { scale: 1.02, x: 5 } : {}}
-            whileTap={!isAnswered ? { scale: 0.98 } : {}}
+            animate={isAnswered ? (option === activity.answer ? { scale: [1, 1.05, 1] } : option === selected ? { x: [0, -5, 5, -5, 0] } : { opacity: 0.4 }) : { opacity: 1, x: 0 }}
+            transition={isAnswered ? { duration: 0.4 } : { delay: 0.1 * i }}
+            whileHover={!isAnswered ? { scale: 1.02, x: 5, boxShadow: "lg" } : {}}
+            whileTap={!isAnswered ? { scale: 0.95 } : {}}
             borderRadius="2xl"
             fontSize={{ base: "md", md: "lg" }}
             boxShadow={!isAnswered ? "sm" : "none"}

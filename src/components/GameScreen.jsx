@@ -54,7 +54,7 @@ const GameScreenComponent = ({
           onSilence={isListening && stopListening ? stopListening : undefined}
         />
         <Text my={1} color={micError ? 'error.500' : 'slate.500'} h="18px" fontWeight="bold" fontSize={{ base: "2xs", md: "2xs" }} textTransform="uppercase" letterSpacing="widest">
-          {micError || (isListening ? 'Voice Detected' : 'Ready Capturing')}
+          {micError || (isListening ? (isSpeaking ? 'Voice Detected...' : 'Listening...') : 'Ready to Capture')}
         </Text>
 
         {!showNextButton ? (

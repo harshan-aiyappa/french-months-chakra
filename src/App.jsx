@@ -192,6 +192,7 @@ function App() {
   } = useSpeechRecognition({
     onResult: (transcript) => {
       stopListening();
+      showToast("success", "Speech Captured! (A-1)", `Captured: "${transcript}"`);
       handleSpeechResult(transcript);
     },
     onNoSpeech: () => {
@@ -358,10 +359,10 @@ function App() {
       <AnimatePresence mode="wait">
         <motion.div
           key={gameState === "playing" ? `playing-${currentIndex}` : gameState}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
+          initial={{ opacity: 0, x: 20, filter: "blur(10px)" }}
+          animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+          exit={{ opacity: 0, x: -20, filter: "blur(10px)" }}
+          transition={{ duration: 0.4, ease: "circOut" }}
         >
           {content}
         </motion.div>
@@ -385,7 +386,7 @@ function App() {
         overflow="hidden"
         p={{ base: 2, md: 4 }}
         pt={{ base: "calc(env(safe-area-inset-top) + 8px)", md: 4 }}
-        pb={{ base: "calc(env(safe-area-inset-bottom) + 8px)", md: 4 }}
+        pb={{ base: "calc(env(safe-area-inset-bottom) + 60px)", md: "calc(env(safe-area-inset-bottom) + 24px)" }}
         pl={{ base: "calc(env(safe-area-inset-left) + 8px)", md: 4 }}
         pr={{ base: "calc(env(safe-area-inset-right) + 8px)", md: 4 }}
       >
@@ -396,6 +397,7 @@ function App() {
           borderRadius={{ base: "xl", md: "3xl" }}
           boxShadow="2xl"
           p={{ base: 3, md: 6, lg: 8 }}
+          pb={{ base: 12, md: 8 }} // Extra padding inside container
           border="1px"
           borderColor="slate.100"
           overflowY="auto"

@@ -33,9 +33,10 @@ const Feedback = React.memo(({ message, type, highlightedPhrase }) => {
     <AnimatePresence>
       {message && (
         <MotionBox
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+          transition={{ type: "spring", stiffness: 500, damping: 30 }}
         >
           <Alert
             status={getStatus(type)}
