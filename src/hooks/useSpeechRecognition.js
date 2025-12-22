@@ -21,7 +21,7 @@ const useSpeechRecognition = ({ onResult, onNoSpeech, onError, onStart, onSpeech
     if (!recognitionRef.current) {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
-      recognition.interimResults = true; // Enabled for better feedback
+      recognition.interimResults = false; // Disabled for faster final transcript processing
       recognition.lang = 'fr-FR';
 
       recognition.onstart = () => {

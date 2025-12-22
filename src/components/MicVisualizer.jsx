@@ -148,7 +148,14 @@ const MicVisualizer = ({
 
         if (isListening) {
           if (currentSpeaking) {
-            hasSpokenRef.current = true;
+            if (!hasSpokenRef.current) {
+              // Track when speech FIRST started to avoid micro-spikes
+              if (!speechStartTimeRef.current) speechStartTimeRef.current = Date.now();
+              if (Date.now() - speechStartTimeRef.current > 200) { // MIN_SPEECH_DURATION
+                hasSpokenRef.current = true;
+                console.log("[VAD] Valid speech duration reached (200ms).");
+              }
+            }
             if (silenceTimerRef.current) {
               clearTimeout(silenceTimerRef.current);
               silenceTimerRef.current = null;
@@ -156,11 +163,15 @@ const MicVisualizer = ({
           } else if (hasSpokenRef.current && !silenceTimerRef.current) {
             console.log("[VAD] Silence detected while listening, starting timeout...");
             silenceTimerRef.current = setTimeout(() => {
-              console.log("[VAD] Silence timeout reached, stopping capture.");
+              console.log("[VAD] Silence timeout reached (1400ms), stopping capture.");
               if (onSilence) onSilence();
               hasSpokenRef.current = false;
+              speechStartTimeRef.current = null;
               silenceTimerRef.current = null;
-            }, 2500);
+            }, 1400); // Optimized silence timeout
+          } else if (!currentSpeaking) {
+            // Reset start time if we were just seeing noise
+            speechStartTimeRef.current = null;
           }
         } else {
           hasSpokenRef.current = false;

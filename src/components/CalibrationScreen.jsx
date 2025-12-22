@@ -3,7 +3,7 @@ import { VStack, Heading, Text, Center, CircularProgress, HStack, Box, useToken 
 import { motion } from 'framer-motion';
 
 const NUM_BARS = 7;
-const CALIBRATION_TIME = 2500; // Slightly longer for stability
+const CALIBRATION_TIME = 2000; // Industry standard for threshold sampling
 const CALIBRATION_SPEECH_THRESHOLD = 50; // Higher threshold during calibration
 
 const MotionBar = React.memo(({ height }) => (
@@ -104,8 +104,8 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
         const averageNoise = noiseSamples.length > 0
           ? noiseSamples.reduce((sum, val) => sum + val, 0) / noiseSamples.length
           : 15;
-        // Ensure a healthy noise floor
-        const newThreshold = Math.max(30, averageNoise + 15);
+        // Ensure a healthy noise floor with a standard +10 margin
+        const newThreshold = Math.max(30, averageNoise + 10);
         showToast('success', 'Optimized!', `Background noise filtered. Threshold set to ${newThreshold.toFixed(0)}.`);
         onCalibrationComplete(newThreshold);
       };
