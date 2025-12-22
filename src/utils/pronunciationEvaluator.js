@@ -4,9 +4,12 @@ const DICTIONARIES = {
   english: {
     A: "0", B: "1", C: "2", D: "3", E: "0", F: "1", G: "2", H: "", I: "0", J: "2", K: "2", L: "4", M: "5", N: "5", O: "0", P: "1", Q: "2", R: "6", S: "2", T: "3", U: "0", V: "1", W: "", X: "2", Y: ""
   },
+  french: {
+    A: "0", B: "1", C: "2", D: "3", E: "0", F: "1", G: "2", H: "", I: "0", J: "2", K: "2", L: "4", M: "5", N: "5", O: "0", P: "1", Q: "2", R: "6", S: "2", T: "3", U: "0", V: "1", W: "", X: "2", Y: ""
+  },
 };
 
-const LANGUAGE_CODES = { "en-US": "english" };
+const LANGUAGE_CODES = { "en-US": "english", "fr-FR": "french" };
 
 const Soundex = (name, languageCode) => {
   if (!name) return "0000";

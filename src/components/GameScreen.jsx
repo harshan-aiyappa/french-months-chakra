@@ -24,19 +24,19 @@ const GameScreenComponent = ({
       >
         <Box
           className={isSpeaking ? 'vad-speaking' : ''}
-          p={{ base: 10, md: 12 }}
+          p={{ base: 6, md: 10, lg: 12 }}
           bg="white"
           borderRadius="3xl"
           border="1px"
           borderColor="slate.100"
           textAlign="center"
-          boxShadow={isSpeaking ? '0 0 40px rgba(16, 185, 129, 0.2)' : 'xl'}
-          transition="all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+          boxShadow={isSpeaking ? 'none' : 'xl'}
+          transition="all 0.3s ease-in-out"
           position="relative"
           overflow="hidden"
         >
           <Box position="absolute" top={0} left={0} right={0} h="4px" bg="brand.500" />
-          <Heading as="h2" size={{ base: "2xl", md: "3xl" }} color="slate.800" fontWeight="black" letterSpacing="tight">
+          <Heading as="h2" size={{ base: "xl", md: "3xl" }} color="slate.800" fontWeight="black" letterSpacing="tight">
             {month.question}
           </Heading>
           <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="semibold" color="brand.500" mt={3} letterSpacing="wide" textTransform="uppercase">

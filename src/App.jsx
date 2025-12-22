@@ -21,14 +21,15 @@ import { UNIT_DATA } from "./constants";
 import MCQScreen from "./components/MCQScreen";
 import evaluatePronunciation from "./utils/pronunciationEvaluator";
 import CalibrationScreen from "./components/CalibrationScreen";
+import NeuralBackground from "./components/NeuralBackground";
 
 const MAX_RETRIES = 3;
 
 const ERROR_MAP = {
-  network: { id: "R-2", title: "Network Error", desc: "A network issue prevented the speech from being recognized." },
-  "audio-capture": { id: "R-3", title: "Microphone Disconnected", desc: "The audio source was lost during recognition." },
-  "not-allowed": { id: "R-4", title: "Service Not Allowed", desc: "The speech recognition service was blocked." },
-  "service-not-allowed": { id: "R-4", title: "Service Not Allowed", desc: "The speech recognition service was blocked." },
+  network: { id: "R-2", title: "Network Error", desc: "A network issue prevented the speech from being recognized. Please check your connection." },
+  "audio-capture": { id: "R-3", title: "Microphone Disconnected", desc: "The audio source was lost during recognition. Please check your microphone." },
+  "not-allowed": { id: "R-4", title: "Service Not Allowed", desc: "The speech recognition service was blocked. This may be due to a browser extension or network policy." },
+  "service-not-allowed": { id: "R-4", title: "Service Not Allowed", desc: "The speech recognition service was blocked. This may be due to a browser extension or network policy." },
   aborted: { id: "R-5", title: "Recognition Canceled", desc: "The listening session was canceled because the page became inactive." },
   "start-failed": { id: "L-3", title: "Recognition Failed to Start", desc: "There was an issue initializing the speech recognition engine." },
 };
@@ -102,7 +103,8 @@ function App() {
 
   const handleSpeechResult = useCallback(
     (transcript) => {
-      const targetPhrase = currentActivity.answer;
+      const isSpeakingTask = currentActivity.type === 'SPEAKING';
+      const targetPhrase = isSpeakingTask ? currentActivity.question : currentActivity.answer;
       const sourcePhrase = transcript;
       let evaluationResult;
 
@@ -221,7 +223,7 @@ function App() {
     if (speechRecognitionError === "unsupported-browser") {
       const err = {
         title: "Browser Not Supported (M-6)",
-        description: "This app requires the Web Speech API.",
+        description: "Your browser does not support the Web Speech API. Please use a recent version of Chrome or Safari.",
       };
       setAppError(err);
       showToast("error", err.title, err.description);
@@ -345,24 +347,45 @@ function App() {
   };
 
   return (
-    <Flex align="center" justify="center" minH="100vh" w="100vw" p={4}>
-      <Container
-        maxW="container.sm"
-        bg="white"
-        borderRadius="2xl"
-        boxShadow="xl"
-        p={{ base: 6, md: 8 }}
-        border="1px"
-        borderColor="slate.200"
+    <>
+      <NeuralBackground />
+      <Flex
+        align="center"
+        justify="center"
+        h={{ base: "100vh", md: "100dvh" }}
+        w="100vw"
+        overflow="hidden"
+        p={{ base: 2, md: 4 }}
+        paddingTop="env(safe-area-inset-top)"
+        paddingBottom="env(safe-area-inset-bottom)"
+        paddingLeft="env(safe-area-inset-left)"
+        paddingRight="env(safe-area-inset-right)"
       >
-        <VStack spacing={8} w="100%">
-          <Header score={score} total={UNIT_DATA.length} progress={progress} />
-          <Box as="main" w="100%" minH={{ base: "420px", md: "450px" }}>
-            {renderContent()}
-          </Box>
-        </VStack>
-      </Container>
-    </Flex>
+        <Container
+          maxW={{ base: "100%", md: "container.md" }}
+          maxH="100%"
+          bg="white"
+          borderRadius={{ base: "xl", md: "3xl" }}
+          boxShadow="2xl"
+          p={{ base: 4, md: 8, lg: 10 }}
+          border="1px"
+          borderColor="slate.100"
+          overflowY="auto"
+          css={{
+            '&::-webkit-scrollbar': { width: '4px' },
+            '&::-webkit-scrollbar-track': { background: 'transparent' },
+            '&::-webkit-scrollbar-thumb': { background: '#CBD5E1', borderRadius: '4px' },
+          }}
+        >
+          <VStack spacing={{ base: 4, md: 8 }} w="100%">
+            <Header score={score} total={UNIT_DATA.length} progress={progress} />
+            <Box as="main" w="100%" minH={{ base: "auto", md: "420px" }} flex="1">
+              {renderContent()}
+            </Box>
+          </VStack>
+        </Container>
+      </Flex>
+    </>
   );
 }
 

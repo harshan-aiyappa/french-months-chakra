@@ -36,7 +36,7 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
 
     const setupAudio = async () => {
       if (window.isSecureContext === false) {
-        showToastOnce('error', 'Insecure Context (M-5)', 'Microphone access is disabled on non-secure (HTTP) pages.');
+        showToastOnce('error', 'Insecure Context (M-5)', 'Microphone access is disabled on non-secure (HTTP) pages. This app must be run on HTTPS.');
         return;
       }
 
@@ -46,6 +46,9 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
         streamRef.current = stream;
 
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioContext.state === 'suspended') {
+          await audioContext.resume();
+        }
         audioContextRef.current = audioContext;
         analyser = audioContext.createAnalyser();
         analyser.fftSize = 256;
@@ -61,7 +64,7 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
         if (err.name === 'NotAllowedError') {
           errorDetails = { id: 'M-2', title: 'Microphone Access Denied', desc: 'You have denied microphone access. Please allow it in your browser\'s site settings to continue.' };
         } else if (err.name === 'SecurityError' || err.name === 'AbortError') {
-          errorDetails = { id: 'M-4', title: 'Could Not Access Microphone', desc: 'Access was blocked at the browser or OS level.' };
+          errorDetails = { id: 'M-4', title: 'Could Not Access Microphone', desc: 'Access was blocked at the browser or OS level. Please check your system\'s privacy settings.' };
         }
         showToastOnce('error', `${errorDetails.title} (${errorDetails.id})`, errorDetails.desc);
       }

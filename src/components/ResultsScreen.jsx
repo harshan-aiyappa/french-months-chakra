@@ -42,15 +42,15 @@ const ResultItem = ({ result }) => {
       borderColor="slate.100"
       boxShadow="sm"
     >
-      <Box w="30px" flexShrink={0}>{getIcon(result.status)}</Box>
+      <Box w={{ base: "24px", md: "30px" }} flexShrink={0}>{getIcon(result.status)}</Box>
       <Box flex="1">
         <HStack justify="space-between">
-          <Text fontWeight="bold" color="slate.800" fontSize="md">{result.question} → {result.answer}</Text>
-          <Text fontSize="xs" fontWeight="bold" color="slate.300" textTransform="uppercase">
+          <Text fontWeight="bold" color="slate.800" fontSize={{ base: "sm", md: "md" }}>{result.question} → {result.answer}</Text>
+          <Text fontSize={{ base: "3xs", md: "xs" }} fontWeight="bold" color="slate.300" textTransform="uppercase">
             {result.type}
           </Text>
         </HStack>
-        <Text fontSize="sm" color="slate.500" mt={1}>
+        <Text fontSize={{ base: "xs", md: "sm" }} color="slate.500" mt={1}>
           {result.transcript ? (
             <>You said: <Text as="span" fontWeight="semibold" color="slate.700">"{result.transcript}"</Text></>
           ) : 'No response detected'}
@@ -144,7 +144,6 @@ const ResultsScreen = ({ results, restartGame }) => {
         color="white"
         size={{ base: "md", md: "lg" }}
         h={{ base: "55px", md: "65px" }}
-        h="60px"
         w="100%"
         maxW="xs"
         onClick={restartGame}
@@ -154,7 +153,7 @@ const ResultsScreen = ({ results, restartGame }) => {
         _hover={{ bg: 'brand.600' }}
         leftIcon={<RepeatIcon />}
         borderRadius="2xl"
-        fontSize="lg"
+        fontSize={{ base: "md", md: "lg" }}
         fontWeight="bold"
       >
         Practice Again

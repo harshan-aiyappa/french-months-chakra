@@ -23,7 +23,7 @@ const StartScreen = ({ onBegin }) => {
       </motion.div>
 
       <Box>
-        <Heading as="h2" size={{ base: "xl", md: "2xl" }} fontWeight="black" color="slate.800" mb={3}>
+        <Heading as="h2" size={{ base: "lg", md: "2xl" }} fontWeight="black" color="slate.800" mb={3}>
           Ready to Practice?
         </Heading>
         <Text fontSize={{ base: "md", md: "lg" }} color="slate.500" maxW="md" mx="auto" lineHeight="tall">

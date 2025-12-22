@@ -34,7 +34,7 @@ const MCQScreen = ({ activity, onAnswer }) => {
         animate={{ opacity: 1, scale: 1 }}
       >
         <Box
-          p={{ base: 8, md: 10 }}
+          p={{ base: 6, md: 10 }}
           bg="white"
           borderRadius="3xl"
           border="1px"
@@ -42,10 +42,10 @@ const MCQScreen = ({ activity, onAnswer }) => {
           textAlign="center"
           boxSize="border-box"
         >
-          <Text fontSize={{ base: "xs", md: "sm" }} color="brand.500" fontWeight="bold" mb={2} textTransform="uppercase" letterSpacing="widest">
+          <Text fontSize={{ base: "3xs", md: "sm" }} color="brand.500" fontWeight="bold" mb={2} textTransform="uppercase" letterSpacing="widest">
             Multiple Choice
           </Text>
-          <Heading as="h2" size={{ base: "lg", md: "xl" }} color="slate.800" lineHeight="base">
+          <Heading as="h2" size={{ base: "md", md: "xl" }} color="slate.800" lineHeight="base">
             {activity.question}
           </Heading>
         </Box>
