@@ -13,18 +13,18 @@ const Header = ({ score, total, progress }) => {
       transition={{ duration: 0.5, ease: "easeOut" }}
       textAlign="center"
       w="100%"
-      p={4}
+      p={{ base: 3, md: 4 }}
       bg="whiteAlpha.100"
       backdropFilter="blur(10px)"
       borderRadius="2xl"
       border="1px solid"
       borderColor="whiteAlpha.300"
       boxShadow="glass"
-      mb={6}
+      mb={{ base: 2, md: 4 }}
     >
-      <Flex justify="center" align="center" mb={4}>
+      <Flex justify="center" align="center" mb={{ base: 2, md: 3 }}>
         <motion.div whileHover={{ rotate: 10, scale: 1.1 }}>
-          <Image src={logoSrc} alt="Lingotran Logo" boxSize="45px" mr={4} borderRadius="xl" />
+          <Image src={logoSrc} alt="Lingotran Logo" boxSize={{ base: "30px", md: "40px" }} mr={3} borderRadius="xl" />
         </motion.div>
         <Box textAlign="left">
           <Heading as="h1" size={{ base: "sm", md: "md" }} color="slate.800" letterSpacing="tight">French Months Unit</Heading>
@@ -38,7 +38,7 @@ const Header = ({ score, total, progress }) => {
         size="xs"
         colorScheme="brand"
         borderRadius="full"
-        mb={3}
+        mb={2}
         hasStripe
         isAnimated
       />

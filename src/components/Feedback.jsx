@@ -43,7 +43,7 @@ const Feedback = React.memo(({ message, type, highlightedPhrase }) => {
             variant="subtle"
             flexDirection="column"
             alignItems="start"
-            p={4}
+            p={{ base: 3, md: 4 }}
           >
             <HStack>
               <AlertIcon />
@@ -51,8 +51,8 @@ const Feedback = React.memo(({ message, type, highlightedPhrase }) => {
             </HStack>
 
             {highlightedPhrase && highlightedPhrase.length > 0 && type !== 'correct' && (
-              <Box mt={3} p={3} bg="blackAlpha.50" borderRadius="md" w="100%">
-                <Text fontSize={{ base: "xs", md: "sm" }} color="slate.600" mb={1} fontWeight="medium">
+              <Box mt={2} p={2} bg="blackAlpha.50" borderRadius="md" w="100%">
+                <Text fontSize={{ base: "2xs", md: "xs" }} color="slate.600" mb={1} fontWeight="medium">
                   Pronunciation Analysis:
                 </Text>
                 <HStack wrap="wrap">

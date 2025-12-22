@@ -8,7 +8,7 @@ const MotionBox = motion.create(Box);
 
 const StatCard = ({ label, value, color = "slate.800" }) => (
   <MotionBox
-    p={6}
+    p={{ base: 3, md: 4 }}
     bg="white"
     border="1px solid"
     borderColor="slate.100"
@@ -36,7 +36,7 @@ const ResultItem = ({ result }) => {
     <HStack
       w="100%"
       bg="white"
-      p={4}
+      p={{ base: 3, md: 4 }}
       borderRadius="xl"
       border="1px solid"
       borderColor="slate.100"
@@ -106,17 +106,17 @@ const ResultsScreen = ({ results, restartGame }) => {
   };
 
   return (
-    <VStack as={motion.div} spacing={10} variants={containerVariants} initial="hidden" animate="visible" py={6}>
-      <VStack spacing={3} textAlign="center">
-        <Heading as="h2" size={{ base: "xl", md: "2xl" }} fontWeight="black" color="slate.800">
+    <VStack as={motion.div} spacing={{ base: 6, md: 8 }} variants={containerVariants} initial="hidden" animate="visible" py={{ base: 2, md: 4 }}>
+      <VStack spacing={2} textAlign="center">
+        <Heading as="h2" size={{ base: "lg", md: "xl" }} fontWeight="black" color="slate.800">
           {percentage >= 85 ? "Magnifique! 🎉" : percentage >= 60 ? "Great Progress! 👍" : "Keep Practicing! 💪"}
         </Heading>
-        <Text fontSize={{ base: "md", md: "lg" }} color="slate.500" maxW="md">
+        <Text fontSize={{ base: "sm", md: "md" }} color="slate.500" maxW="md">
           You've completed the French Months unit. Take a look at your stats below.
         </Text>
       </VStack>
 
-      <SimpleGrid columns={{ base: 2, md: 4 }} spacing={6} w="100%">
+      <SimpleGrid columns={{ base: 2, md: 4 }} spacing={{ base: 3, md: 4 }} w="100%">
         <StatCard label="Score" value={`${correct}/${results.length}`} color="brand.500" />
         <StatCard label="Accuracy" value={`${percentage}%`} color="accent.500" />
         <StatCard label="Partial" value={partial} color="warning.500" />
@@ -130,7 +130,7 @@ const ResultsScreen = ({ results, restartGame }) => {
             {results.length} ITEMS
           </Text>
         </HStack>
-        <VStack w="100%" align="stretch" spacing={4}>
+        <VStack w="100%" align="stretch" spacing={3}>
           {results.map((result, idx) => (
             <MotionBox key={idx} variants={itemVariants}>
               <ResultItem result={result} />
@@ -142,8 +142,8 @@ const ResultsScreen = ({ results, restartGame }) => {
       <Button
         bg="brand.500"
         color="white"
-        size={{ base: "md", md: "lg" }}
-        h={{ base: "55px", md: "65px" }}
+        size={{ base: "sm", md: "md" }}
+        h={{ base: "45px", md: "55px" }}
         w="100%"
         maxW="xs"
         onClick={restartGame}

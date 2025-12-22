@@ -15,7 +15,7 @@ const GameScreenComponent = ({
   useEffect(() => { setMicError(null); }, [month]);
 
   return (
-    <VStack spacing={{ base: 6, md: 10 }} align="stretch" py={{ base: 2, md: 4 }}>
+    <VStack spacing={{ base: 3, md: 6 }} align="stretch" py={{ base: 1, md: 2 }}>
       <motion.div
         key={month.question}
         initial={{ opacity: 0, y: 10 }}
@@ -24,7 +24,7 @@ const GameScreenComponent = ({
       >
         <Box
           className={isSpeaking ? 'vad-speaking' : ''}
-          p={{ base: 6, md: 10, lg: 12 }}
+          p={{ base: 5, md: 8, lg: 10 }}
           bg="white"
           borderRadius="3xl"
           border="1px"
@@ -36,10 +36,10 @@ const GameScreenComponent = ({
           overflow="hidden"
         >
           <Box position="absolute" top={0} left={0} right={0} h="4px" bg="brand.500" />
-          <Heading as="h2" size={{ base: "xl", md: "3xl" }} color="slate.800" fontWeight="black" letterSpacing="tight">
+          <Heading as="h2" size={{ base: "xl", md: "2xl" }} color="slate.800" fontWeight="black" letterSpacing="tight">
             {month.question}
           </Heading>
-          <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="semibold" color="brand.500" mt={3} letterSpacing="wide" textTransform="uppercase">
+          <Text fontSize={{ base: "lg", md: "lg" }} fontWeight="semibold" color="brand.500" mt={2} letterSpacing="wide" textTransform="uppercase">
             {month.pronunciation}
           </Text>
         </Box>
@@ -53,17 +53,17 @@ const GameScreenComponent = ({
           dynamicThreshold={dynamicThreshold}
           onSilence={isListening && stopListening ? stopListening : undefined}
         />
-        <Text my={2} color={micError ? 'error.500' : 'slate.500'} h="24px" fontWeight="bold" fontSize={{ base: "2xs", md: "xs" }} textTransform="uppercase" letterSpacing="widest">
+        <Text my={1} color={micError ? 'error.500' : 'slate.500'} h="18px" fontWeight="bold" fontSize={{ base: "2xs", md: "2xs" }} textTransform="uppercase" letterSpacing="widest">
           {micError || (isListening ? 'Voice Detected' : 'Ready Capturing')}
         </Text>
 
         {!showNextButton ? (
           <Button
             leftIcon={!isListening ? <Icon as={FaMicrophone} /> : null}
-            size={{ base: "md", md: "lg" }}
-            h={{ base: "55px", md: "65px" }}
+            size={{ base: "sm", md: "md" }}
+            h={{ base: "45px", md: "55px" }}
             w="100%"
-            maxW="280px"
+            maxW="240px"
             onClick={startListening}
             isDisabled={!!micError || isListening}
             as={motion.button}
@@ -86,10 +86,10 @@ const GameScreenComponent = ({
         ) : (
           <Button
             rightIcon={<Icon as={FaArrowRight} />}
-            size={{ base: "md", md: "lg" }}
-            h={{ base: "50px", md: "60px" }}
+            size={{ base: "sm", md: "md" }}
+            h={{ base: "42px", md: "50px" }}
             w="100%"
-            maxW="200px"
+            maxW="180px"
             onClick={nextPrompt}
             variant="ghost"
             colorScheme="brand"
@@ -102,7 +102,7 @@ const GameScreenComponent = ({
         )}
       </VStack>
 
-      <Box minH={{ base: '90px', md: '70px' }} mt={2}>
+      <Box minH={{ base: '70px', md: '60px' }} mt={1}>
         <Feedback
           message={feedback.message}
           type={feedback.type}

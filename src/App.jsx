@@ -354,20 +354,23 @@ function App() {
         justify="center"
         h={{ base: "100vh", md: "100dvh" }}
         w="100vw"
+        position="fixed"
+        top={0}
+        left={0}
         overflow="hidden"
         p={{ base: 2, md: 4 }}
-        paddingTop="env(safe-area-inset-top)"
-        paddingBottom="env(safe-area-inset-bottom)"
-        paddingLeft="env(safe-area-inset-left)"
-        paddingRight="env(safe-area-inset-right)"
+        pt={{ base: "calc(env(safe-area-inset-top) + 8px)", md: 4 }}
+        pb={{ base: "calc(env(safe-area-inset-bottom) + 8px)", md: 4 }}
+        pl={{ base: "calc(env(safe-area-inset-left) + 8px)", md: 4 }}
+        pr={{ base: "calc(env(safe-area-inset-right) + 8px)", md: 4 }}
       >
         <Container
-          maxW={{ base: "100%", md: "container.md" }}
+          maxW={{ base: "100%", md: "container.sm", lg: "container.md" }}
           maxH="100%"
           bg="white"
           borderRadius={{ base: "xl", md: "3xl" }}
           boxShadow="2xl"
-          p={{ base: 4, md: 8, lg: 10 }}
+          p={{ base: 3, md: 6, lg: 8 }}
           border="1px"
           borderColor="slate.100"
           overflowY="auto"
@@ -377,9 +380,9 @@ function App() {
             '&::-webkit-scrollbar-thumb': { background: '#CBD5E1', borderRadius: '4px' },
           }}
         >
-          <VStack spacing={{ base: 4, md: 8 }} w="100%">
+          <VStack spacing={{ base: 3, md: 5 }} w="100%">
             <Header score={score} total={UNIT_DATA.length} progress={progress} />
-            <Box as="main" w="100%" minH={{ base: "auto", md: "420px" }} flex="1">
+            <Box as="main" w="100%" minH={{ base: "auto", md: "380px" }} flex="1">
               {renderContent()}
             </Box>
           </VStack>

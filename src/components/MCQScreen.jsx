@@ -28,13 +28,13 @@ const MCQScreen = ({ activity, onAnswer }) => {
   };
 
   return (
-    <VStack spacing={{ base: 6, md: 10 }} align="stretch" py={{ base: 2, md: 4 }}>
+    <VStack spacing={{ base: 4, md: 6 }} align="stretch" py={{ base: 1, md: 2 }}>
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
       >
         <Box
-          p={{ base: 6, md: 10 }}
+          p={{ base: 4, md: 8 }}
           bg="white"
           borderRadius="3xl"
           border="1px"
@@ -51,12 +51,12 @@ const MCQScreen = ({ activity, onAnswer }) => {
         </Box>
       </motion.div>
 
-      <VStack spacing={4}>
+      <VStack spacing={3}>
         {activity.options.map((option, i) => (
           <Button
             key={option}
-            size={{ base: "md", md: "lg" }}
-            h={{ base: "56px", md: "64px" }}
+            size={{ base: "sm", md: "md" }}
+            h={{ base: "48px", md: "56px" }}
             w="100%"
             onClick={() => handleSelect(option)}
             isDisabled={isAnswered}
