@@ -5,12 +5,17 @@ This document provides a comprehensive breakdown of all user-facing and technica
 ## 1. User Experience (UX) Features
 
 ### 🌟 Interactive Practice Loop
+- **Game Modes**: Choose between Mix (default), Speaking Only, or Quiz Only modes to customize your learning experience.
 - **Multi-Modal Learning**: Combines speaking prompts with Multiple Choice Questions (MCQ) to reinforce memory.
 - **Dynamic Questioning**: System rotates through French months with randomized types (Pronunciation vs. Identification).
 - **Graceful Failure**: If the system doesn't hear you, it prompts a retry rather than failing immediately.
+- **Retry Functionality**: Option to re-attempt pronunciation after receiving feedback.
 
 ### 🎨 Visual & Motion Design
 - **Glassmorphic UI**: High-end aesthetic using semi-transparent containers, subtle blur effects, and premium shadows.
+- **Light/Dark Mode**: Seamless theme toggle with consistent semantic color tokens across all components.
+- **Lucide Icons**: Professional icon library (Zap, Mic, FileText) for mode selection.
+- **Premium StartScreen**: Interactive card-based mode selector with gradient typography and staggered animations.
 - **Fluid Transitions**: Slide-and-blur entrance/exit animations between every screen.
 - **Interaction Feedback**: 
   - **Success**: Stat cards "pop", confetti explosions, and green highlighting.
@@ -62,6 +67,8 @@ This document provides a comprehensive breakdown of all user-facing and technica
 - **ARIA Compliant**: Full screen-reader support with descriptive labels on all interactive elements.
 
 ### 🚀 Performance Architecture
+- **Redux State Management**: Centralized state with Redux Toolkit for predictable, scalable state updates.
+- **Memoized Selectors**: Computed values (score, progress, currentActivity) derived efficiently from Redux state.
 - **Persistent Refs**: Expensive audio nodes are stored in refs to prevent memory leaks and unnecessary re-renders.
 - **Layout Stability**: Optimized `minH` and transition physics ensure the UI stays rock-solid without jarring jumps during content changes.
 - **Debounced Interaction**: Click/Touch interactions are protected against "spamming" to ensure state stability.
