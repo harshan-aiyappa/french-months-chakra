@@ -1,6 +1,7 @@
 import React from 'react';
 import { VStack, Heading, Text, Button, Icon, Box, SimpleGrid, Image, Badge } from '@chakra-ui/react';
 import { CheckCircleIcon } from '@chakra-ui/icons';
+import { Zap, Mic, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const MotionBox = motion.create(Box);
@@ -41,9 +42,12 @@ const ModeCard = ({ mode, isSelected, onClick, delay }) => (
       </Badge>
     )}
     <VStack spacing={2}>
-      <Text fontSize="3xl" role="img" aria-label={mode.label}>
-        {mode.icon}
-      </Text>
+      <Icon
+        as={mode.IconComponent}
+        boxSize={8}
+        color={isSelected ? 'white' : 'brand.500'}
+        strokeWidth={2}
+      />
       <Text
         fontSize="md"
         fontWeight="bold"
@@ -69,19 +73,19 @@ const StartScreen = ({ onBegin }) => {
     {
       id: 'mixed',
       label: 'Mix Mode',
-      icon: '⚡',
+      IconComponent: Zap,
       description: 'Speaking + Quiz challenges'
     },
     {
       id: 'speech',
       label: 'Speaking',
-      icon: '🎤',
+      IconComponent: Mic,
       description: 'Pronunciation practice only'
     },
     {
       id: 'mcq',
       label: 'Quiz',
-      icon: '📝',
+      IconComponent: FileText,
       description: 'Multiple choice only'
     },
   ];
