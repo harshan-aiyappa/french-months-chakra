@@ -24,6 +24,8 @@ import evaluatePronunciation from "./utils/pronunciationEvaluator";
 import CalibrationScreen from "./components/CalibrationScreen";
 import NeuralBackground from "./components/NeuralBackground";
 import DeveloperAttribution from "./components/DeveloperAttribution";
+import { ERROR_MAP } from "./constants/errors";
+import { getBrowserInfo, checkFeatureSupport } from "./utils/browserDetection";
 import {
   selectGameStatus,
   selectCurrentActivity,
@@ -96,6 +98,42 @@ function App() {
       window.removeEventListener('touchstart', resumeAudio);
     };
   }, []);
+
+  const showToast = useCallback(
+    (status, title, description) => {
+      const id = title + description;
+      if (!toast.isActive(id)) {
+        toast({
+          id,
+          position: "top-right",
+          duration: 4000,
+          isClosable: true,
+          render: () => (
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+            >
+              <Alert
+                status={status}
+                borderRadius="xl"
+                boxShadow="lg"
+                p={4}
+                variant="solid"
+              >
+                <AlertIcon />
+                <Box flex="1">
+                  <Text fontWeight="bold">{title}</Text>
+                  <Text fontSize="sm">{description}</Text>
+                </Box>
+              </Alert>
+            </motion.div>
+          ),
+        });
+      }
+    },
+    [toast]
+  );
 
   // Show browser info and feature compatibility toasts on load
   useEffect(() => {
