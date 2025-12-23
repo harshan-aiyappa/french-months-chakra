@@ -5,9 +5,9 @@ This document provides a comprehensive breakdown of all user-facing and technica
 ## 1. User Experience (UX) Features
 
 ### 🌟 Interactive Practice Loop
-- **Game Modes**: Choose between Mix (default), Speaking Only, or Quiz Only modes to customize your learning experience.
+- **Game Modes**: Choose between Mix (24 activities), Speaking Only (12 months), or Quiz Only (12 months) to customize your learning experience.
 - **Multi-Modal Learning**: Combines speaking prompts with Multiple Choice Questions (MCQ) to reinforce memory.
-- **Dynamic Questioning**: System rotates through French months with randomized types (Pronunciation vs. Identification).
+- **Dynamic Questioning**: System rotates through all 12 French months with randomized types (Pronunciation vs. Identification).
 - **Graceful Failure**: If the system doesn't hear you, it prompts a retry rather than failing immediately.
 - **Retry Functionality**: Option to re-attempt pronunciation after receiving feedback.
 
