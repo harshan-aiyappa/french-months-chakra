@@ -21,7 +21,6 @@ const ModeCard = ({ mode, isSelected, onClick, delay }) => (
     border="2px solid"
     borderColor={isSelected ? 'brand.500' : 'border'}
     boxShadow={isSelected ? '0 10px 30px -5px rgba(99, 102, 241, 0.4)' : 'sm'}
-    transition="all 0.2s"
     _hover={{
       borderColor: isSelected ? 'brand.600' : 'brand.300',
       boxShadow: isSelected ? '0 15px 35px -5px rgba(99, 102, 241, 0.5)' : 'md',
