@@ -417,7 +417,8 @@ function App() {
         <Container
           w="100%"
           maxW={{ base: "100%", sm: "90%", md: "container.sm", lg: "container.md" }}
-          maxH="100%"
+          minH={{ base: "auto", md: "400px" }}
+          maxH={{ base: "calc(100dvh - 16px)", md: "calc(100dvh - 32px)" }}
           bg="card"
           borderRadius={{ base: "xl", md: "3xl" }}
           boxShadow="2xl"
