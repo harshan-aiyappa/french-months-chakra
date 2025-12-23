@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useEffect, useCallback } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import {
   Container,
   Box,
@@ -23,6 +24,26 @@ import evaluatePronunciation from "./utils/pronunciationEvaluator";
 import CalibrationScreen from "./components/CalibrationScreen";
 import NeuralBackground from "./components/NeuralBackground";
 import DeveloperAttribution from "./components/DeveloperAttribution";
+import {
+  selectGameStatus,
+  selectCurrentActivity,
+  selectHistory,
+  selectRetryCount,
+  selectFeedback,
+  selectDynamicThreshold,
+  selectScore,
+  selectProgress,
+  selectTotal,
+  selectCurrentIndex,
+  startGame,
+  setCalibrationComplete,
+  submitResult,
+  setFeedback,
+  nextActivity,
+  retryCurrent,
+  incrementRetry,
+  triggerRecalibration,
+} from "./store/gameSlice";
 
 const MAX_RETRIES = 3;
 
@@ -36,17 +57,22 @@ const ERROR_MAP = {
 };
 
 function App() {
-  const [gameState, setGameState] = useState("start");
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [sessionResults, setSessionResults] = useState([]);
-  const [retryCount, setRetryCount] = useState(0);
-  const [feedback, setFeedback] = useState({
-    message: "",
-    type: "",
-    highlightedPhrase: [],
-  });
-  const [appError, setAppError] = useState(null);
-  const [dynamicThreshold, setDynamicThreshold] = useState(30);
+  const dispatch = useDispatch();
+
+  // Redux state
+  const gameState = useSelector(selectGameStatus);
+  const currentActivity = useSelector(selectCurrentActivity);
+  const sessionResults = useSelector(selectHistory);
+  const retryCount = useSelector(selectRetryCount);
+  const feedback = useSelector(selectFeedback);
+  const dynamicThreshold = useSelector(selectDynamicThreshold);
+  const score = useSelector(selectScore);
+  const progress = useSelector(selectProgress);
+  const total = useSelector(selectTotal);
+  const currentIndex = useSelector(selectCurrentIndex);
+
+  // Local state (non-Redux)
+  const [appError, setAppError] = React.useState(null);
   const toast = useToast();
 
   // iOS Safari AudioContext fix: Resume AudioContext on first interaction
@@ -107,21 +133,9 @@ function App() {
     [toast]
   );
 
-  const currentActivity = useMemo(
-    () => UNIT_DATA[currentIndex],
-    [currentIndex]
-  );
-  const score = useMemo(
-    () => sessionResults.filter((r) => r.status === "correct").length,
-    [sessionResults]
-  );
-  const progress = useMemo(
-    () => (sessionResults.length / UNIT_DATA.length) * 100,
-    [sessionResults]
-  );
   const resetFeedback = useCallback(
-    () => setFeedback({ message: "", type: "", highlightedPhrase: [] }),
-    []
+    () => dispatch(setFeedback({ message: "", type: "", highlightedPhrase: [] })),
+    [dispatch]
   );
 
   const handleSpeechResult = useCallback(
@@ -166,22 +180,19 @@ function App() {
             ? "partial"
             : "incorrect";
 
-      setFeedback({
+      dispatch(setFeedback({
         message: evaluationResult.message,
         type: newStatus,
         highlightedPhrase: evaluationResult.highlightedPhrase,
-      });
+      }));
 
-      setSessionResults((prev) => [
-        ...prev,
-        {
-          ...currentActivity,
-          transcript,
-          status: newStatus,
-          retries: retryCount,
-          evaluation: evaluationResult,
-        },
-      ]);
+      dispatch(submitResult({
+        ...currentActivity,
+        transcript,
+        status: newStatus,
+        retries: retryCount,
+        evaluation: evaluationResult,
+      }));
     },
     [currentActivity, retryCount]
   );
@@ -189,7 +200,8 @@ function App() {
   const nextActivity = useCallback(() => {
     resetFeedback();
     setRetryCount(0);
-    if (currentIndex < UNIT_DATA.length - 1) {
+    setRetryCount(0);
+    if (currentIndex < activeUnitData.length - 1) {
       console.log(`[Game] Moving to activity index: ${currentIndex + 1}`);
       setCurrentIndex((prev) => prev + 1);
     } else {
@@ -208,18 +220,18 @@ function App() {
         "Didn't catch that (R-1)",
         "Try speaking a bit louder or closer to the mic."
       );
-      setRetryCount(1);
+      dispatch(incrementRetry());
       resetFeedback();
       // We STAY in "playing" state
     } else if (retryCount === 1) {
-      // Second failure: Trigger re-calibration
+      // Second failure: Trigger re-calibration (BEST APPROACH criteria)
       showToast(
         "info",
-        "adjusting Mic... (C-4)",
+        "Adjusting Mic... (C-4)",
         "Let's recalibrate to make sure I can hear you clearly."
       );
-      setGameState("calibrating");
-      setRetryCount(2); // Progress to final retry attempt
+      dispatch(triggerRecalibration());
+      dispatch(incrementRetry()); // Progress to final retry attempt
     } else {
       // Final failure: Move on
       showToast(
@@ -227,35 +239,25 @@ function App() {
         "Moving On (R-1)",
         "Still couldn't hear you. Let's try the next one."
       );
-      setFeedback({
+      dispatch(setFeedback({
         message: `No speech detected after ${MAX_RETRIES} attempts. Moving on.`,
         type: "warning",
-      });
-      setSessionResults((prev) => [
-        ...prev,
-        {
-          ...currentActivity,
-          transcript: "",
-          status: "skipped",
-          retries: MAX_RETRIES,
-        },
-      ]);
-      setRetryCount(0); // Reset for next activity
+      }));
+      dispatch(submitResult({
+        ...currentActivity,
+        transcript: "",
+        status: "skipped",
+        retries: MAX_RETRIES,
+      }));
       // Wait a moment so the user sees the feedback before skipping
-      setTimeout(nextActivity, 1500);
+      setTimeout(() => dispatch(nextActivity()), 1500);
     }
-  }, [retryCount, currentActivity, showToast, resetFeedback, nextActivity]);
+  }, [retryCount, currentActivity, showToast, resetFeedback, dispatch]);
 
   const handleRetry = useCallback(() => {
     console.log("[Game] Retrying current prompt...");
-    setSessionResults((prev) => {
-      const newResults = [...prev];
-      newResults.pop(); // Remove the failed attempt
-      return newResults;
-    });
-    setFeedback({ message: "", type: "", highlightedPhrase: [] });
-    // Retry count logic is already handled, we just don't increment index
-  }, []);
+    dispatch(retryCurrent());
+  }, [dispatch]);
 
   const {
     isListening,
@@ -297,34 +299,26 @@ function App() {
     }
   }, [speechRecognitionError, showToast]);
 
-  const startUnit = useCallback(() => {
-    setCurrentIndex(0);
-    setSessionResults([]);
-    setRetryCount(0);
-    resetFeedback();
-    setGameState("calibrating");
-  }, [resetFeedback]);
+  const startUnit = useCallback((mode = "mixed") => {
+    dispatch(startGame(mode));
+  }, [dispatch]);
 
 
   const handleMCQAnswer = (isCorrect) => {
     const status = isCorrect ? "correct" : "incorrect";
-    setSessionResults((prev) => [
-      ...prev,
-      {
-        ...currentActivity,
-        status,
-        transcript: isCorrect ? "Correct" : "Incorrect",
-      },
-    ]);
+    dispatch(submitResult({
+      ...currentActivity,
+      status,
+      transcript: isCorrect ? "Correct" : "Incorrect",
+    }));
     setTimeout(() => {
-      nextActivity();
+      dispatch(nextActivity());
     }, 1000);
   };
 
   const handleCalibrationComplete = useCallback((newThreshold) => {
-    setDynamicThreshold(newThreshold);
-    setGameState("playing");
-  }, []);
+    dispatch(setCalibrationComplete(newThreshold));
+  }, [dispatch]);
 
   const renderContent = () => {
     if (appError) {
@@ -443,7 +437,7 @@ function App() {
           }}
         >
           <VStack spacing={{ base: 3, md: 5 }} w="100%">
-            <Header score={score} total={UNIT_DATA.length} progress={progress} />
+            <Header score={score} total={activeUnitData.length} progress={progress} />
             <Box as="main" w="100%" minH="380px" flex="1">
               {renderContent()}
             </Box>

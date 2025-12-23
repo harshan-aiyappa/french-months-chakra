@@ -19,10 +19,10 @@ const MCQScreen = ({ activity, onAnswer }) => {
       return { variant: 'outline', colorScheme: 'brand', borderColor: 'border', color: 'text' };
     }
     if (option === activity.answer) {
-      return { variant: 'solid', bg: 'success.500', color: 'white', _hover: { bg: 'success.600' } };
+      return { variant: 'solid', bg: 'correctBg', color: 'onStatus', _hover: { opacity: 0.9 } };
     }
     if (option === selected && option !== activity.answer) {
-      return { variant: 'solid', bg: 'error.500', color: 'white', _hover: { bg: 'error.600' } };
+      return { variant: 'solid', bg: 'errorBg', color: 'onStatus', _hover: { opacity: 0.9 } };
     }
     return { variant: 'outline', opacity: 0.4, borderColor: 'border', color: 'textMuted' };
   };

@@ -20,7 +20,8 @@ const theme = extendTheme({
       400: '#94A3B8', 500: '#64748B', 600: '#475569', 700: '#334155',
       800: '#1E293B', 900: '#0F172A',
     },
-    error: { 50: '#FEF2F2', 500: '#EF4444' },
+    error: { 50: '#FEF2F2', 500: '#EF4444', 600: '#DC2626' },
+    success: { 50: '#ECFDF5', 500: '#10B981', 600: '#059669' }, // Emerald 500/600
   },
   semanticTokens: {
     colors: {
@@ -43,6 +44,18 @@ const theme = extendTheme({
       border: {
         default: 'slate.100',
         _dark: 'slate.700',
+      },
+      correctBg: {
+        default: 'success.500',
+        _dark: 'success.500', // Keep vibrant for clear feedback, or use 600 for less glare
+      },
+      errorBg: {
+        default: 'error.500',
+        _dark: 'error.500',
+      },
+      onStatus: {
+        default: 'white',
+        _dark: 'white', // Text color on status buttons
       }
     },
   },

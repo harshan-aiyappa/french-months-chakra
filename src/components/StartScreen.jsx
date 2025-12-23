@@ -1,11 +1,93 @@
 import React from 'react';
-import { VStack, Heading, Text, Button, Icon, Box, HStack, Image } from '@chakra-ui/react';
+import { VStack, Heading, Text, Button, Icon, Box, SimpleGrid, Image, Badge } from '@chakra-ui/react';
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import { motion } from 'framer-motion';
 
+const MotionBox = motion.create(Box);
+
+const ModeCard = ({ mode, isSelected, onClick, delay }) => (
+  <MotionBox
+    initial={{ opacity: 0, y: 20, scale: 0.9 }}
+    animate={{ opacity: 1, y: 0, scale: 1 }}
+    transition={{ delay, type: "spring", stiffness: 200, damping: 20 }}
+    whileHover={{ scale: 1.05, y: -5 }}
+    whileTap={{ scale: 0.95 }}
+    onClick={onClick}
+    cursor="pointer"
+    p={4}
+    bg={isSelected ? 'brand.500' : 'card'}
+    borderRadius="2xl"
+    border="2px solid"
+    borderColor={isSelected ? 'brand.500' : 'border'}
+    boxShadow={isSelected ? '0 10px 30px -5px rgba(99, 102, 241, 0.4)' : 'sm'}
+    transition="all 0.2s"
+    _hover={{
+      borderColor: isSelected ? 'brand.600' : 'brand.300',
+      boxShadow: isSelected ? '0 15px 35px -5px rgba(99, 102, 241, 0.5)' : 'md',
+    }}
+    position="relative"
+    overflow="hidden"
+  >
+    {isSelected && (
+      <Badge
+        position="absolute"
+        top={2}
+        right={2}
+        colorScheme="green"
+        fontSize="2xs"
+        borderRadius="md"
+      >
+        Selected
+      </Badge>
+    )}
+    <VStack spacing={2}>
+      <Text fontSize="3xl" role="img" aria-label={mode.label}>
+        {mode.icon}
+      </Text>
+      <Text
+        fontSize="md"
+        fontWeight="bold"
+        color={isSelected ? 'white' : 'text'}
+      >
+        {mode.label}
+      </Text>
+      <Text
+        fontSize="2xs"
+        color={isSelected ? 'whiteAlpha.900' : 'textMuted'}
+        textAlign="center"
+      >
+        {mode.description}
+      </Text>
+    </VStack>
+  </MotionBox>
+);
+
 const StartScreen = ({ onBegin }) => {
+  const [mode, setMode] = React.useState('mixed');
+
+  const modes = [
+    {
+      id: 'mixed',
+      label: 'Mix Mode',
+      icon: '⚡',
+      description: 'Speaking + Quiz challenges'
+    },
+    {
+      id: 'speech',
+      label: 'Speaking',
+      icon: '🎤',
+      description: 'Pronunciation practice only'
+    },
+    {
+      id: 'mcq',
+      label: 'Quiz',
+      icon: '📝',
+      description: 'Multiple choice only'
+    },
+  ];
+
   return (
-    <VStack spacing={{ base: 4, md: 6 }} textAlign="center" py={{ base: 2, md: 4 }} px={{ base: 2, md: 4 }}>
+    <VStack spacing={{ base: 5, md: 7 }} textAlign="center" py={{ base: 2, md: 4 }} px={{ base: 2, md: 4 }}>
       <motion.div
         initial={{ scale: 0.5, opacity: 0, rotate: -15 }}
         animate={{ scale: 1, opacity: 1, rotate: 0 }}
@@ -29,63 +111,104 @@ const StartScreen = ({ onBegin }) => {
       </motion.div>
 
       <Box>
-        <Heading as="h2" size={{ base: "lg", md: "xl" }} fontWeight="black" color="text" mb={1}>
-          Ready to Practice?
+        <Heading
+          as="h1"
+          size={{ base: "xl", md: "2xl" }}
+          fontWeight="black"
+          color="text"
+          mb={2}
+          bgGradient="linear(to-r, brand.500, brand.600)"
+          bgClip="text"
+        >
+          French Months
         </Heading>
-        <Text fontSize={{ base: "sm", md: "md" }} color="textMuted" maxW="md" mx="auto" lineHeight="short">
-          Master the French months through interactive speaking and logic activities.
+        <Text
+          fontSize={{ base: "md", md: "lg" }}
+          color="textMuted"
+          maxW="md"
+          mx="auto"
+          lineHeight="tall"
+          fontWeight="medium"
+        >
+          Master pronunciation through interactive challenges
         </Text>
       </Box>
 
-      <VStack spacing={2} align="stretch" w="100%" maxW="xs">
+      <Box w="100%" maxW="lg">
+        <Text
+          fontSize="xs"
+          fontWeight="bold"
+          color="textMuted"
+          textTransform="uppercase"
+          letterSpacing="wider"
+          mb={3}
+        >
+          Choose Your Mode
+        </Text>
+        <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={3} w="100%">
+          {modes.map((m, i) => (
+            <ModeCard
+              key={m.id}
+              mode={m}
+              isSelected={mode === m.id}
+              onClick={() => setMode(m.id)}
+              delay={0.6 + i * 0.1}
+            />
+          ))}
+        </SimpleGrid>
+      </Box>
+
+      <VStack spacing={2} w="100%" maxW="xs">
         {[
-          { text: "Mic Calibration included", icon: CheckCircleIcon },
-          { text: "Speaking & MCQ prompts", icon: CheckCircleIcon },
-          { text: "Adaptive learning system", icon: CheckCircleIcon },
+          { text: "Smart mic calibration", icon: CheckCircleIcon },
+          { text: "Real-time feedback", icon: CheckCircleIcon },
+          { text: "Adaptive difficulty", icon: CheckCircleIcon },
         ].map((item, i) => (
-          <HStack
+          <motion.div
             key={i}
-            as={motion.div}
-            initial={{ opacity: 0, x: -30, filter: "blur(4px)" }}
-            animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-            transition={{
-              delay: 0.4 + i * 0.12,
-              type: "spring",
-              stiffness: 100,
-              damping: 15
-            }}
-            bg="card"
-            p={{ base: 2, md: 2.5 }}
-            borderRadius="xl"
-            border="1px solid"
-            borderColor="border"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.9 + i * 0.1, type: "spring" }}
+            style={{ width: '100%' }}
           >
-            <Icon as={item.icon} color="accent.500" boxSize={4} />
-            <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium" color="text">{item.text}</Text>
-          </HStack>
+            <Box
+              bg="card"
+              p={2.5}
+              borderRadius="lg"
+              border="1px solid"
+              borderColor="border"
+              w="100%"
+            >
+              <Box display="flex" alignItems="center" gap={2}>
+                <Icon as={item.icon} color="success.500" boxSize={4} />
+                <Text fontSize="sm" fontWeight="medium" color="text">{item.text}</Text>
+              </Box>
+            </Box>
+          </motion.div>
         ))}
       </VStack>
 
       <Button
-        size={{ base: "sm", md: "md" }}
-        h={{ base: "45px", md: "55px" }}
+        size={{ base: "md", md: "lg" }}
+        h={{ base: "50px", md: "60px" }}
         w="100%"
-        maxW="240px"
-        onClick={onBegin}
+        maxW="280px"
+        onClick={() => onBegin(mode)}
         as={motion.button}
-        whileHover={{ scale: 1.05, boxShadow: "0 20px 25px -5px rgba(99, 102, 241, 0.4)" }}
+        whileHover={{ scale: 1.05, boxShadow: "0 20px 30px -5px rgba(99, 102, 241, 0.5)" }}
         whileTap={{ scale: 0.95 }}
         bg="brand.500"
         color="white"
         fontSize={{ base: "lg", md: "xl" }}
-        fontWeight="bold"
+        fontWeight="black"
         borderRadius="2xl"
         _hover={{ bg: 'brand.600' }}
         aria-label="Begin French Months Unit"
+        boxShadow="lg"
       >
-        Begin Unit
+        Start Learning →
       </Button>
-    </VStack >
+    </VStack>
   );
 };
 

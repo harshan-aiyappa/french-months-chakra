@@ -128,7 +128,7 @@ const ResultsScreen = ({ results, restartGame }) => {
 
       <SimpleGrid columns={{ base: 2, md: 4 }} spacing={{ base: 3, md: 4 }} w="100%">
         <StatCard label="Score" value={`${correct}/${results.length}`} color="brand.500" />
-        <StatCard label="Accuracy" value={`${percentage}%`} color="accent.500" />
+        <StatCard label="Accuracy" value={`${percentage}%`} color="success.500" />
         <StatCard label="Partial" value={partial} color="warning.500" />
         <StatCard label="Incorrect" value={incorrect} color="error.500" />
       </SimpleGrid>
