@@ -9,6 +9,7 @@ import {
   Text,
   Flex,
   useToast,
+  VStack,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { Globe, CheckCircle, XCircle } from "lucide-react";
