@@ -28,18 +28,6 @@ const ModeCard = ({ mode, isSelected, onClick, delay }) => (
     position="relative"
     overflow="hidden"
   >
-    {isSelected && (
-      <Badge
-        position="absolute"
-        top={2}
-        right={2}
-        colorScheme="green"
-        fontSize="2xs"
-        borderRadius="md"
-      >
-        Selected
-      </Badge>
-    )}
     <VStack spacing={2}>
       <Icon
         as={mode.IconComponent}
