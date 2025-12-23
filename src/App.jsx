@@ -16,7 +16,7 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Globe, CheckCircle, XCircle } from "lucide-react";
 
 // Components
