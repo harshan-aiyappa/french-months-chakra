@@ -1,4 +1,33 @@
 // ============================================================================
+// FRENCH MONTHS PRONUNCIATION APP - Main Application Component
+// ============================================================================
+//
+// PURPOSE:
+// Interactive pronunciation training app for learning French month names.
+// Uses speech recognition (ASR) and voice activity detection (VAD) to provide
+// real-time feedback on pronunciation accuracy.
+//
+// KEY TECHNOLOGIES:
+// - React 18 with Hooks (useState, useEffect, useCallback)
+// - Redux Toolkit for centralized state management
+// - Chakra UI for component library and theming
+// - Framer Motion for smooth animations
+// - Web Speech API for speech recognition (browser-native ASR)
+// - Web Audio API for voice activity detection (microphone level monitoring)
+// - Lucide React for SVG icons
+//
+// GAME MODES:
+// 1. Mix Mode (24 activities) - 12 Speaking + 12 Multiple Choice Questions
+// 2. Speaking Mode (12 activities) - Pronunciation practice only
+// 3. Quiz Mode (12 activities) - Multiple choice only (no microphone needed)
+//
+// ARCHITECTURE:
+// - Redux manages game state (mode, status, progress, history)
+// - Components are organized by screen (Start, Calibration, Game, MCQ, Results)
+// - Custom hooks handle speech recognition and audio processing
+// - Memoized selectors optimize performance
+//
+// ============================================================================
 // IMPORTS
 // ============================================================================
 

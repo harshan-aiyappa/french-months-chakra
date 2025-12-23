@@ -1,6 +1,29 @@
 // ============================================================================
 // REDUX GAME SLICE - State Management for French Months Game
 // ============================================================================
+//
+// PURPOSE:
+// Centralized state management for the entire game flow using Redux Toolkit.
+// Handles game mode selection, activity progression, calibration status,
+// user feedback, and session history.
+//
+// STATE STRUCTURE:
+// - status: Current game phase ('start' | 'calibrating' | 'playing' | 'results')
+// - mode: Selected game mode ('mixed' | 'speech' | 'mcq')
+// - currentIndex: Index of current activity in the filtered activity list
+// - history: Array of completed activity results (for scoring)
+// - retryCount: Number of retry attempts for current activity
+// - dynamicThreshold: Calibrated audio threshold for VAD (Voice Activity Detection)
+// - isCalibrated: Whether microphone calibration has been completed
+// - feedback: Current user feedback (message, type, highlighted phrase)
+//
+// KEY FEATURES:
+// - Memoized selectors for optimized performance
+// - Mode-specific activity filtering (speaking/MCQ/mixed)
+// - Unit-level calibration (calibrate once, reuse threshold)
+// - Smart re-calibration on repeated failures
+//
+// ============================================================================
 
 import { createSlice } from '@reduxjs/toolkit';
 import { UNIT_DATA } from '../constants';
