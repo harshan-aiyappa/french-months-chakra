@@ -9,9 +9,9 @@ const MotionBox = motion.create(Box);
 const StatCard = ({ label, value, color = "slate.800" }) => (
   <MotionBox
     p={{ base: 3, md: 4 }}
-    bg="white"
+    bg="card"
     border="1px solid"
-    borderColor="slate.100"
+    borderColor="border"
     boxShadow="xl"
     borderRadius="2xl"
     textAlign="center"
@@ -24,7 +24,7 @@ const StatCard = ({ label, value, color = "slate.800" }) => (
     }}
     transition={{ type: "spring", stiffness: 400, damping: 10 }}
   >
-    <Text fontSize={{ base: "2xs", md: "xs" }} color="slate.500" fontWeight="bold" textTransform="uppercase" mb={2}>{label}</Text>
+    <Text fontSize={{ base: "2xs", md: "xs" }} color="textMuted" fontWeight="bold" textTransform="uppercase" mb={2}>{label}</Text>
     <Heading size={{ base: "lg", md: "xl" }} color={color} fontWeight="black">{value}</Heading>
   </MotionBox>
 );
@@ -40,24 +40,24 @@ const ResultItem = ({ result }) => {
   return (
     <HStack
       w="100%"
-      bg="white"
+      bg="card"
       p={{ base: 3, md: 4 }}
       borderRadius="xl"
       border="1px solid"
-      borderColor="slate.100"
+      borderColor="border"
       boxShadow="sm"
     >
       <Box w={{ base: "24px", md: "30px" }} flexShrink={0}>{getIcon(result.status)}</Box>
       <Box flex="1">
         <HStack justify="space-between">
-          <Text fontWeight="bold" color="slate.800" fontSize={{ base: "sm", md: "md" }}>{result.question} → {result.answer}</Text>
-          <Text fontSize={{ base: "3xs", md: "xs" }} fontWeight="bold" color="slate.300" textTransform="uppercase">
+          <Text fontWeight="bold" color="text" fontSize={{ base: "sm", md: "md" }}>{result.question} → {result.answer}</Text>
+          <Text fontSize={{ base: "3xs", md: "xs" }} fontWeight="bold" color="textMuted" textTransform="uppercase">
             {result.type}
           </Text>
         </HStack>
-        <Text fontSize={{ base: "xs", md: "sm" }} color="slate.500" mt={1}>
+        <Text fontSize={{ base: "xs", md: "sm" }} color="textMuted" mt={1}>
           {result.transcript ? (
-            <>You said: <Text as="span" fontWeight="semibold" color="slate.700">"{result.transcript}"</Text></>
+            <>You said: <Text as="span" fontWeight="semibold" color="text">"{result.transcript}"</Text></>
           ) : 'No response detected'}
         </Text>
       </Box>
@@ -118,10 +118,10 @@ const ResultsScreen = ({ results, restartGame }) => {
   return (
     <VStack as={motion.div} spacing={{ base: 6, md: 8 }} variants={containerVariants} initial="hidden" animate="visible" py={{ base: 2, md: 4 }}>
       <VStack spacing={2} textAlign="center">
-        <Heading as="h2" size={{ base: "lg", md: "xl" }} fontWeight="black" color="slate.800">
+        <Heading as="h2" size={{ base: "lg", md: "xl" }} fontWeight="black" color="text">
           {percentage >= 85 ? "Magnifique! 🎉" : percentage >= 60 ? "Great Progress! 👍" : "Keep Practicing! 💪"}
         </Heading>
-        <Text fontSize={{ base: "sm", md: "md" }} color="slate.500" maxW="md">
+        <Text fontSize={{ base: "sm", md: "md" }} color="textMuted" maxW="md">
           You've completed the French Months unit. Take a look at your stats below.
         </Text>
       </VStack>
@@ -135,8 +135,8 @@ const ResultsScreen = ({ results, restartGame }) => {
 
       <Box w="100%">
         <HStack justify="space-between" mb={6}>
-          <Heading size={{ base: "sm", md: "md" }} color="slate.800">Review Summary</Heading>
-          <Text fontSize={{ base: "2xs", md: "xs" }} fontWeight="bold" bg="slate.100" px={2} py={1} borderRadius="md" color="slate.500">
+          <Heading size={{ base: "sm", md: "md" }} color="text">Review Summary</Heading>
+          <Text fontSize={{ base: "2xs", md: "xs" }} fontWeight="bold" bg="card" border="1px solid" borderColor="border" px={2} py={1} borderRadius="md" color="textMuted">
             {results.length} ITEMS
           </Text>
         </HStack>

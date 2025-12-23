@@ -246,6 +246,17 @@ function App() {
     }
   }, [retryCount, currentActivity, showToast, resetFeedback, nextActivity]);
 
+  const handleRetry = useCallback(() => {
+    console.log("[Game] Retrying current prompt...");
+    setSessionResults((prev) => {
+      const newResults = [...prev];
+      newResults.pop(); // Remove the failed attempt
+      return newResults;
+    });
+    setFeedback({ message: "", type: "", highlightedPhrase: [] });
+    // Retry count logic is already handled, we just don't increment index
+  }, []);
+
   const {
     isListening,
     error: speechRecognitionError,
@@ -365,6 +376,7 @@ function App() {
               showNextButton={!!sessionResults[currentIndex]}
               showToast={showToast}
               dynamicThreshold={dynamicThreshold}
+              onRetry={handleRetry}
             />
           );
         }
@@ -416,13 +428,13 @@ function App() {
         <Container
           maxW={{ base: "100%", md: "container.sm", lg: "container.md" }}
           maxH="100%"
-          bg="white"
+          bg="card"
           borderRadius={{ base: "xl", md: "3xl" }}
           boxShadow="2xl"
           p={{ base: 3, md: 6, lg: 8 }}
           pb={{ base: 12, md: 8 }} // Extra padding inside container
           border="1px"
-          borderColor="slate.100"
+          borderColor="border"
           overflowY="auto"
           css={{
             '&::-webkit-scrollbar': { width: '4px' },

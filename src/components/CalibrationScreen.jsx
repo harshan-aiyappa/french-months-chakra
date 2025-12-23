@@ -13,7 +13,7 @@ const MotionBar = React.memo(({ height }) => (
     transition={{ type: 'tween', ease: 'linear', duration: 0.1 }}
     w="6px"
     minH="5px"
-    bg="slate.200"
+    bg="textMuted"
     borderRadius="full"
   />
 ));
@@ -125,15 +125,15 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
 
   return (
     <VStack h={{ base: "200px", md: "220px" }} justify="center" spacing={4} p={6}>
-      <Heading size={{ base: "sm", md: "md" }} color="slate.600">Calibrating Audio...</Heading>
+      <Heading size={{ base: "sm", md: "md" }} color="text">Calibrating Audio...</Heading>
       <Center position="relative" h="100px" w="100px">
         <CircularProgress
           value={calibrationProgress}
           size="100px"
           thickness="4px"
           color="brand.400"
-          trackColor="slate.500"
-          opacity={0.1}
+          trackColor="border"
+          opacity={0.3}
         />
         <HStack spacing={1.5} h="60px" w="100px" align="center" justify="center" position="absolute">
           {barHeights.map((height, i) => (
@@ -141,7 +141,7 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
           ))}
         </HStack>
       </Center>
-      <Text color="slate.400" fontSize={{ base: "xs", md: "sm" }} fontWeight="bold" letterSpacing="widest">SILENCE REQUIRED</Text>
+      <Text color="textMuted" fontSize={{ base: "xs", md: "sm" }} fontWeight="bold" letterSpacing="widest">SILENCE REQUIRED</Text>
     </VStack>
   );
 };

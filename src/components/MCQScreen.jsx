@@ -16,7 +16,7 @@ const MCQScreen = ({ activity, onAnswer }) => {
 
   const getButtonProps = (option) => {
     if (!isAnswered) {
-      return { variant: 'outline', colorScheme: 'brand', borderColor: 'slate.200' };
+      return { variant: 'outline', colorScheme: 'brand', borderColor: 'border', color: 'text' };
     }
     if (option === activity.answer) {
       return { variant: 'solid', bg: 'success.500', color: 'white', _hover: { bg: 'success.600' } };
@@ -24,7 +24,7 @@ const MCQScreen = ({ activity, onAnswer }) => {
     if (option === selected && option !== activity.answer) {
       return { variant: 'solid', bg: 'error.500', color: 'white', _hover: { bg: 'error.600' } };
     }
-    return { variant: 'outline', opacity: 0.4, borderColor: 'slate.100' };
+    return { variant: 'outline', opacity: 0.4, borderColor: 'border', color: 'textMuted' };
   };
 
   return (
@@ -35,17 +35,17 @@ const MCQScreen = ({ activity, onAnswer }) => {
       >
         <Box
           p={{ base: 4, md: 8 }}
-          bg="white"
+          bg="card"
           borderRadius="3xl"
           border="1px"
-          borderColor="slate.100"
+          borderColor="border"
           textAlign="center"
           boxSize="border-box"
         >
           <Text fontSize={{ base: "3xs", md: "sm" }} color="brand.500" fontWeight="bold" mb={2} textTransform="uppercase" letterSpacing="widest">
             Multiple Choice
           </Text>
-          <Heading as="h2" size={{ base: "md", md: "xl" }} color="slate.800" lineHeight="base">
+          <Heading as="h2" size={{ base: "md", md: "xl" }} color="text" lineHeight="base">
             {activity.question}
           </Heading>
         </Box>

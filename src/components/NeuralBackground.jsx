@@ -1,8 +1,24 @@
 import React, { useEffect, useRef } from 'react';
-import { Box } from '@chakra-ui/react';
+import { Box, useColorModeValue, useToken } from '@chakra-ui/react';
 
 const NeuralBackground = () => {
     const canvasRef = useRef(null);
+    // Dynamic color values based on theme
+    const particleColorLight = 'rgba(99, 102, 241, 0.4)'; // brand.500
+    const particleColorDark = 'rgba(165, 180, 252, 0.4)'; // brand.300
+    const lineColorLight = 'rgba(99, 102, 241, ';
+    const lineColorDark = 'rgba(165, 180, 252, ';
+
+    // Store current colors in ref to access inside animation loop without stale closures
+    const themeColorsRef = useRef({ particle: particleColorLight, line: lineColorLight });
+
+    // Update refs when theme changes
+    const currentParticleColor = useColorModeValue(particleColorLight, particleColorDark);
+    const currentLineColor = useColorModeValue(lineColorLight, lineColorDark);
+
+    useEffect(() => {
+        themeColorsRef.current = { particle: currentParticleColor, line: currentLineColor };
+    }, [currentParticleColor, currentLineColor]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -37,7 +53,8 @@ const NeuralBackground = () => {
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(99, 102, 241, 0.4)'; // brand.500 with opacity
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = themeColorsRef.current.particle;
                 ctx.fill();
             }
         }
@@ -69,7 +86,8 @@ const NeuralBackground = () => {
                         ctx.beginPath();
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `rgba(99, 102, 241, ${opacity * 0.2})`;
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `${themeColorsRef.current.line}${opacity * 0.2})`;
                         ctx.lineWidth = 1;
                         ctx.stroke();
                     }
@@ -115,7 +133,7 @@ const NeuralBackground = () => {
             w="100vw"
             h="100vh"
             zIndex={-1}
-            bg="slate.50"
+            bg={useColorModeValue('slate.50', 'slate.900')}
             pointerEvents="none"
             opacity={0.6}
             style={{ willChange: 'transform' }}

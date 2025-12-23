@@ -7,7 +7,7 @@ import Feedback from './Feedback';
 
 const GameScreenComponent = ({
   month, isListening, startListening, stopListening, nextPrompt, feedback, showNextButton, showToast,
-  dynamicThreshold
+  dynamicThreshold, onRetry
 }) => {
   const [micError, setMicError] = useState(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -25,10 +25,10 @@ const GameScreenComponent = ({
         <Box
           className={isSpeaking ? 'vad-speaking' : ''}
           p={{ base: 5, md: 8, lg: 10 }}
-          bg="white"
+          bg="card"
           borderRadius="3xl"
           border="1px"
-          borderColor="slate.100"
+          borderColor="border"
           textAlign="center"
           boxShadow={isSpeaking ? 'none' : 'xl'}
           transition="all 0.3s ease-in-out"
@@ -36,7 +36,7 @@ const GameScreenComponent = ({
           overflow="hidden"
         >
           <Box position="absolute" top={0} left={0} right={0} h="4px" bg="brand.500" />
-          <Heading as="h2" size={{ base: "xl", md: "2xl" }} color="slate.800" fontWeight="black" letterSpacing="tight">
+          <Heading as="h2" size={{ base: "xl", md: "2xl" }} color="text" fontWeight="black" letterSpacing="tight">
             {month.question}
           </Heading>
           <Text fontSize={{ base: "lg", md: "lg" }} fontWeight="semibold" color="brand.500" mt={2} letterSpacing="wide" textTransform="uppercase">
@@ -53,7 +53,7 @@ const GameScreenComponent = ({
           dynamicThreshold={dynamicThreshold}
           onSilence={isListening && stopListening ? stopListening : undefined}
         />
-        <Text my={1} color={micError ? 'error.500' : 'slate.500'} h="18px" fontWeight="bold" fontSize={{ base: "2xs", md: "2xs" }} textTransform="uppercase" letterSpacing="widest">
+        <Text my={1} color={micError ? 'error.500' : 'textMuted'} h="18px" fontWeight="bold" fontSize={{ base: "2xs", md: "2xs" }} textTransform="uppercase" letterSpacing="widest">
           {micError || (isListening ? (isSpeaking ? 'Voice Detected...' : 'Listening...') : 'Ready to Capture')}
         </Text>
 
@@ -85,22 +85,41 @@ const GameScreenComponent = ({
             </AnimatePresence>
           </Button>
         ) : (
-          <Button
-            rightIcon={<Icon as={FaArrowRight} />}
-            size={{ base: "sm", md: "md" }}
-            h={{ base: "42px", md: "50px" }}
-            w="100%"
-            maxW="180px"
-            onClick={nextPrompt}
-            variant="ghost"
-            colorScheme="brand"
-            borderRadius="xl"
-            fontWeight="bold"
-            fontSize="lg"
-            aria-label="Continue to next task"
-          >
-            Continue
-          </Button>
+          <HStack spacing={4} w="100%" justify="center">
+            <Button
+              leftIcon={<Icon as={FaMicrophone} />}
+              size={{ base: "sm", md: "md" }}
+              h={{ base: "42px", md: "50px" }}
+              w="100%"
+              maxW="140px"
+              onClick={onRetry}
+              variant="outline"
+              colorScheme="brand"
+              borderRadius="xl"
+              fontWeight="bold"
+              fontSize="lg"
+              aria-label="Retry pronunciation"
+            >
+              Retry
+            </Button>
+            <Button
+              rightIcon={<Icon as={FaArrowRight} />}
+              size={{ base: "sm", md: "md" }}
+              h={{ base: "42px", md: "50px" }}
+              w="100%"
+              maxW="140px"
+              onClick={nextPrompt}
+              bg="brand.500"
+              color="white"
+              _hover={{ bg: 'brand.600' }}
+              borderRadius="xl"
+              fontWeight="bold"
+              fontSize="lg"
+              aria-label="Continue to next task"
+            >
+              Continue
+            </Button>
+          </HStack>
         )}
       </VStack>
 

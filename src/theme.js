@@ -1,16 +1,9 @@
 import { extendTheme } from '@chakra-ui/react';
 
 const theme = extendTheme({
-  styles: {
-    global: {
-      body: {
-        bg: 'slate.50',
-      },
-    },
-  },
-  fonts: {
-    heading: `"Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif`,
-    body: `"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif`,
+  config: {
+    initialColorMode: 'light',
+    useSystemColorMode: false,
   },
   colors: {
     brand: {
@@ -27,9 +20,39 @@ const theme = extendTheme({
       400: '#94A3B8', 500: '#64748B', 600: '#475569', 700: '#334155',
       800: '#1E293B', 900: '#0F172A',
     },
-    success: { 50: '#ECFDF5', 500: '#10B981' },
-    warning: { 50: '#FFFBEB', 500: '#F59E0B' },
     error: { 50: '#FEF2F2', 500: '#EF4444' },
+  },
+  semanticTokens: {
+    colors: {
+      bg: {
+        default: 'slate.50',
+        _dark: 'slate.900',
+      },
+      card: {
+        default: 'white',
+        _dark: 'slate.800',
+      },
+      text: {
+        default: 'slate.800',
+        _dark: 'slate.100',
+      },
+      textMuted: {
+        default: 'slate.500',
+        _dark: 'slate.400',
+      },
+      border: {
+        default: 'slate.100',
+        _dark: 'slate.700',
+      }
+    },
+  },
+  styles: {
+    global: (props) => ({
+      body: {
+        bg: 'bg',
+        color: 'text',
+      },
+    }),
   },
   shadows: {
     'sm': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',

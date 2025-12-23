@@ -19,6 +19,7 @@ const StartScreen = ({ onBegin }) => {
         <Box
           p={{ base: 3, md: 4 }}
           bg="brand.50"
+          _dark={{ bg: 'whiteAlpha.200' }}
           borderRadius="full"
           display="inline-block"
           boxShadow="inner"
@@ -28,10 +29,10 @@ const StartScreen = ({ onBegin }) => {
       </motion.div>
 
       <Box>
-        <Heading as="h2" size={{ base: "lg", md: "xl" }} fontWeight="black" color="slate.800" mb={1}>
+        <Heading as="h2" size={{ base: "lg", md: "xl" }} fontWeight="black" color="text" mb={1}>
           Ready to Practice?
         </Heading>
-        <Text fontSize={{ base: "sm", md: "md" }} color="slate.500" maxW="md" mx="auto" lineHeight="short">
+        <Text fontSize={{ base: "sm", md: "md" }} color="textMuted" maxW="md" mx="auto" lineHeight="short">
           Master the French months through interactive speaking and logic activities.
         </Text>
       </Box>
@@ -53,14 +54,14 @@ const StartScreen = ({ onBegin }) => {
               stiffness: 100,
               damping: 15
             }}
-            bg="slate.50"
+            bg="card"
             p={{ base: 2, md: 2.5 }}
             borderRadius="xl"
             border="1px solid"
-            borderColor="slate.100"
+            borderColor="border"
           >
             <Icon as={item.icon} color="accent.500" boxSize={4} />
-            <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium" color="slate.700">{item.text}</Text>
+            <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium" color="text">{item.text}</Text>
           </HStack>
         ))}
       </VStack>
@@ -84,7 +85,7 @@ const StartScreen = ({ onBegin }) => {
       >
         Begin Unit
       </Button>
-    </VStack>
+    </VStack >
   );
 };
 
