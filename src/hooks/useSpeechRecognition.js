@@ -1,9 +1,25 @@
+// ============================================================================
+// SPEECH RECOGNITION HOOK - Web Speech API Integration
+// ============================================================================
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 
+// ============================================================================
+// MAIN HOOK
+// ============================================================================
+
 const useSpeechRecognition = ({ onResult, onNoSpeech, onError, onStart, onSpeechStart }) => {
+  // ========================================================================
+  // STATE & REFS
+  // ========================================================================
+
   const [isListening, setIsListening] = useState(false);
   const [error, setError] = useState(null);
   const recognitionRef = useRef(null);
+
+  // ========================================================================
+  // CALLBACK REFS (Avoid re-initialization)
+  // ========================================================================
 
   // Use refs for callbacks to avoid re-initializing the recognition engine when they change
   const callbacks = useRef({ onResult, onNoSpeech, onError, onStart, onSpeechStart });

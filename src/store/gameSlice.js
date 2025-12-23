@@ -1,5 +1,13 @@
+// ============================================================================
+// REDUX GAME SLICE - State Management for French Months Game
+// ============================================================================
+
 import { createSlice } from '@reduxjs/toolkit';
 import { UNIT_DATA } from '../constants';
+
+// ============================================================================
+// INITIAL STATE
+// ============================================================================
 
 const initialState = {
     status: 'start', // 'start' | 'calibrating' | 'playing' | 'results'
@@ -16,9 +24,17 @@ const initialState = {
     },
 };
 
+// ============================================================================
+// SLICE DEFINITION
+// ============================================================================
+
 export const gameSlice = createSlice({
     name: 'game',
     initialState,
+
+    // ========================================================================
+    // REDUCERS (Actions)
+    // ========================================================================
     reducers: {
         setMode: (state, action) => {
             state.mode = action.payload;
@@ -80,7 +96,10 @@ export const gameSlice = createSlice({
     },
 });
 
-// Actions
+// ============================================================================
+// ACTIONS EXPORT
+// ============================================================================
+
 export const {
     setMode,
     startGame,
