@@ -12,6 +12,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Globe, CheckCircle, XCircle } from "lucide-react";
 
 import Header from "./components/Header";
 import StartScreen from "./components/StartScreen";
@@ -91,7 +92,7 @@ function App() {
   }, []);
 
   const showToast = useCallback(
-    (status, title, description) => {
+    (status, title, description, IconComponent = null) => {
       const id = title + description;
       if (!toast.isActive(id)) {
         toast({
@@ -112,7 +113,13 @@ function App() {
                 p={4}
                 variant="solid"
               >
-                <AlertIcon />
+                {IconComponent ? (
+                  <Box mr={3}>
+                    <IconComponent size={20} />
+                  </Box>
+                ) : (
+                  <AlertIcon />
+                )}
                 <Box flex="1">
                   <Text fontWeight="bold">{title}</Text>
                   <Text fontSize="sm">{description}</Text>
@@ -135,8 +142,9 @@ function App() {
     setTimeout(() => {
       showToast(
         'info',
-        `🌐 ${browserInfo.fullName}`,
-        `Running on ${browserInfo.os} • ${browserInfo.isSupported ? 'Fully supported' : 'Limited support'}`
+        browserInfo.fullName,
+        `Running on ${browserInfo.os} • ${browserInfo.isSupported ? 'Fully supported' : 'Limited support'}`,
+        Globe
       );
     }, 500);
 
@@ -146,8 +154,9 @@ function App() {
         setTimeout(() => {
           showToast(
             feature.status,
-            `${feature.supported ? '✅' : '❌'} ${feature.name}`,
-            feature.supported ? 'Available and ready' : 'Not supported in this browser'
+            feature.name,
+            feature.supported ? 'Available and ready' : 'Not supported in this browser',
+            feature.supported ? CheckCircle : XCircle
           );
         }, index * 300);
       });
