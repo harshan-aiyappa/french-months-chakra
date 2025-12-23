@@ -194,21 +194,10 @@ function App() {
         evaluation: evaluationResult,
       }));
     },
-    [currentActivity, retryCount]
+    [currentActivity, retryCount, dispatch]
   );
 
-  const nextActivity = useCallback(() => {
-    resetFeedback();
-    setRetryCount(0);
-    setRetryCount(0);
-    if (currentIndex < activeUnitData.length - 1) {
-      console.log(`[Game] Moving to activity index: ${currentIndex + 1}`);
-      setCurrentIndex((prev) => prev + 1);
-    } else {
-      console.log("[Game] Unit complete, moving to results.");
-      setGameState("results");
-    }
-  }, [resetFeedback, currentIndex]);
+
 
   const handleNoSpeech = useCallback(() => {
     console.log(`[Game] No speech detected. Failure count: ${retryCount + 1}`);
@@ -437,7 +426,7 @@ function App() {
           }}
         >
           <VStack spacing={{ base: 3, md: 5 }} w="100%">
-            <Header score={score} total={activeUnitData.length} progress={progress} />
+            <Header score={score} total={total} progress={progress} />
             <Box as="main" w="100%" minH="380px" flex="1">
               {renderContent()}
             </Box>
