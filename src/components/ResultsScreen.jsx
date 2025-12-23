@@ -1,63 +1,87 @@
 import React from 'react';
-import { VStack, Heading, Text, Button, Box, HStack, SimpleGrid, Divider } from '@chakra-ui/react';
+import { VStack, Heading, Text, Button, Box, HStack, SimpleGrid, Flex, Icon } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import { CheckCircleIcon, WarningIcon, CloseIcon, ArrowForwardIcon, RepeatIcon } from '@chakra-ui/icons';
+import { Trophy, Activity, Target, Zap } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-const MotionBox = motion.create(Box);
+const MotionBox = motion(Box);
+const MotionButton = motion(Button);
 
-const StatCard = ({ label, value, color = "slate.800" }) => (
+const StatCard = ({ label, value, color, icon }) => (
   <MotionBox
-    p={{ base: 3, md: 4 }}
-    bg="card"
+    p={5}
+    bg="rgba(255, 255, 255, 0.05)"
+    backdropFilter="blur(16px)"
     border="1px solid"
-    borderColor="border"
-    boxShadow="xl"
+    borderColor="rgba(255,255,255,0.1)"
+    boxShadow="glass"
     borderRadius="2xl"
     textAlign="center"
     variants={{ hidden: { opacity: 0, scale: 0.9 }, visible: { opacity: 1, scale: 1 } }}
     whileHover={{
-      translateY: -8,
-      scale: 1.02,
-      boxShadow: '0 20px 25px -5px rgba(99, 102, 241, 0.2), 0 10px 10px -5px rgba(99, 102, 241, 0.1)',
-      borderColor: 'brand.300'
+      y: -5,
+      boxShadow: '0 15px 30px rgba(0,0,0,0.1)',
+      bg: 'rgba(255, 255, 255, 0.1)'
     }}
-    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+    transition={{ type: "spring", stiffness: 400, damping: 15 }}
   >
-    <Text fontSize={{ base: "2xs", md: "xs" }} color="textMuted" fontWeight="bold" textTransform="uppercase" mb={2}>{label}</Text>
-    <Heading size={{ base: "lg", md: "xl" }} color={color} fontWeight="black">{value}</Heading>
+    <VStack spacing={1}>
+      <Icon as={icon} color={color} boxSize={5} opacity={0.8} mb={1} />
+      <Text fontSize="xs" color="slate.400" fontWeight="bold" textTransform="uppercase" letterSpacing="wider">{label}</Text>
+      <Heading size="lg" color="white" fontWeight="black">{value}</Heading>
+    </VStack>
   </MotionBox>
 );
 
 const ResultItem = ({ result }) => {
-  const getIcon = (status) => {
-    if (status === 'correct') return <CheckCircleIcon color="success.500" boxSize={5} />;
-    if (status === 'partial') return <WarningIcon color="warning.500" boxSize={5} />;
-    if (status === 'skipped') return <ArrowForwardIcon color="slate.400" boxSize={5} />;
-    return <CloseIcon color="error.500" boxSize={5} />;
+  const getStatusConfig = (status) => {
+    if (status === 'correct') return { icon: CheckCircleIcon, color: 'success.400', bg: 'rgba(16, 185, 129, 0.1)' };
+    if (status === 'partial') return { icon: WarningIcon, color: 'warning.400', bg: 'rgba(245, 158, 11, 0.1)' };
+    if (status === 'skipped') return { icon: ArrowForwardIcon, color: 'slate.400', bg: 'rgba(148, 163, 184, 0.1)' };
+    return { icon: CloseIcon, color: 'error.400', bg: 'rgba(239, 68, 68, 0.1)' };
   };
+
+  const config = getStatusConfig(result.status);
 
   return (
     <HStack
       w="100%"
-      bg="card"
-      p={{ base: 3, md: 4 }}
+      bg="rgba(255, 255, 255, 0.03)"
+      p={4}
       borderRadius="xl"
       border="1px solid"
-      borderColor="border"
-      boxShadow="sm"
+      borderColor="rgba(255, 255, 255, 0.05)"
+      _hover={{ bg: 'rgba(255, 255, 255, 0.08)' }}
+      transition="background 0.2s"
+      spacing={4}
     >
-      <Box w={{ base: "24px", md: "30px" }} flexShrink={0}>{getIcon(result.status)}</Box>
+      <Flex
+        w={10}
+        h={10}
+        align="center"
+        justify="center"
+        borderRadius="full"
+        bg={config.bg}
+        color={config.color}
+      >
+        <Icon as={config.icon} boxSize={5} />
+      </Flex>
+
       <Box flex="1">
-        <HStack justify="space-between">
-          <Text fontWeight="bold" color="text" fontSize={{ base: "sm", md: "md" }}>{result.question} → {result.answer}</Text>
-          <Text fontSize={{ base: "3xs", md: "xs" }} fontWeight="bold" color="textMuted" textTransform="uppercase">
-            {result.type}
+        <HStack justify="space-between" mb={1}>
+          <Text fontWeight="bold" color="slate.200" fontSize="md">
+            {result.question} <Text as="span" color="slate.500" mx={1}>→</Text> {result.answer}
           </Text>
+          <Box px={2} py={0.5} borderRadius="md" bg="rgba(255,255,255,0.05)" border="1px solid rgba(255,255,255,0.1)">
+            <Text fontSize="2xs" fontWeight="bold" color="slate.400" textTransform="uppercase">
+              {result.type}
+            </Text>
+          </Box>
         </HStack>
-        <Text fontSize={{ base: "xs", md: "sm" }} color="textMuted" mt={1}>
+        <Text fontSize="sm" color="slate.400">
           {result.transcript ? (
-            <>You said: <Text as="span" fontWeight="semibold" color="text">"{result.transcript}"</Text></>
+            <>You said: <Text as="span" color={config.color} fontWeight="medium">"{result.transcript}"</Text></>
           ) : 'No response detected'}
         </Text>
       </Box>
@@ -82,14 +106,14 @@ const ResultsScreen = ({ results, restartGame }) => {
           angle: 60,
           spread: 55,
           origin: { x: 0 },
-          colors: ['#6366F1', '#10B981']
+          colors: ['#22d3ee', '#818cf8']
         });
         confetti({
           particleCount: 2,
           angle: 120,
           spread: 55,
           origin: { x: 1 },
-          colors: ['#6366F1', '#10B981']
+          colors: ['#22d3ee', '#818cf8']
         });
 
         if (Date.now() < end) {
@@ -106,37 +130,47 @@ const ResultsScreen = ({ results, restartGame }) => {
   };
 
   const itemVariants = {
-    hidden: { y: 30, opacity: 0, filter: "blur(4px)" },
+    hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
-      filter: "blur(0px)",
       transition: { type: "spring", stiffness: 300, damping: 20 }
     },
   };
 
   return (
-    <VStack as={motion.div} spacing={{ base: 6, md: 8 }} variants={containerVariants} initial="hidden" animate="visible" py={{ base: 2, md: 4 }}>
+    <VStack as={motion.div} spacing={8} variants={containerVariants} initial="hidden" animate="visible" py={4} w="100%">
       <VStack spacing={2} textAlign="center">
-        <Heading as="h2" size={{ base: "lg", md: "xl" }} fontWeight="black" color="text">
+        <MotionBox
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          mb={2}
+        >
+          <Box p={4} bg="brand.500" borderRadius="full" boxShadow="glow">
+            <Trophy size={40} color="white" />
+          </Box>
+        </MotionBox>
+
+        <Heading as="h2" size="xl" fontWeight="black" color="white" bgGradient="linear(to-r, white, slate.400)" bgClip="text">
           {percentage >= 85 ? "Magnifique! 🎉" : percentage >= 60 ? "Great Progress! 👍" : "Keep Practicing! 💪"}
         </Heading>
-        <Text fontSize={{ base: "sm", md: "md" }} color="textMuted" maxW="md">
-          You've completed the French Months unit. Take a look at your stats below.
+        <Text fontSize="md" color="slate.400" maxW="md">
+          Unit complete. Check out your breakdown below.
         </Text>
       </VStack>
 
-      <SimpleGrid columns={{ base: 2, md: 4 }} spacing={{ base: 3, md: 4 }} w="100%">
-        <StatCard label="Score" value={`${correct}/${results.length}`} color="brand.500" />
-        <StatCard label="Accuracy" value={`${percentage}%`} color="success.500" />
-        <StatCard label="Partial" value={partial} color="warning.500" />
-        <StatCard label="Incorrect" value={incorrect} color="error.500" />
+      <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4} w="100%">
+        <StatCard label="Score" value={`${correct}/${results.length}`} color="brand.400" icon={Target} />
+        <StatCard label="Accuracy" value={`${percentage}%`} color="success.400" icon={Activity} />
+        <StatCard label="Partial" value={partial} color="warning.400" icon={Zap} />
+        <StatCard label="Incorrect" value={incorrect} color="error.400" icon={CloseIcon} />
       </SimpleGrid>
 
       <Box w="100%">
-        <HStack justify="space-between" mb={6}>
-          <Heading size={{ base: "sm", md: "md" }} color="text">Review Summary</Heading>
-          <Text fontSize={{ base: "2xs", md: "xs" }} fontWeight="bold" bg="card" border="1px solid" borderColor="border" px={2} py={1} borderRadius="md" color="textMuted">
+        <HStack justify="space-between" mb={4} px={1}>
+          <Heading size="sm" color="slate.300" textTransform="uppercase" letterSpacing="wide">Session History</Heading>
+          <Text fontSize="xs" fontWeight="bold" bg="rgba(255,255,255,0.1)" px={2} py={1} borderRadius="md" color="brand.200">
             {results.length} ITEMS
           </Text>
         </HStack>
@@ -149,26 +183,24 @@ const ResultsScreen = ({ results, restartGame }) => {
         </VStack>
       </Box>
 
-      <Button
-        bg="brand.500"
+      <MotionButton
+        bgGradient="linear(to-r, brand.500, brand.600)"
         color="white"
-        size={{ base: "sm", md: "md" }}
-        h={{ base: "45px", md: "55px" }}
+        size="lg"
+        h="60px"
         w="100%"
         maxW="xs"
         onClick={restartGame}
-        as={motion.button}
-        whileHover={{ scale: 1.05, boxShadow: "0 15px 25px -5px rgba(99, 102, 241, 0.4)" }}
+        whileHover={{ scale: 1.05, boxShadow: "glow" }}
         whileTap={{ scale: 0.95 }}
-        _hover={{ bg: 'brand.600' }}
         leftIcon={<RepeatIcon />}
         borderRadius="2xl"
-        fontSize={{ base: "md", md: "lg" }}
+        fontSize="lg"
         fontWeight="bold"
-        aria-label="Practice the unit again"
+        boxShadow="lg"
       >
         Practice Again
-      </Button>
+      </MotionButton>
     </VStack>
   );
 };

@@ -1,56 +1,99 @@
 import React from 'react';
-import { VStack, Heading, Text, Button, Icon, Box, SimpleGrid, Image, Badge } from '@chakra-ui/react';
+import { VStack, Heading, Text, Button, Icon, Box, SimpleGrid, Image, Flex } from '@chakra-ui/react';
 import { CheckCircleIcon } from '@chakra-ui/icons';
-import { Zap, Mic, FileText } from 'lucide-react';
+import { Zap, Mic, FileText, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useDispatch } from 'react-redux';
 import { setMode as setReduxMode } from '../store/gameSlice';
 
-const MotionBox = motion.create(Box);
+const MotionBox = motion(Box);
+const MotionButton = motion(Button);
 
-const ModeCard = ({ mode, isSelected, onClick, delay }) => (
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 10
+    }
+  }
+};
+
+const ModeCard = ({ mode, isSelected, onClick }) => (
   <MotionBox
-    initial={{ opacity: 0, y: 20, scale: 0.9 }}
-    animate={{ opacity: 1, y: 0, scale: 1 }}
-    transition={{ delay, type: "spring", stiffness: 200, damping: 20 }}
-    whileHover={{ scale: 1.05, y: -5 }}
-    whileTap={{ scale: 0.95 }}
+    variants={itemVariants}
+    whileHover={{ y: -8, scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
     onClick={onClick}
     cursor="pointer"
-    p={4}
-    bg={isSelected ? 'brand.500' : 'card'}
+    p={5}
+    bg={isSelected ? 'rgba(6, 182, 212, 0.15)' : 'rgba(255, 255, 255, 0.05)'}
+    backdropFilter="blur(16px)"
     borderRadius="2xl"
-    border="2px solid"
-    borderColor={isSelected ? 'brand.500' : 'border'}
-    boxShadow={isSelected ? '0 10px 30px -5px rgba(99, 102, 241, 0.4)' : '0 1px 2px 0 rgba(0, 0, 0, 0.05)'}
-    _hover={{
-      borderColor: isSelected ? 'brand.600' : 'brand.300',
-      boxShadow: isSelected ? '0 15px 35px -5px rgba(99, 102, 241, 0.5)' : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-    }}
+    border="1px solid"
+    borderColor={isSelected ? 'brand.400' : 'rgba(255,255,255,0.1)'}
+    boxShadow={isSelected ? '0 0 20px rgba(6, 182, 212, 0.3)' : 'none'}
+    transition="all 0.3s ease"
     position="relative"
     overflow="hidden"
   >
-    <VStack spacing={2}>
-      <Icon
-        as={mode.IconComponent}
-        boxSize={8}
-        color={isSelected ? 'white' : 'brand.500'}
-        strokeWidth={2}
+    {isSelected && (
+      <MotionBox
+        position="absolute"
+        top="-50%"
+        left="-50%"
+        width="200%"
+        height="200%"
+        bg="radial-gradient(circle, rgba(6,182,212,0.1) 0%, transparent 70%)"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+        zIndex={-1}
       />
-      <Text
-        fontSize="md"
-        fontWeight="bold"
-        color={isSelected ? 'white' : 'text'}
+    )}
+    <VStack spacing={3} align="flex-start">
+      <Flex
+        w={10}
+        h={10}
+        align="center"
+        justify="center"
+        borderRadius="xl"
+        bg={isSelected ? 'brand.500' : 'rgba(255,255,255,0.1)'}
+        color={isSelected ? 'white' : 'slate.400'}
+        boxShadow={isSelected ? 'lg' : 'none'}
       >
-        {mode.label}
-      </Text>
-      <Text
-        fontSize="2xs"
-        color={isSelected ? 'whiteAlpha.900' : 'textMuted'}
-        textAlign="center"
-      >
-        {mode.description}
-      </Text>
+        <Icon as={mode.IconComponent} boxSize={5} strokeWidth={2.5} />
+      </Flex>
+      <Box>
+        <Text
+          fontSize="lg"
+          fontWeight="bold"
+          color={isSelected ? 'brand.100' : 'slate.200'}
+          mb={1}
+        >
+          {mode.label}
+        </Text>
+        <Text
+          fontSize="sm"
+          color={isSelected ? 'brand.200' : 'slate.500'}
+          lineHeight="short"
+        >
+          {mode.description}
+        </Text>
+      </Box>
     </VStack>
   </MotionBox>
 );
@@ -64,83 +107,76 @@ const StartScreen = ({ onBegin }) => {
       id: 'mixed',
       label: 'Mix Mode',
       IconComponent: Zap,
-      description: 'Speaking + Quiz challenges'
+      description: 'The full experience: Speaking & Quiz challenges combined.'
     },
     {
       id: 'speech',
-      label: 'Speaking',
+      label: 'Speaking Only',
       IconComponent: Mic,
-      description: 'Pronunciation practice only'
+      description: 'Focus purely on perfecting your pronunciation.'
     },
     {
       id: 'mcq',
-      label: 'Quiz',
+      label: 'Quiz Only',
       IconComponent: FileText,
-      description: 'Multiple choice only'
+      description: 'Test your knowledge with rapid-fire questions.'
     },
   ];
 
   return (
-    <VStack spacing={{ base: 5, md: 7 }} textAlign="center" py={{ base: 2, md: 4 }} px={{ base: 2, md: 4 }}>
-      <motion.div
-        initial={{ scale: 0.5, opacity: 0, rotate: -15 }}
-        animate={{ scale: 1, opacity: 1, rotate: 0 }}
-        transition={{
-          type: "spring",
-          stiffness: 260,
-          damping: 20,
-          duration: 0.8
-        }}
-      >
-        <Box
-          p={{ base: 3, md: 4 }}
-          bg="brand.50"
-          _dark={{ bg: 'whiteAlpha.200' }}
+    <VStack
+      as={motion.div}
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      spacing={8}
+      w="100%"
+      py={6}
+      px={{ base: 2, md: 6 }}
+    >
+      <VStack spacing={4} textAlign="center">
+        <MotionBox
+          variants={itemVariants}
+          whileHover={{ rotate: 10, scale: 1.1 }}
+          p={4}
+          bg="rgba(255,255,255,0.05)"
           borderRadius="full"
-          display="inline-block"
-          boxShadow="inner"
+          border="1px solid rgba(255,255,255,0.1)"
+          boxShadow="glass"
         >
-          <Image src="/assets/favicon1.png" boxSize={{ base: "50px", md: "65px" }} />
+          <Image src="/assets/favicon1.png" boxSize="60px" />
+        </MotionBox>
+
+        <Box>
+          <Heading
+            as={motion.h1}
+            variants={itemVariants}
+            size="2xl"
+            fontWeight="black"
+            letterSpacing="tight"
+            bgGradient="linear(to-r, brand.300, accent.400)"
+            bgClip="text"
+            textShadow="0 0 20px rgba(99, 102, 241, 0.3)"
+          >
+            French Months
+          </Heading>
+          <Text
+            as={motion.p}
+            variants={itemVariants}
+            fontSize="lg"
+            color="slate.400"
+            maxW="md"
+            mx="auto"
+            mt={2}
+          >
+            Master pronunciation through AI-powered interactive challenges
+          </Text>
         </Box>
-      </motion.div>
+      </VStack>
 
-      <Box>
-        <Heading
-          as="h1"
-          size={{ base: "xl", md: "2xl" }}
-          fontWeight="black"
-          color="text"
-          mb={2}
-          bgGradient="linear(to-r, brand.500, brand.600)"
-          bgClip="text"
-        >
-          French Months
-        </Heading>
-        <Text
-          fontSize={{ base: "md", md: "lg" }}
-          color="textMuted"
-          maxW="md"
-          mx="auto"
-          lineHeight="tall"
-          fontWeight="medium"
-        >
-          Master pronunciation through interactive challenges
-        </Text>
-      </Box>
-
-      <Box w="100%" maxW="lg">
-        <Text
-          fontSize="xs"
-          fontWeight="bold"
-          color="textMuted"
-          textTransform="uppercase"
-          letterSpacing="wider"
-          mb={3}
-        >
-          Choose Your Mode
-        </Text>
-        <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={3} w="100%">
-          {modes.map((m, i) => (
+      <Box w="100%">
+        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+          {modes.map((m) => (
             <ModeCard
               key={m.id}
               mode={m}
@@ -149,62 +185,50 @@ const StartScreen = ({ onBegin }) => {
                 setMode(m.id);
                 dispatch(setReduxMode(m.id));
               }}
-              delay={0.6 + i * 0.1}
             />
           ))}
         </SimpleGrid>
       </Box>
 
-      <VStack spacing={2} w="100%" maxW="xs">
-        {[
-          { text: "Smart mic calibration", icon: CheckCircleIcon },
-          { text: "Real-time feedback", icon: CheckCircleIcon },
-          { text: "Adaptive difficulty", icon: CheckCircleIcon },
-        ].map((item, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.9 + i * 0.1, type: "spring" }}
-            style={{ width: '100%' }}
-          >
-            <Box
-              bg="card"
-              p={2.5}
-              borderRadius="lg"
-              border="1px solid"
-              borderColor="border"
-              w="100%"
-            >
-              <Box display="flex" alignItems="center" gap={2}>
-                <Icon as={item.icon} color="success.500" boxSize={4} />
-                <Text fontSize="sm" fontWeight="medium" color="text">{item.text}</Text>
-              </Box>
-            </Box>
-          </motion.div>
-        ))}
-      </VStack>
-
-      <Button
-        size={{ base: "md", md: "lg" }}
-        h={{ base: "50px", md: "60px" }}
+      <MotionButton
+        variants={itemVariants}
+        size="lg"
+        h="70px"
         w="100%"
-        maxW="280px"
+        maxW="300px"
         onClick={() => onBegin(mode)}
-        as={motion.button}
-        whileHover={{ scale: 1.05, boxShadow: "0 20px 30px -5px rgba(99, 102, 241, 0.5)" }}
-        whileTap={{ scale: 0.95 }}
-        bg="brand.500"
-        color="white"
-        fontSize={{ base: "lg", md: "xl" }}
-        fontWeight="black"
-        borderRadius="2xl"
-        _hover={{ bg: 'brand.600' }}
-        aria-label="Begin French Months Unit"
-        boxShadow="lg"
+        colorScheme="brand"
+        fontSize="xl"
+        rightIcon={<Sparkles size={20} />}
+        boxShadow="glow"
+        _hover={{
+          transform: 'translateY(-2px)',
+          boxShadow: '0 0 30px rgba(6, 182, 212, 0.6)',
+          bg: 'brand.400'
+        }}
       >
-        Start Learning →
-      </Button>
+        Start Learning
+      </MotionButton>
+
+      <Flex
+        as={motion.div}
+        variants={itemVariants}
+        gap={6}
+        justify="center"
+        wrap="wrap"
+        pt={4}
+      >
+        {[
+          "AI Speech Analysis",
+          "Real-time Scoring",
+          "Adaptive Difficulty"
+        ].map((feature, i) => (
+          <Flex key={i} align="center" gap={2} opacity={0.7}>
+            <Icon as={CheckCircleIcon} color="success.400" />
+            <Text fontSize="sm" color="slate.400" fontWeight="medium">{feature}</Text>
+          </Flex>
+        ))}
+      </Flex>
     </VStack>
   );
 };
