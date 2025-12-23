@@ -197,6 +197,10 @@ function App() {
     [currentActivity, retryCount, dispatch]
   );
 
+  const handleNextActivity = useCallback(() => {
+    dispatch(nextActivity());
+  }, [dispatch]);
+
 
 
   const handleNoSpeech = useCallback(() => {
@@ -354,7 +358,7 @@ function App() {
               isListening={isListening}
               startListening={startListening}
               stopListening={stopListening}
-              nextPrompt={nextActivity}
+              nextPrompt={handleNextActivity}
               feedback={feedback}
               showNextButton={!!sessionResults[currentIndex]}
               showToast={showToast}

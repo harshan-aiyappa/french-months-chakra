@@ -33,6 +33,7 @@ const MicVisualizer = ({
   const silenceTimerRef = useRef(null);
   const hasSpokenRef = useRef(false);
   const speakingDebounceRef = useRef(null);
+  const speechStartTimeRef = useRef(null);
 
   const [barHeights, setBarHeights] = useState(Array(NUM_BARS).fill(5));
   const [isVisuallySpeaking, setIsVisuallySpeaking] = useState(false);
