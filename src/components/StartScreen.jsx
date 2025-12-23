@@ -3,6 +3,8 @@ import { VStack, Heading, Text, Button, Icon, Box, SimpleGrid, Image, Badge } fr
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import { Zap, Mic, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useDispatch } from 'react-redux';
+import { setMode as setReduxMode } from '../store/gameSlice';
 
 const MotionBox = motion.create(Box);
 
@@ -54,6 +56,7 @@ const ModeCard = ({ mode, isSelected, onClick, delay }) => (
 );
 
 const StartScreen = ({ onBegin }) => {
+  const dispatch = useDispatch();
   const [mode, setMode] = React.useState('mixed');
 
   const modes = [
@@ -142,7 +145,10 @@ const StartScreen = ({ onBegin }) => {
               key={m.id}
               mode={m}
               isSelected={mode === m.id}
-              onClick={() => setMode(m.id)}
+              onClick={() => {
+                setMode(m.id);
+                dispatch(setReduxMode(m.id));
+              }}
               delay={0.6 + i * 0.1}
             />
           ))}
