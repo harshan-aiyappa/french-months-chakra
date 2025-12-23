@@ -38,3 +38,33 @@ export const getBrowserInfo = () => {
         isSupported: browserName === 'Chrome' || browserName === 'Edge' || browserName === 'Safari',
     };
 };
+
+// Feature compatibility checks
+export const checkFeatureSupport = () => {
+    const features = {
+        asr: {
+            name: 'Speech Recognition (ASR)',
+            supported: !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+            status: 'success',
+        },
+        audioContext: {
+            name: 'Audio Calibration (VAD)',
+            supported: !!(window.AudioContext || window.webkitAudioContext),
+            status: 'success',
+        },
+        mediaDevices: {
+            name: 'Microphone Access',
+            supported: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
+            status: 'success',
+        },
+    };
+
+    // Update status based on support
+    Object.keys(features).forEach(key => {
+        if (!features[key].supported) {
+            features[key].status = 'error';
+        }
+    });
+
+    return features;
+};
