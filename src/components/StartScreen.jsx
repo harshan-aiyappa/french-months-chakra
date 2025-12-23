@@ -22,10 +22,10 @@ const ModeCard = ({ mode, isSelected, onClick, delay }) => (
     borderRadius="2xl"
     border="2px solid"
     borderColor={isSelected ? 'brand.500' : 'border'}
-    boxShadow={isSelected ? '0 10px 30px -5px rgba(99, 102, 241, 0.4)' : 'sm'}
+    boxShadow={isSelected ? '0 10px 30px -5px rgba(99, 102, 241, 0.4)' : '0 1px 2px 0 rgba(0, 0, 0, 0.05)'}
     _hover={{
       borderColor: isSelected ? 'brand.600' : 'brand.300',
-      boxShadow: isSelected ? '0 15px 35px -5px rgba(99, 102, 241, 0.5)' : 'md',
+      boxShadow: isSelected ? '0 15px 35px -5px rgba(99, 102, 241, 0.5)' : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
     }}
     position="relative"
     overflow="hidden"
