@@ -97,6 +97,34 @@ function App() {
     };
   }, []);
 
+  // Show browser info and feature compatibility toasts on load
+  useEffect(() => {
+    const browserInfo = getBrowserInfo();
+    const features = checkFeatureSupport();
+
+    // Browser info toast (blue)
+    setTimeout(() => {
+      showToast(
+        'info',
+        `🌐 ${browserInfo.fullName}`,
+        `Running on ${browserInfo.os} • ${browserInfo.isSupported ? 'Fully supported' : 'Limited support'}`
+      );
+    }, 500);
+
+    // Feature compatibility toasts (green for supported, red for not supported)
+    setTimeout(() => {
+      Object.values(features).forEach((feature, index) => {
+        setTimeout(() => {
+          showToast(
+            feature.status,
+            `${feature.supported ? '✅' : '❌'} ${feature.name}`,
+            feature.supported ? 'Available and ready' : 'Not supported in this browser'
+          );
+        }, index * 300);
+      });
+    }, 1000);
+  }, [showToast]);
+
   const showToast = useCallback(
     (status, title, description) => {
       const id = title + description;
