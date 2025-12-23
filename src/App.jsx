@@ -1,3 +1,8 @@
+// ============================================================================
+// IMPORTS
+// ============================================================================
+
+// React & Hooks
 import React, { useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -14,6 +19,7 @@ import {
 import { motion } from "framer-motion";
 import { Globe, CheckCircle, XCircle } from "lucide-react";
 
+// Components
 import Header from "./components/Header";
 import StartScreen from "./components/StartScreen";
 import GameScreen from "./components/GameScreen";
@@ -26,7 +32,10 @@ import CalibrationScreen from "./components/CalibrationScreen";
 import NeuralBackground from "./components/NeuralBackground";
 import DeveloperAttribution from "./components/DeveloperAttribution";
 import { ERROR_MAP } from "./constants/errors";
+
+// Utils
 import { getBrowserInfo, checkFeatureSupport } from "./utils/browserDetection";
+// Redux Store
 import {
   selectGameStatus,
   selectCurrentActivity,
@@ -48,12 +57,24 @@ import {
   triggerRecalibration,
 } from "./store/gameSlice";
 
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
 const MAX_RETRIES = 3;
 
+// ============================================================================
+// MAIN APP COMPONENT
+// ============================================================================
+
 function App() {
+  // ========================================================================
+  // REDUX STATE & DISPATCH
+  // ========================================================================
+
   const dispatch = useDispatch();
 
-  // Redux state
+  // Redux selectors
   const gameState = useSelector(selectGameStatus);
   const currentActivity = useSelector(selectCurrentActivity);
   const sessionResults = useSelector(selectHistory);
@@ -65,9 +86,16 @@ function App() {
   const total = useSelector(selectTotal);
   const currentIndex = useSelector(selectCurrentIndex);
 
-  // Local state (non-Redux)
+  // ========================================================================
+  // LOCAL STATE & HOOKS
+  // ========================================================================
+
   const [appError, setAppError] = React.useState(null);
   const toast = useToast();
+
+  // ========================================================================
+  // EFFECTS
+  // ========================================================================
 
   // iOS Safari AudioContext fix: Resume AudioContext on first interaction
   useEffect(() => {
@@ -90,6 +118,10 @@ function App() {
       window.removeEventListener('touchstart', resumeAudio);
     };
   }, []);
+
+  // ========================================================================
+  // TOAST NOTIFICATIONS
+  // ========================================================================
 
   const showToast = useCallback(
     (status, title, description, IconComponent = null) => {
