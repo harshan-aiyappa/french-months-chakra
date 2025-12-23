@@ -49,15 +49,6 @@ import {
 
 const MAX_RETRIES = 3;
 
-const ERROR_MAP = {
-  network: { id: "R-2", title: "Network Error", desc: "A network issue prevented the speech from being recognized. Please check your connection." },
-  "audio-capture": { id: "R-3", title: "Microphone Disconnected", desc: "The audio source was lost during recognition. Please check your microphone." },
-  "not-allowed": { id: "R-4", title: "Service Not Allowed", desc: "The speech recognition service was blocked. This may be due to a browser extension or network policy." },
-  "service-not-allowed": { id: "R-4", title: "Service Not Allowed", desc: "The speech recognition service was blocked. This may be due to a browser extension or network policy." },
-  aborted: { id: "R-5", title: "Recognition Canceled", desc: "The listening session was canceled because the page became inactive." },
-  "start-failed": { id: "L-3", title: "Recognition Failed to Start", desc: "There was an issue initializing the speech recognition engine." },
-};
-
 function App() {
   const dispatch = useDispatch();
 
@@ -162,42 +153,6 @@ function App() {
       });
     }, 1000);
   }, [showToast]);
-
-  const showToast = useCallback(
-    (status, title, description) => {
-      const id = title + description;
-      if (!toast.isActive(id)) {
-        toast({
-          id,
-          position: "top-right",
-          duration: 4000,
-          isClosable: true,
-          render: () => (
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 50 }}
-            >
-              <Alert
-                status={status}
-                borderRadius="xl"
-                boxShadow="lg"
-                p={4}
-                variant="solid"
-              >
-                <AlertIcon />
-                <Box flex="1">
-                  <Text fontWeight="bold">{title}</Text>
-                  <Text fontSize="sm">{description}</Text>
-                </Box>
-              </Alert>
-            </motion.div>
-          ),
-        });
-      }
-    },
-    [toast]
-  );
 
   const resetFeedback = useCallback(
     () => dispatch(setFeedback({ message: "", type: "", highlightedPhrase: [] })),
