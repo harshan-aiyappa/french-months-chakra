@@ -401,11 +401,13 @@ function App() {
         justify="center"
         h={{ base: "100dvh", md: "100dvh" }}
         className="full-h-mobile"
-        w="100vw"
+        w="100%"
+        maxW="100vw"
         position="fixed"
         top={0}
         left={0}
         overflow="hidden"
+        overflowX="hidden"
         p={{ base: 2, md: 4 }}
         pt={{ base: "calc(env(safe-area-inset-top) + 8px)", md: 4 }}
         pb={{ base: "calc(env(safe-area-inset-bottom) + 60px)", md: "calc(env(safe-area-inset-bottom) + 24px)" }}
@@ -413,7 +415,8 @@ function App() {
         pr={{ base: "calc(env(safe-area-inset-right) + 8px)", md: 4 }}
       >
         <Container
-          maxW={{ base: "100%", md: "container.sm", lg: "container.md" }}
+          w="100%"
+          maxW={{ base: "100%", sm: "90%", md: "container.sm", lg: "container.md" }}
           maxH="100%"
           bg="card"
           borderRadius={{ base: "xl", md: "3xl" }}
@@ -423,6 +426,7 @@ function App() {
           border="1px"
           borderColor="border"
           overflowY="auto"
+          overflowX="hidden"
           css={{
             '&::-webkit-scrollbar': { width: '4px' },
             '&::-webkit-scrollbar-track': { background: 'transparent' },
