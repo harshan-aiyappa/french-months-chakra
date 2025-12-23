@@ -510,21 +510,19 @@ function App() {
           maxW={{ base: "100%", sm: "90%", md: "container.sm", lg: "container.md" }}
           minH={{ base: "auto", md: "400px" }}
           maxH={{ base: "calc(100dvh - 16px)", md: "calc(100dvh - 32px)" }}
-          bg="rgba(255, 255, 255, 0.4)" // More transparent base
-          _dark={{ bg: "rgba(15, 23, 42, 0.6)" }}
-          backdropFilter="blur(24px)"
-          borderRadius={{ base: "2xl", md: "3xl" }}
-          boxShadow="glass"
-          p={{ base: 4, md: 8 }}
-          pb={{ base: 12, md: 8 }}
-          border="1px solid"
-          borderColor="rgba(255, 255, 255, 0.3)"
+          bg="card"
+          borderRadius={{ base: "xl", md: "3xl" }}
+          boxShadow="2xl"
+          p={{ base: 3, md: 6, lg: 8 }}
+          pb={{ base: 12, md: 8 }} // Extra padding inside container
+          border="1px"
+          borderColor="border"
           overflowY="auto"
           overflowX="hidden"
           css={{
             '&::-webkit-scrollbar': { width: '4px' },
             '&::-webkit-scrollbar-track': { background: 'transparent' },
-            '&::-webkit-scrollbar-thumb': { background: 'rgba(255, 255, 255, 0.4)', borderRadius: '4px' }, // Glassy scrollbar
+            '&::-webkit-scrollbar-thumb': { background: '#CBD5E1', borderRadius: '4px' },
           }}
         >
           <VStack spacing={{ base: 3, md: 5 }} w="100%">
