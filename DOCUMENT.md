@@ -66,5 +66,13 @@ This document provides a comprehensive breakdown of all user-facing and technica
 - **Layout Stability**: Optimized `minH` and transition physics ensure the UI stays rock-solid without jarring jumps during content changes.
 - **Debounced Interaction**: Click/Touch interactions are protected against "spamming" to ensure state stability.
 
+### 🎨 UX & Design Philosophy (Audit)
+Verified adherence to core design principles:
+- **Consistency & Contrast**: Semantic tokens (`text`, `bg`, `card`) ensure perfect readability and visual balance in both Light/Dark modes.
+- **User Control & Error Recovery**: Added "Retry" flows and detailed specific error toasts (Network vs Mic) to guide users.
+- **Accessibility & Affordance**: All interactive elements have `aria-label`, hover states (`scale: 1.05`), and clear focus indicators.
+- **Mobile-First Responsiveness**: Touches are thumb-friendly (min 45px height), and layouts prevent layout shifts (`minH` locking).
+- **Feedback & Visibility**: Real-time VAD visualizer and granular progress bars keep the user informed of system status at all times.
+
 ---
 *Developed by Harshan Aiyappa*

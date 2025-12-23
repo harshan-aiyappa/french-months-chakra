@@ -7,6 +7,7 @@ The application is built on three main pillars:
 1. **The Audio Graph (`MicVisualizer.jsx`)**: Handles raw PCM data from the microphone.
 2. **The Speech Engine (`useSpeechRecognition.js`)**: Interfaces with the browser's native `SpeechRecognition` API.
 3. **The Orchestrator (`App.jsx`)**: Manages game state and evaluates transcripts.
+4. **The Theme Manager (`theme.js`)**: Controls dynamic semantic tokens for Light/Dark mode consistency.
 
 ## 2. Interaction Lifecycle
 
@@ -21,6 +22,7 @@ The application is built on three main pillars:
 3. **VAD Detection**: `MicVisualizer` detects signal > threshold and updates `isSpeaking` state.
 4. **Capture**: System waits for **1.4s** of silence after speech before closing the ASR window.
 5. **Evaluation**: Resulting transcript is processed via `pronunciationEvaluator.js`.
+6. **Retry/Continue**: User chooses to retry the current word (resetting specific state) or proceed.
 
 ### Phase C: Results
 - Final state aggregation and statistical display with performance animations.
@@ -35,10 +37,13 @@ graph TD
     E --> F[Capture Transcript]
     F --> G[Evaluate Pronunciation]
     G --> H[Display Feedback]
-    H --> I[Next Activity or Result]
+    H --> I{User Action}
+    I -- "Retry" --> B
+    I -- "Continue" --> J[Next Activity or Result]
 ```
 
 ## 4. Key Implementation Details
 - **Persistent Audio Nodes**: Audio sources and analysers are stored in `useRef` to prevent redundant processing and memory leaks.
 - **State Debouncing**: Speaking transitions are debounced by 50ms to prevent UI flickering.
 - **iOS Stability**: A global listener in `App.jsx` handles the explicit `AudioContext.resume()` required by mobile Safari.
+- **Semantic Theming**: all UI colors map to abstract tokens (`bg`, `text`, `card`) allowing instant, glitch-free Light/Dark mode switching.
