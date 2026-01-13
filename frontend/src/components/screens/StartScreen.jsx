@@ -1,5 +1,5 @@
 import React from 'react';
-import { VStack, Heading, Text, Button, Icon, Box, SimpleGrid, Image, Badge } from '@chakra-ui/react';
+import { VStack, Heading, Text, Button, Icon, Box, SimpleGrid, Image, Badge, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Code, List, ListItem, ListIcon } from '@chakra-ui/react';
 import { CheckCircleIcon } from '@chakra-ui/icons';
 import { Zap, Mic, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -215,6 +215,60 @@ const StartScreen = ({ onBegin }) => {
       >
         Start Learning →
       </Button>
+
+      <Accordion allowToggle w="100%" maxW="lg" mt={2}>
+        <AccordionItem border="none" bg="whiteAlpha.500" borderRadius="xl" _dark={{ bg: 'whiteAlpha.100' }}>
+          <h2>
+            <AccordionButton _hover={{ bg: 'whiteAlpha.200' }} borderRadius="xl" px={4} py={3}>
+              <Box flex="1" textAlign="left" fontWeight="bold" fontSize="xs" color="textMuted" letterSpacing="wide" textTransform="uppercase">
+                ⚙️ &nbsp; Industry-Standard Architecture
+              </Box>
+              <AccordionIcon color="textMuted" />
+            </AccordionButton>
+          </h2>
+          <AccordionPanel pb={4}>
+            <VStack align="stretch" spacing={3}>
+              <Text fontSize="sm" color="text">
+                We use the <b>production-proven approach</b> trusted by Google Meet, Zoom, and Teams — powered by open-source tech.
+              </Text>
+
+              <Box>
+                <Text fontSize="xs" fontWeight="bold" color="textMuted" mb={1} textTransform="uppercase">The Standard Flow</Text>
+                <Code p={3} borderRadius="md" w="100%" display="block" fontSize="2xs" lineHeight="tall" colorScheme="gray">
+                  Mic (Web/iOS) → WebRTC (LiveKit)<br />
+                  → Noise Calibration (1s) → RMS Gate<br />
+                  → VAD (webrtcvad) → Chunking (2.5s)<br />
+                  → Whisper ASR (Base Model)<br />
+                  → Partial + Final Transcripts
+                </Code>
+              </Box>
+
+              <SimpleGrid columns={2} spacing={2}>
+                <Box p={2} bg="bg" borderRadius="md" border="1px solid" borderColor="border">
+                  <Text fontSize="2xs" color="textMuted" fontWeight="bold">TRANSPORT</Text>
+                  <Text fontSize="xs" fontWeight="semibold">LiveKit (WebRTC)</Text>
+                </Box>
+                <Box p={2} bg="bg" borderRadius="md" border="1px solid" borderColor="border">
+                  <Text fontSize="2xs" color="textMuted" fontWeight="bold">ASR MODEL</Text>
+                  <Text fontSize="xs" fontWeight="semibold">Whisper (OpenAI)</Text>
+                </Box>
+                <Box p={2} bg="bg" borderRadius="md" border="1px solid" borderColor="border">
+                  <Text fontSize="2xs" color="textMuted" fontWeight="bold">DETECTION</Text>
+                  <Text fontSize="xs" fontWeight="semibold">webrtcvad + RMS</Text>
+                </Box>
+                <Box p={2} bg="bg" borderRadius="md" border="1px solid" borderColor="border">
+                  <Text fontSize="2xs" color="textMuted" fontWeight="bold">APPROACH</Text>
+                  <Text fontSize="xs" fontWeight="semibold">Server-Side Norm.</Text>
+                </Box>
+              </SimpleGrid>
+
+              <Text fontSize="xs" color="textMuted" fontStyle="italic">
+                Solves iOS dropouts, frequency shifts, and false triggers by moving processing to the server.
+              </Text>
+            </VStack>
+          </AccordionPanel>
+        </AccordionItem>
+      </Accordion>
     </VStack>
   );
 };
