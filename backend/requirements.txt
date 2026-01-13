@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+livekit
+livekit-agents
+faster-whisper
+pydantic
+python-dotenv
+python-multipart
+aiohttp

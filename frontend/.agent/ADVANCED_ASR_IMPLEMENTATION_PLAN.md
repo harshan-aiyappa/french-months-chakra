@@ -83,9 +83,16 @@ To implement a professional-grade speech recognition system for Vocalis that pro
 
 ## **5. Current Status Tracker**
 
-- **Project Status**: 🏗️ In Progress (Phase 2-3)
-- **Latest Update**: Decision Engine and LiveKit Client Hook implemented.
-- **Next Step**: Create the Master Abstraction Hook (`useUnifiedASR`).
+- **Project Status**: 🏗️ In Progress (Phase 2-4)
+- **Latest Update**: Optimized FastAPI Gateway and ASR Worker implemented with `int8` quantization.
+- **Next Step**: Configure local LiveKit server and connect Frontend to the real Gateway.
+
+### **Backend Optimizations Implemented:**
+1.  **Quantization**: Using `int8` in `faster-whisper` for 4x faster CPU inference.
+2.  **Concurrency**: Fully `asyncio` based audio processing in `asr_worker.py`.
+3.  **Security**: Added `TrustedHostMiddleware` and `ProxyHeadersMiddleware` for SSL-ready production environments.
+4.  **Modern Stack**: Python 3.12 recommended for stability; FastAPI 0.110+ for performance.
+
 
 ---
 

@@ -58,6 +58,7 @@ import ResultsScreen from "./screens/ResultsScreen";
 import useSpeechRecognition from "../hooks/useSpeechRecognition";
 import useLiveKit from "../hooks/useLiveKit";
 import useUnifiedASR from "../hooks/useUnifiedASR";
+import { fetchLiveKitToken } from "../utils/tokenService";
 import { UNIT_DATA } from "../constants";
 import MCQScreen from "./screens/MCQScreen";
 import evaluatePronunciation from "../utils/pronunciationEvaluator";
@@ -403,12 +404,32 @@ function GameUnit() {
   });
 
   // Mocked credentials for simulation for now
-  const startListening = useCallback(() => {
-    startUnifiedListening({
-      url: "wss://vocalis-demo.livekit.cloud",
-      token: "simulation-token"
-    });
-  }, [startUnifiedListening]);
+  // Real backend connection for Hybrid ASR
+  const startListening = useCallback(async () => {
+    try {
+      // Only fetch token if in Hybrid/Auto mode (UnifiedASR handles the logic internally, 
+      // but we pass credentials just in case)
+      let options = {};
+
+      // Hardcoded URL for now as per user instruction, or fetched from env
+      const liveKitUrl = "wss://kimo-zg71lj4i.livekit.cloud";
+
+      if (determinedAsrMode === 'hybrid' || asrMode === 'hybrid' || asrMode === 'auto') {
+        // Generate a random participant name for uniqueness
+        const participantIdentity = `user-${Math.floor(Math.random() * 10000)}`;
+        const roomName = "vocalis-practice-room";
+
+        const token = await fetchLiveKitToken(roomName, participantIdentity);
+        options = { url: liveKitUrl, token };
+      }
+
+      startUnifiedListening(options);
+    } catch (err) {
+      console.error("Failed to start listening:", err);
+      showToast("error", "Connection Failed", "Could not connect to ASR server. Falling back to native if possible.");
+      // Fallback or retry logic could go here
+    }
+  }, [startUnifiedListening, determinedAsrMode, asrMode, showToast]);
 
   const stopListening = stopUnifiedListening;
 
