@@ -25,7 +25,7 @@
 //
 // ============================================================================
 
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createSelector } from '@reduxjs/toolkit';
 import { UNIT_DATA } from '../constants';
 
 // ============================================================================
@@ -46,6 +46,7 @@ const initialState = {
         type: '',
         highlightedPhrase: [],
     },
+    activityQueue: [], // Pre-shuffled or ordered list of activities
 };
 
 // ============================================================================
@@ -72,6 +73,23 @@ export const gameSlice = createSlice({
             state.retryCount = 0;
             state.feedback = { message: '', type: '', highlightedPhrase: [] };
 
+            // Generate Activity Queue
+            let data = [...UNIT_DATA];
+            if (mode === 'speech') {
+                data = UNIT_DATA.filter((a) => a.type === 'SPEAKING');
+            } else if (mode === 'mcq') {
+                data = UNIT_DATA.filter((a) => a.type === 'MCQ');
+            } else {
+                // Mixed Mode: Filter invalid items if any, then SHUFFLE
+                // (Assuming UNIT_DATA has both. We include all.)
+                // Fisher-Yates Shuffle
+                for (let i = data.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [data[i], data[j]] = [data[j], data[i]];
+                }
+            }
+            state.activityQueue = data;
+
             // BEST APPROACH: Calibrate once per unit (unless MCQ-only)
             if (mode === 'mcq') {
                 state.status = 'playing';
@@ -97,8 +115,7 @@ export const gameSlice = createSlice({
             state.feedback = { message: '', type: '', highlightedPhrase: [] };
             state.retryCount = 0;
 
-            const activeData = selectActiveUnitData({ game: state });
-            if (state.currentIndex < activeData.length - 1) {
+            if (state.currentIndex < state.activityQueue.length - 1) {
                 state.currentIndex += 1;
             } else {
                 state.status = 'results';
@@ -150,29 +167,29 @@ export const selectAsrMode = (state) => state.game.asrMode;
 export const selectFeedback = (state) => state.game.feedback;
 
 // Memoized selectors
-export const selectActiveUnitData = (state) => {
-    const mode = state.game.mode;
-    if (mode === 'speech') return UNIT_DATA.filter((a) => a.type === 'SPEAKING');
-    if (mode === 'mcq') return UNIT_DATA.filter((a) => a.type === 'MCQ');
-    return UNIT_DATA;
-};
+export const selectActiveUnitData = (state) => state.game.activityQueue;
 
 export const selectCurrentActivity = (state) => {
     const activeData = selectActiveUnitData(state);
     return activeData[state.game.currentIndex] || activeData[0];
 };
 
-export const selectScore = (state) => {
-    return state.game.history.filter((r) => r.status === 'correct').length;
-};
+export const selectScore = createSelector(
+    [selectHistory],
+    (history) => history.filter((r) => r.status === 'correct').length
+);
 
-export const selectProgress = (state) => {
-    const activeData = selectActiveUnitData(state);
-    return (state.game.history.length / activeData.length) * 100;
-};
+export const selectProgress = createSelector(
+    [selectHistory, selectActiveUnitData],
+    (history, activeData) => {
+        if (!activeData || activeData.length === 0) return 0;
+        return (history.length / activeData.length) * 100;
+    }
+);
 
-export const selectTotal = (state) => {
-    return selectActiveUnitData(state).length;
-};
+export const selectTotal = createSelector(
+    [selectActiveUnitData],
+    (activeData) => activeData ? activeData.length : 0
+);
 
 export default gameSlice.reducer;

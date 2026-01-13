@@ -142,7 +142,7 @@ const DashboardHome = () => {
                     <PracticeModeCard
                         icon="record_voice_over"
                         title="Speaking Practice"
-                        description="Focus on perfecting your accent with real-time feedback and pronunciation analysis."
+                        description="Practice your pronunciation by speaking French words aloud. No quizzes, just speech."
                         techs={[
                             { icon: 'mic', label: 'Native ASR' },
                             { icon: 'graphic_eq', label: 'VAD Visuals' }
@@ -152,7 +152,7 @@ const DashboardHome = () => {
                     <PracticeModeCard
                         icon="quiz"
                         title="Phonetic Quiz"
-                        description="Sharpen your ear for French nuances with interactive listening quizzes."
+                        description="Test your listening skills by identifying the correct French words. No microphone required."
                         techs={[
                             { icon: 'volume_up', label: 'TTS Engine' },
                             { icon: 'checklist', label: 'Instant Eval' }
@@ -162,7 +162,7 @@ const DashboardHome = () => {
                     <PracticeModeCard
                         icon="shuffle"
                         title="Mixed Mode"
-                        description="A balanced session combining speaking challenges and listening checks."
+                        description="The ultimate challenge. Switch between Speaking and Listening tasks to test your full range of skills."
                         techs={[
                             { icon: 'mic', label: 'Speech' },
                             { icon: 'quiz', label: 'Quiz Check' }
@@ -172,7 +172,7 @@ const DashboardHome = () => {
                     <PracticeModeCard
                         icon="auto_awesome"
                         title="Advanced Practice"
-                        description="High-fidelity feedback session using cutting-edge AI models for professional fluency."
+                        description="Experience low-latency, real-time feedback powered by LiveKit and OpenAI Whisper."
                         techs={[
                             { icon: 'cloud_sync', label: 'LiveKit' },
                             { icon: 'model_training', label: 'Whisper AI' }

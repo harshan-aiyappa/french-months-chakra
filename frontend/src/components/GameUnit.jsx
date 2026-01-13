@@ -71,6 +71,7 @@ import { getBrowserInfo, checkFeatureSupport } from "../utils/browserDetection";
 // Redux Store
 import {
   selectGameStatus,
+  selectGameMode,
   selectCurrentActivity,
   selectHistory,
   selectRetryCount,
@@ -128,6 +129,7 @@ function GameUnit() {
   const total = useSelector(selectTotal);
   const currentIndex = useSelector(selectCurrentIndex);
   const asrMode = useSelector(selectAsrMode);
+  const currentMode = useSelector(selectGameMode);
 
   // ========================================================================
   // LOCAL STATE & HOOKS
@@ -143,7 +145,14 @@ function GameUnit() {
   // State to hold the actually determined ASR mode (esp. for 'auto' mode)
   const [determinedAsrMode, setDeterminedAsrMode] = React.useState(null);
 
-  // Auto-start game when component mounts
+  // Reset game state on unmount
+  useEffect(() => {
+    return () => {
+      dispatch(resetGame());
+    };
+  }, [dispatch]);
+
+  // Auto-start game or switch modes when parameters change
   useEffect(() => {
     const initASR = async () => {
       if (asrMode === 'auto') {
@@ -156,10 +165,12 @@ function GameUnit() {
 
     initASR();
 
-    if (gameState === "start") {
+    // Start or Restart if mode changes
+    if (gameState === "start" || currentMode !== passedMode) {
+      console.log(`[GameUnit] Initializing Game: ${passedMode} (Previous: ${currentMode})`);
       dispatch(startGame({ mode: passedMode, asrMode: passedAsrMode }));
     }
-  }, [gameState, dispatch, passedMode, passedAsrMode, asrMode]);
+  }, [gameState, dispatch, passedMode, passedAsrMode, asrMode, currentMode]);
 
   // iOS Safari AudioContext fix: Resume AudioContext on first interaction
   useEffect(() => {

@@ -30,21 +30,25 @@ const MCQScreen = ({ activity, onAnswer, onExit, currentIndex, total }) => {
   const options = activity.options || ["/æmˈbɪʃ.ən/", "/æmˈbi.ʃən/", "/ɑːmˈbɪʃ.ən/", "/æmˈbiː.ʒən/"];
   const correctAnswer = activity.answer || "/æmˈbɪʃ.ən/";
 
-  // Theme colors
+  // Theme colors - hooks must be at top level
   const headingColor = useColorModeValue('gray.900', 'white');
   const textColor = useColorModeValue('gray.600', 'gray.400');
   const cardBgColor = useColorModeValue('white', 'gray.800');
-  const cardBg = cardBgColor; // Fallback for HMR safety/caching issues
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
+
+  // Option specific colors
+  const optionBorderDefault = useColorModeValue('gray.200', 'transparent');
+  const optionBgSelected = useColorModeValue('brand.50', 'whiteAlpha.100');
+  const optionBgCorrect = useColorModeValue('green.50', 'green.900');
+  const optionColorCorrect = useColorModeValue('green.700', 'green.200');
+  const optionBgWrong = useColorModeValue('red.50', 'red.900');
+  const optionColorWrong = useColorModeValue('red.700', 'red.200');
+  const optionHoverBg = useColorModeValue('brand.50', 'whiteAlpha.100');
+
 
   const handleCheck = () => {
     if (!selectedOption) return;
     setIsSubmitted(true);
-    // In a real app, you might show feedback before moving on
-    // For now, passing the result up
-    // const isCorrect = selectedOption === correctAnswer;
-    // setTimeout(() => onAnswer(isCorrect), 1000); 
-    // Or wait for user to click "Next"
   };
 
   const handleNext = () => {
@@ -55,15 +59,15 @@ const MCQScreen = ({ activity, onAnswer, onExit, currentIndex, total }) => {
   const getOptionStyle = (option) => {
     if (!isSubmitted) {
       return selectedOption === option
-        ? { borderColor: 'brand.500', bg: useColorModeValue('brand.50', 'whiteAlpha.100'), shadow: 'md' }
-        : { borderColor: useColorModeValue('gray.200', 'transparent'), bg: cardBgColor };
+        ? { borderColor: 'brand.500', bg: optionBgSelected, shadow: 'md' }
+        : { borderColor: optionBorderDefault, bg: cardBgColor };
     }
 
     if (option === correctAnswer) {
-      return { borderColor: 'green.400', bg: useColorModeValue('green.50', 'green.900'), color: useColorModeValue('green.700', 'green.200') };
+      return { borderColor: 'green.400', bg: optionBgCorrect, color: optionColorCorrect };
     }
     if (selectedOption === option && selectedOption !== correctAnswer) {
-      return { borderColor: 'red.400', bg: useColorModeValue('red.50', 'red.900'), color: useColorModeValue('red.700', 'red.200') };
+      return { borderColor: 'red.400', bg: optionBgWrong, color: optionColorWrong };
     }
     return { borderColor: 'transparent', opacity: 0.5 };
   };
@@ -162,7 +166,7 @@ const MCQScreen = ({ activity, onAnswer, onExit, currentIndex, total }) => {
                   border="2px solid"
                   borderColor={style.borderColor}
                   borderRadius="xl"
-                  _hover={{ borderColor: 'brand.400', bg: useColorModeValue('brand.50', 'whiteAlpha.100') }}
+                  _hover={{ borderColor: 'brand.400', bg: optionHoverBg }}
                   onClick={() => !isSubmitted && setSelectedOption(option)}
                   transition="all 0.2s"
                   position="relative"
