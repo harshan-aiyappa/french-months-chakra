@@ -9,20 +9,24 @@ const VantaBackground = () => {
 
     useEffect(() => {
         if (!vantaEffect.current && vantaRef.current) {
-            vantaEffect.current = CELLS({
-                el: vantaRef.current,
-                THREE: THREE,
-                mouseControls: true,
-                touchControls: true,
-                gyroControls: false,
-                minHeight: 200.00,
-                minWidth: 200.00,
-                scale: 1.00,
-                color1: 0x6366f1, // brand.500 (Indigo)
-                color2: 0x312e81, // brand.900 (Deep Indigo)
-                size: 1.50,
-                speed: 1.00
-            });
+            try {
+                vantaEffect.current = CELLS({
+                    el: vantaRef.current,
+                    THREE: THREE,
+                    mouseControls: true,
+                    touchControls: true,
+                    gyroControls: false,
+                    minHeight: 200.00,
+                    minWidth: 200.00,
+                    scale: 1.00,
+                    color1: 0x6366f1, // brand.500 (Indigo)
+                    color2: 0x312e81, // brand.900 (Deep Indigo)
+                    size: 1.50,
+                    speed: 1.00
+                });
+            } catch (error) {
+                console.error("[VantaBackground] Failed to initialize Vanta effect:", error);
+            }
         }
         return () => {
             if (vantaEffect.current) vantaEffect.current.destroy();
