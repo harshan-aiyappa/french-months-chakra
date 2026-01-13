@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { startGame } from '../../store/gameSlice';
 import {
     Box,
     Flex,
@@ -24,6 +26,7 @@ const MaterialSymbol = ({ icon, fontSize = "24px", ...props }) => (
 
 const AdvancedPracticeScreen = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [asrMode, setAsrMode] = useState('auto');
 
     const headingColor = useColorModeValue('gray.900', 'white');
@@ -32,8 +35,10 @@ const AdvancedPracticeScreen = () => {
     const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
 
     const handleStartPractice = () => {
-        // Navigate to practice with selected ASR mode
-        navigate('/practice/advanced-practice', { state: { asrMode } });
+        // Dispatch Redux action FIRST to set asrMode in state
+        dispatch(startGame({ mode: 'advanced-practice', asrMode }));
+        // Then navigate without state (Redux is source of truth)
+        navigate('/practice/advanced-practice');
     };
 
     const asrModes = [
@@ -160,7 +165,7 @@ const AdvancedPracticeScreen = () => {
                             </Text>
                             <Text fontSize="xs" color={textColor}>
                                 {asrMode === 'native' && 'Uses your browser\'s built-in speech recognition. Fast and free, works offline in some browsers.'}
-                                {asrMode === 'hybrid' && 'Connects to LiveKit server and uses OpenAI Whisper for transcription. Requires backend setup and API keys.'}
+                                {asrMode === 'hybrid' && 'Connects to LiveKit server and uses OpenAI Whisper for transcription. Powered by cloud backend (no API keys needed).'}
                                 {asrMode === 'auto' && 'Automatically detects network conditions and browser capabilities to select the best ASR engine. Falls back to Native if Hybrid is unavailable.'}
                             </Text>
                         </Box>

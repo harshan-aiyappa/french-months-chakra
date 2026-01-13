@@ -51,13 +51,28 @@ const useLiveKit = ({ onResult, onError, onStart, onStatusChange }) => {
             roomRef.current = r;
             setRoom(r);
 
+            if (callbacks.current.onStatusChange) {
+                callbacks.current.onStatusChange('room-created', 'LiveKit Room Initialized');
+            }
+
             // 2. Setup Event Listeners
             r.on(RoomEvent.DataReceived, (payload) => {
                 const decoder = new TextDecoder();
                 const data = JSON.parse(decoder.decode(payload));
-                if (data.type === 'transcript' && data.is_final && callbacks.current.onResult) {
+                if (data.type === 'transcript') {
                     console.log(`[Hybrid ASR] Whisper Transcript: "${data.text}" (Final: ${data.is_final})`);
-                    callbacks.current.onResult(data.text.toLowerCase().trim());
+
+                    if (callbacks.current.onStatusChange) {
+                        if (data.is_final) {
+                            callbacks.current.onStatusChange('whisper-final', `Whisper: "${data.text}"`);
+                        } else {
+                            callbacks.current.onStatusChange('whisper-partial', 'Whisper Processing...');
+                        }
+                    }
+
+                    if (data.is_final && callbacks.current.onResult) {
+                        callbacks.current.onResult(data.text.toLowerCase().trim());
+                    }
                 }
             });
 
@@ -74,7 +89,7 @@ const useLiveKit = ({ onResult, onError, onStart, onStatusChange }) => {
             await r.connect(url, token);
             setIsConnected(true);
             if (callbacks.current.onStatusChange) {
-                callbacks.current.onStatusChange('connected', 'Connected to LiveKit Neural Grid');
+                callbacks.current.onStatusChange('connected', `Connected to Room: ${r.name || 'Neural Grid'}`);
             }
             console.log("[Hybrid ASR] Connected to LiveKit Room:", r.name);
 

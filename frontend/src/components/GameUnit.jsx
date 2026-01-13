@@ -435,8 +435,18 @@ function GameUnit() {
         case 'connecting':
           showToast('info', 'Connecting...', message);
           break;
+        case 'room-created':
+          showToast('info', 'Room Ready', message);
+          break;
         case 'connected':
           showToast('success', 'System Online', message, Globe);
+          break;
+        case 'whisper-partial':
+          // Optional: Show subtle processing indicator
+          // showToast('info', 'Whisper Active', message);
+          break;
+        case 'whisper-final':
+          showToast('success', 'Transcription', message);
           break;
         case 'disconnected':
           showToast('warning', 'Link Terminated', message);
