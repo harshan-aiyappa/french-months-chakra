@@ -32,6 +32,9 @@ const VoiceVisualizer = ({ isListening }) => {
 
     useEffect(() => {
         let isMounted = true;
+        let localStream = null;
+        let localAudioContext = null;
+        let localAnimationId = null;
 
         // Reset state when listening toggles
         if (!isListening) {
@@ -48,15 +51,20 @@ const VoiceVisualizer = ({ isListening }) => {
                 // We wrap in try/catch to fall back to simulated visualization if needed.
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-                // CRITICAL: Check if mounted before using the stream
+                // CRITICAL: Strict check immediately after acquisition
                 if (!isMounted) {
-                    stream.getTracks().forEach(track => track.stop());
+                    stream.getTracks().forEach(track => {
+                        track.stop();
+                        track.enabled = false;
+                    });
                     return;
                 }
 
-                streamRef.current = stream;
+                localStream = stream;
+                streamRef.current = stream; // Keep ref for external access if needed
 
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                localAudioContext = audioContext;
                 audioContextRef.current = audioContext;
 
                 const analyser = audioContext.createAnalyser();
@@ -65,6 +73,29 @@ const VoiceVisualizer = ({ isListening }) => {
 
                 const source = audioContext.createMediaStreamSource(stream);
                 source.connect(analyser);
+
+                const animate = () => {
+                    if (!analyser || !isMounted) return;
+
+                    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                    analyser.getByteFrequencyData(dataArray);
+
+                    // Map frequency data to our bars
+                    // We'll take a subset or average to fit NUM_BARS
+                    // fftSize 64 gives 32 bins. We have 24 bars.
+                    // Let's just grab the first 24 relevant bins
+                    const newHeights = Array.from(dataArray).slice(0, NUM_BARS).map(val => {
+                        // Value is 0-255. Map to percentage height 10%-100%
+                        const percent = (val / 255) * 100;
+                        return Math.max(percent, 10); // Min height 10%
+                    });
+
+                    if (isMounted) {
+                        setAudioData(newHeights);
+                        localAnimationId = requestAnimationFrame(animate);
+                        animationRef.current = localAnimationId;
+                    }
+                };
 
                 if (isMounted) {
                     setIsRealAudio(true);
@@ -76,33 +107,28 @@ const VoiceVisualizer = ({ isListening }) => {
             }
         };
 
-        const animate = () => {
-            if (!analyserRef.current || !isMounted) return;
-
-            const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
-            analyserRef.current.getByteFrequencyData(dataArray);
-
-            // Map frequency data to our bars
-            // We'll take a subset or average to fit NUM_BARS
-            // fftSize 64 gives 32 bins. We have 24 bars.
-            // Let's just grab the first 24 relevant bins
-            const newHeights = Array.from(dataArray).slice(0, NUM_BARS).map(val => {
-                // Value is 0-255. Map to percentage height 10%-100%
-                const percent = (val / 255) * 100;
-                return Math.max(percent, 10); // Min height 10%
-            });
-
-            if (isMounted) {
-                setAudioData(newHeights);
-                animationRef.current = requestAnimationFrame(animate);
-            }
-        };
-
         initAudio();
 
+        // CLOSURE-SAFE CLEANUP
+        // This runs when isListening changes OR component unmounts
         return () => {
             isMounted = false;
-            cleanupAudio();
+
+            if (localStream) {
+                localStream.getTracks().forEach(track => {
+                    track.stop();
+                    track.enabled = false;
+                });
+            }
+            if (localAudioContext) {
+                localAudioContext.close().catch(e => console.warn(e));
+            }
+            if (localAnimationId) {
+                cancelAnimationFrame(localAnimationId);
+            }
+            // Also clear refs to be safe
+            streamRef.current = null;
+            audioContextRef.current = null;
         };
     }, [isListening]);
 
