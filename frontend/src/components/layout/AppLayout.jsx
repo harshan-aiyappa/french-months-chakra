@@ -118,6 +118,15 @@ const AppLayout = ({ children, activeView, onNavigate }) => {
                             label="Dashboard"
                             isActive={activeView === 'dashboard'}
                             onClick={() => onNavigate('dashboard')}
+                            isCollapsed={isSidebarCollapsed}
+                        />
+                        <SidebarItem
+                            icon="workspace_premium"
+                            label="Advanced"
+                            id="advanced"
+                            isActive={activeView === 'advanced'}
+                            onClick={() => onNavigate('advanced-practice')}
+                            isCollapsed={isSidebarCollapsed}
                         />
                         {/* Lessons - Integrated into Dashboard */}
                         {/* <SidebarItem

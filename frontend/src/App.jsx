@@ -10,6 +10,7 @@ import { Box, Spinner, Center } from '@chakra-ui/react';
 import DashboardHome from './components/screens/DashboardHome';
 import StatsScreen from './components/screens/StatsScreen';
 import SettingsScreen from './components/screens/SettingsScreen';
+import AdvancedPracticeScreen from './components/screens/AdvancedPracticeScreen';
 
 const AppContent = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -36,13 +37,15 @@ const AppContent = () => {
   // Get current route for active state
   const currentPath = location.pathname;
   const activeView = currentPath === '/practice' ? 'practice'
-    : currentPath === '/settings' ? 'settings'
-      : 'dashboard';
+    : currentPath === '/advanced-practice' ? 'advanced'
+      : currentPath === '/settings' ? 'settings'
+        : 'dashboard';
 
   return (
     <AppLayout activeView={activeView} onNavigate={(view) => navigate(`/${view}`)}>
       <Routes>
         <Route path="/dashboard" element={<DashboardHome />} />
+        <Route path="/advanced-practice" element={<AdvancedPracticeScreen />} />
         <Route path="/practice" element={<GameUnit />} />
         <Route path="/settings" element={<SettingsScreen />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />

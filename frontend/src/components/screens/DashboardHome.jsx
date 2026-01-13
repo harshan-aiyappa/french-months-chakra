@@ -113,6 +113,12 @@ const DashboardHome = () => {
                         description="Speaking and quiz combined"
                         onClick={handleStartPractice}
                     />
+                    <PracticeModeCard
+                        icon="auto_awesome"
+                        title="Advanced Practice"
+                        description="Expert modes with LiveKit & Whisper"
+                        onClick={() => navigate('/advanced-practice')}
+                    />
                 </SimpleGrid>
             </Box>
         </Flex>

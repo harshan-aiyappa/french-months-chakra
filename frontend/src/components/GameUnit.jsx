@@ -34,6 +34,7 @@
 // React & Hooks
 import React, { useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useLocation } from 'react-router-dom';
 import {
   Container,
   Box,
@@ -75,6 +76,7 @@ import {
   selectProgress,
   selectTotal,
   selectCurrentIndex,
+  selectAsrMode,
   startGame,
   setCalibrationComplete,
   submitResult,
@@ -83,6 +85,7 @@ import {
   retryCurrent,
   incrementRetry,
   triggerRecalibration,
+  resetGame,
 } from "../store/gameSlice";
 
 // ============================================================================
@@ -101,6 +104,8 @@ function GameUnit() {
   // ========================================================================
 
   const dispatch = useDispatch();
+  const location = useLocation();
+  const passedAsrMode = location.state?.asrMode || 'native';
 
   // Redux selectors
   const gameState = useSelector(selectGameStatus);
@@ -113,6 +118,7 @@ function GameUnit() {
   const progress = useSelector(selectProgress);
   const total = useSelector(selectTotal);
   const currentIndex = useSelector(selectCurrentIndex);
+  const asrMode = useSelector(selectAsrMode);
 
   // ========================================================================
   // LOCAL STATE & HOOKS
@@ -128,9 +134,9 @@ function GameUnit() {
   // Auto-start game when component mounts (skip StartScreen since mode selected on Dashboard)
   useEffect(() => {
     if (gameState === "start") {
-      dispatch(startGame({ mode: "MIX" })); // Default to MIX mode
+      dispatch(startGame({ mode: "MIX", asrMode: passedAsrMode })); // Default to MIX mode
     }
-  }, [gameState, dispatch]);
+  }, [gameState, dispatch, passedAsrMode]);
 
   // iOS Safari AudioContext fix: Resume AudioContext on first interaction
   useEffect(() => {

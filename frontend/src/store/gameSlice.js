@@ -35,6 +35,7 @@ import { UNIT_DATA } from '../constants';
 const initialState = {
     status: 'start', // 'start' | 'calibrating' | 'playing' | 'results'
     mode: 'mixed', // 'mixed' | 'speech' | 'mcq'
+    asrMode: 'native', // 'native' | 'hybrid' | 'auto'
     currentIndex: 0,
     history: [], // Array of session results
     retryCount: 0,
@@ -63,8 +64,9 @@ export const gameSlice = createSlice({
             state.mode = action.payload;
         },
         startGame: (state, action) => {
-            const mode = action.payload || 'mixed';
+            const { mode = 'mixed', asrMode = 'native' } = action.payload || {};
             state.mode = mode;
+            state.asrMode = asrMode;
             state.currentIndex = 0;
             state.history = [];
             state.retryCount = 0;
@@ -144,6 +146,7 @@ export const selectHistory = (state) => state.game.history;
 export const selectRetryCount = (state) => state.game.retryCount;
 export const selectDynamicThreshold = (state) => state.game.dynamicThreshold;
 export const selectIsCalibrated = (state) => state.game.isCalibrated;
+export const selectAsrMode = (state) => state.game.asrMode;
 export const selectFeedback = (state) => state.game.feedback;
 
 // Memoized selectors
