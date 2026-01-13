@@ -9,7 +9,7 @@ import { detectBestASRMode, ASR_ENGINE_TYPES } from '../utils/asrService';
  * Abstraction layer that handles Native, Hybrid, and Auto ASR modes.
  * Provides a consistent API for components to start/stop listening and receive transcripts.
  */
-const useUnifiedASR = ({ onResult, onError, onStart, selectedMode = 'native' }) => {
+const useUnifiedASR = ({ onResult, onError, onStart, onStatusChange, selectedMode = 'native' }) => {
     const [activeEngine, setActiveEngine] = useState(null); // 'native' | 'hybrid'
     const [isThinking, setIsThinking] = useState(false); // For "Auto" mode detection phase
 
@@ -22,7 +22,10 @@ const useUnifiedASR = ({ onResult, onError, onStart, selectedMode = 'native' }) 
             if (activeEngine === ASR_ENGINE_TYPES.NATIVE) onError(err);
         },
         onStart: () => {
-            if (activeEngine === ASR_ENGINE_TYPES.NATIVE && onStart) onStart();
+            if (activeEngine === ASR_ENGINE_TYPES.NATIVE) {
+                if (onStart) onStart();
+                if (onStatusChange) onStatusChange('listening', 'Microphone Active (Native)');
+            }
         }
     });
 
@@ -41,6 +44,11 @@ const useUnifiedASR = ({ onResult, onError, onStart, selectedMode = 'native' }) 
         },
         onStart: () => {
             if (activeEngine === ASR_ENGINE_TYPES.HYBRID && onStart) onStart();
+        },
+        onStatusChange: (status, message) => {
+            if (activeEngine === ASR_ENGINE_TYPES.HYBRID && onStatusChange) {
+                onStatusChange(status, message);
+            }
         }
     });
 

@@ -11,7 +11,7 @@ import {
  * useLiveKit - Hybrid ASR Hook
  * Manages WebRTC connection to LiveKit and receives Whisper transcripts.
  */
-const useLiveKit = ({ onResult, onError, onStart }) => {
+const useLiveKit = ({ onResult, onError, onStart, onStatusChange }) => {
     const [isConnecting, setIsConnecting] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
     const [isTranscribing, setIsTranscribing] = useState(false);
@@ -21,10 +21,10 @@ const useLiveKit = ({ onResult, onError, onStart }) => {
     const audioTrackRef = useRef(null);
 
     // Callback refs to prevent re-initialization
-    const callbacks = useRef({ onResult, onError, onStart });
+    const callbacks = useRef({ onResult, onError, onStart, onStatusChange });
     useEffect(() => {
-        callbacks.current = { onResult, onError, onStart };
-    }, [onResult, onError, onStart]);
+        callbacks.current = { onResult, onError, onStart, onStatusChange };
+    }, [onResult, onError, onStart, onStatusChange]);
 
     /**
      * Connect to LiveKit Room and start publishing audio
@@ -39,6 +39,9 @@ const useLiveKit = ({ onResult, onError, onStart }) => {
         try {
             setIsConnecting(true);
             setError(null);
+            if (callbacks.current.onStatusChange) callbacks.current.onStatusChange('connecting', 'Establishing secure link...');
+
+            // ... (rest of logic) ...
 
             // 1. Initialize Room
             const room = new Room({
@@ -47,16 +50,13 @@ const useLiveKit = ({ onResult, onError, onStart }) => {
             });
             roomRef.current = room;
 
-            // 2. Setup Event Listeners (DataChannel for transcripts)
-            room.on(RoomEvent.DataReceived, (payload, participant, kind) => {
+            // 2. Setup Event Listeners
+            room.on(RoomEvent.DataReceived, (payload) => {
+                // ... handled ...
                 const decoder = new TextDecoder();
                 const data = JSON.parse(decoder.decode(payload));
-
-                if (data.type === 'transcript') {
-                    console.log(`[Hybrid ASR] Whisper Transcript: "${data.text}" (Final: ${data.is_final})`);
-                    if (data.is_final && callbacks.current.onResult) {
-                        callbacks.current.onResult(data.text.toLowerCase().trim());
-                    }
+                if (data.type === 'transcript' && data.is_final && callbacks.current.onResult) {
+                    callbacks.current.onResult(data.text.toLowerCase().trim());
                 }
             });
 
@@ -64,11 +64,13 @@ const useLiveKit = ({ onResult, onError, onStart }) => {
                 console.log("[Hybrid ASR] Disconnected from room");
                 setIsConnected(false);
                 setIsTranscribing(false);
+                if (callbacks.current.onStatusChange) callbacks.current.onStatusChange('disconnected', 'Link Terminated');
             });
 
             // 3. Connect to Room
             await room.connect(url, token);
             setIsConnected(true);
+            if (callbacks.current.onStatusChange) callbacks.current.onStatusChange('connected', 'Connected to LiveKit Neural Grid');
             console.log("[Hybrid ASR] Connected to LiveKit Room:", room.name);
 
             // 4. Capture and Publish Mic Track (WebRTC Stream)
@@ -89,6 +91,7 @@ const useLiveKit = ({ onResult, onError, onStart }) => {
             setError(err.message);
             setIsConnecting(false);
             if (callbacks.current.onError) callbacks.current.onError(err.message);
+            if (callbacks.current.onStatusChange) callbacks.current.onStatusChange('error', 'Connection Failed');
         } finally {
             setIsConnecting(false);
         }

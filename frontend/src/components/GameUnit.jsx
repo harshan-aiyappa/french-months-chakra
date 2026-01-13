@@ -424,7 +424,32 @@ function GameUnit() {
       };
       showToast("error", `${err.title} (${err.id})`, err.desc);
     },
-    onStart: () => showToast("info", "Listening... (L-1)", "The speech recognition engine has started."),
+    onStart: () => {
+      // Suppress default "Listening" toast here if handled by onStatusChange for granularity
+      // But we keep it as a fallback
+    },
+    onStatusChange: (status, message) => {
+      // Map Status to Toast
+      switch (status) {
+        case 'connecting':
+          showToast('info', 'Connecting...', message);
+          break;
+        case 'connected':
+          showToast('success', 'System Online', message, Globe);
+          break;
+        case 'disconnected':
+          showToast('warning', 'Link Terminated', message);
+          break;
+        case 'listening':
+          showToast('info', 'Listening...', message);
+          break;
+        case 'error':
+          // Errors handled by onError usually
+          break;
+        default:
+          break;
+      }
+    }
   });
 
   // Mocked credentials for simulation for now
