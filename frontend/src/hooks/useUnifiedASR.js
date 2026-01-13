@@ -1,0 +1,108 @@
+import { useState, useCallback, useEffect, useRef } from 'react';
+import useSpeechRecognition from './useSpeechRecognition';
+import useLiveKit from './useLiveKit';
+import { detectBestASRMode, ASR_ENGINE_TYPES } from '../utils/asrService';
+
+/**
+ * useUnifiedASR - The "Master Hook"
+ * 
+ * Abstraction layer that handles Native, Hybrid, and Auto ASR modes.
+ * Provides a consistent API for components to start/stop listening and receive transcripts.
+ */
+const useUnifiedASR = ({ onResult, onError, onStart, selectedMode = 'native' }) => {
+    const [activeEngine, setActiveEngine] = useState(null); // 'native' | 'hybrid'
+    const [isThinking, setIsThinking] = useState(false); // For "Auto" mode detection phase
+
+    // --- NATIVE ENGINE ---
+    const nativeEngine = useSpeechRecognition({
+        onResult: (text) => {
+            if (activeEngine === ASR_ENGINE_TYPES.NATIVE) onResult(text);
+        },
+        onError: (err) => {
+            if (activeEngine === ASR_ENGINE_TYPES.NATIVE) onError(err);
+        },
+        onStart: () => {
+            if (activeEngine === ASR_ENGINE_TYPES.NATIVE && onStart) onStart();
+        }
+    });
+
+    // --- HYBRID ENGINE ---
+    const hybridEngine = useLiveKit({
+        onResult: (text) => {
+            if (activeEngine === ASR_ENGINE_TYPES.HYBRID) onResult(text);
+        },
+        onError: (err) => {
+            if (activeEngine === ASR_ENGINE_TYPES.HYBRID) onError(err);
+        },
+        onStart: () => {
+            if (activeEngine === ASR_ENGINE_TYPES.HYBRID && onStart) onStart();
+        }
+    });
+
+    /**
+     * Start Listening Logic
+     * Handles the selection logic (especially for 'auto' mode)
+     */
+    const startListening = useCallback(async (options = {}) => {
+        const { url, token } = options;
+
+        // 1. Determine which engine to use
+        let engineToUse = selectedMode;
+
+        if (selectedMode === 'auto') {
+            setIsThinking(true);
+            engineToUse = await detectBestASRMode();
+            setIsThinking(false);
+
+            if (!engineToUse) {
+                onError('no-asr-supported');
+                return;
+            }
+        }
+
+        setActiveEngine(engineToUse);
+
+        // 2. Start the selected engine
+        if (engineToUse === ASR_ENGINE_TYPES.HYBRID) {
+            if (!url || !token) {
+                console.warn("[Unified ASR] Hybrid selected but no credentials provided. Falling back to Native.");
+                setActiveEngine(ASR_ENGINE_TYPES.NATIVE);
+                nativeEngine.startListening();
+            } else {
+                await hybridEngine.startHybridASR(url, token);
+            }
+        } else {
+            nativeEngine.startListening();
+        }
+    }, [selectedMode, hybridEngine, nativeEngine, onError]);
+
+    /**
+     * Stop Listening Logic
+     */
+    const stopListening = useCallback(async () => {
+        if (activeEngine === ASR_ENGINE_TYPES.HYBRID) {
+            await hybridEngine.stopHybridASR();
+        } else {
+            nativeEngine.stopListening();
+        }
+    }, [activeEngine, hybridEngine, nativeEngine]);
+
+    const isListening = activeEngine === ASR_ENGINE_TYPES.HYBRID
+        ? hybridEngine.isTranscribing
+        : nativeEngine.isListening;
+
+    const error = activeEngine === ASR_ENGINE_TYPES.HYBRID
+        ? hybridEngine.error
+        : nativeEngine.error;
+
+    return {
+        startListening,
+        stopListening,
+        isListening,
+        isConnecting: hybridEngine.isConnecting || isThinking,
+        activeEngine,
+        error
+    };
+};
+
+export default useUnifiedASR;

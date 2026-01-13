@@ -56,11 +56,14 @@ import StartScreen from "./screens/StartScreen";
 import GameScreen from "./screens/GameScreen";
 import ResultsScreen from "./screens/ResultsScreen";
 import useSpeechRecognition from "../hooks/useSpeechRecognition";
+import useLiveKit from "../hooks/useLiveKit";
+import useUnifiedASR from "../hooks/useUnifiedASR";
 import { UNIT_DATA } from "../constants";
 import MCQScreen from "./screens/MCQScreen";
 import evaluatePronunciation from "../utils/pronunciationEvaluator";
 import CalibrationScreen from "./screens/CalibrationScreen";
 import { ERROR_MAP } from "../constants/errors";
+import { ASR_ENGINE_TYPES, detectBestASRMode } from "../utils/asrService";
 
 // Utils
 import { getBrowserInfo, checkFeatureSupport } from "../utils/browserDetection";
@@ -131,12 +134,26 @@ function GameUnit() {
   // EFFECTS
   // ========================================================================
 
-  // Auto-start game when component mounts (skip StartScreen since mode selected on Dashboard)
+  // State to hold the actually determined ASR mode (esp. for 'auto' mode)
+  const [determinedAsrMode, setDeterminedAsrMode] = React.useState(null);
+
+  // Auto-start game when component mounts
   useEffect(() => {
+    const initASR = async () => {
+      if (asrMode === 'auto') {
+        const bestMode = await detectBestASRMode();
+        setDeterminedAsrMode(bestMode || 'native');
+      } else {
+        setDeterminedAsrMode(asrMode);
+      }
+    };
+
+    initASR();
+
     if (gameState === "start") {
       dispatch(startGame({ mode: "MIX", asrMode: passedAsrMode })); // Default to MIX mode
     }
-  }, [gameState, dispatch, passedAsrMode]);
+  }, [gameState, dispatch, passedAsrMode, asrMode]);
 
   // iOS Safari AudioContext fix: Resume AudioContext on first interaction
   useEffect(() => {
@@ -358,31 +375,42 @@ function GameUnit() {
   const {
     isListening,
     error: speechRecognitionError,
-    startListening,
-    stopListening,
-  } = useSpeechRecognition({
+    startListening: startUnifiedListening,
+    stopListening: stopUnifiedListening,
+    isConnecting,
+    activeEngine
+  } = useUnifiedASR({
+    selectedMode: asrMode,
     onResult: (transcript) => {
-      stopListening();
+      stopUnifiedListening();
       showToast("success", "Speech Captured! (A-1)", `Captured: "${transcript}"`);
       handleSpeechResult(transcript);
     },
     onNoSpeech: () => {
-      stopListening();
+      stopUnifiedListening();
       handleNoSpeech();
     },
     onError: (error) => {
-      stopListening();
+      stopUnifiedListening();
       const err = ERROR_MAP[error] || {
         id: "E-X",
         title: "Unknown Error",
-        desc: "An unexpected error occurred.",
+        desc: error || "An unexpected error occurred.",
       };
       showToast("error", `${err.title} (${err.id})`, err.desc);
     },
     onStart: () => showToast("info", "Listening... (L-1)", "The speech recognition engine has started."),
-    onSpeechStart: () =>
-      showToast("info", "Speech Detected! (L-2)", "Your voice is being picked up by the microphone. Keep going!"),
   });
+
+  // Mocked credentials for simulation for now
+  const startListening = useCallback(() => {
+    startUnifiedListening({
+      url: "wss://vocalis-demo.livekit.cloud",
+      token: "simulation-token"
+    });
+  }, [startUnifiedListening]);
+
+  const stopListening = stopUnifiedListening;
 
   useEffect(() => {
     if (speechRecognitionError === "unsupported-browser") {
@@ -459,6 +487,8 @@ function GameUnit() {
             <GameScreen
               month={currentActivity}
               isListening={isListening}
+              isConnecting={isConnecting}
+              activeEngine={activeEngine}
               startListening={startListening}
               stopListening={stopListening}
               nextPrompt={handleNextActivity}

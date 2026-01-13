@@ -37,6 +37,8 @@ const WaveformBar = ({ height, delay, isActive }) => (
 const GameScreen = ({
   month, // Current activity/word data
   isListening,
+  isConnecting,
+  activeEngine,
   startListening,
   stopListening,
   nextPrompt,
@@ -112,7 +114,7 @@ const GameScreen = ({
           {ipa}
         </Text>
 
-        <Flex gap={4}>
+        <Flex gap={4} direction="column" align="center">
           <Button
             variant="unstyled"
             display="flex"
@@ -130,8 +132,18 @@ const GameScreen = ({
             }}
           >
             <MaterialSymbol icon="volume_up" color="#6366F1" />
-            <Text fontSize="sm" fontWeight="bold">Listen to Native</Text>
+            <Text fontSize="sm" fontWeight="bold" color={textColor}>Listen to Native</Text>
           </Button>
+
+          {/* ASR Engine Indicator */}
+          {activeEngine && (
+            <HStack spacing={2} p={1} px={3} borderRadius="full" bg={useColorModeValue('brand.50', 'whiteAlpha.100')} border="1px solid" borderColor="brand.200">
+              <MaterialSymbol icon={activeEngine === 'hybrid' ? 'high_quality' : 'mic'} fontSize="14px" color="brand.500" />
+              <Text fontSize="10px" fontWeight="bold" color="brand.600" textTransform="uppercase" letterSpacing="wider">
+                {activeEngine === 'hybrid' ? 'Hybrid ASR (Whisper)' : 'Native ASR (Browser)'}
+              </Text>
+            </HStack>
+          )}
         </Flex>
 
         {/* Feedback Panel */}
@@ -208,8 +220,8 @@ const GameScreen = ({
           </Button>
         </Box>
 
-        <Text mt={6} color="cyan.400" fontWeight="bold" letterSpacing="widest" fontSize="xs" textTransform="uppercase" visibility={isListening ? "visible" : "hidden"} className="animate-pulse">
-          Listening...
+        <Text mt={6} color="cyan.400" fontWeight="bold" letterSpacing="widest" fontSize="xs" textTransform="uppercase" visibility={isListening || isConnecting ? "visible" : "hidden"} className="animate-pulse">
+          {isConnecting ? "Establishing Connection..." : "Listening..."}
         </Text>
 
         <HStack mt={12} spacing={8}>
