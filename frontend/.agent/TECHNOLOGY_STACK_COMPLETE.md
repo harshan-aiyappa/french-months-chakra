@@ -76,54 +76,48 @@ Start → Calibration (VAD) →
 
 ---
 
-## **New Mode 4 (Future)** - LiveKit + Whisper Based 🆕
+## **New Mode 4 (Implemented)** - LiveKit + Whisper Based 🆕
 
-### **4. Advanced Practice** (To Be Implemented)
-**Technologies Planned:**
+### **4. Advanced Practice** (Implemented)
+**Technologies Used:**
 
 #### **Frontend:**
-- 🔲 **LiveKit Client SDK** - WebRTC real-time communication
+- ✅ **LiveKit Client SDK** - WebRTC real-time communication
   - `@livekit/components-react` - Pre-built React components
   - Room management
   - Track publishing/subscription
   - Audio encoding/decoding
-- 🔲 **React Hooks** - Custom hooks for LiveKit integration
-- 🔲 **Redux Toolkit** - State management (extended)
-- 🔲 **Chakra UI** - Consistent UI components
-- 🔲 **Framer Motion** - Advanced animations
+- ✅ **React Hooks** - `useLiveKit` and `useUnifiedASR`
+- ✅ **Redux Toolkit** - `asrMode` state management
+- ✅ **Chakra UI** - Consistent UI components
+- ✅ **Framer Motion** - Advanced animations
 
-#### **Backend (Required):**
-- 🔲 **LiveKit Server** - Media routing server
+#### **Backend (Implemented):**
+- ✅ **LiveKit Server** - Cloud/Local Media routing
   - WebRTC SFU (Selective Forwarding Unit)
   - Room creation and management
   - Token-based authentication
-- 🔲 **OpenAI Whisper API** - Transcription service
-  - `whisper-v3-large` model
-  - Real-time or batch transcription
-  - Multi-language support
-- 🔲 **Node.js/Python Backend** - Integration layer
-  - LiveKit token generation
-  - Whisper API calls
-  - Pronunciation scoring
-  - Results storage
+- ✅ **Faster-Whisper** - Local Inference Engine
+  - `faster-whisper` Python library
+  - `int8` quantization for speed
+  - Multi-language support (French optimized)
+- ✅ **Python FastAPI Backend** - Integration layer
+  - `main.py` - Secure Gateway
+  - `tokenService.js` - Frontend Auth
+  - `asr_worker.py` - Real-time LiveKit Agent
 
 #### **Infrastructure:**
-- 🔲 **WebRTC** - Peer-to-peer or SFU connection
-- 🔲 **WebSocket** - Signaling and control
-- 🔲 **HTTPS** - Required for WebRTC
-- 🔲 **Cloud Hosting** - For LiveKit server
-  - AWS/GCP/Azure
-  - Self-hosted option available
+- ✅ **WebRTC** - Peer-to-peer or SFU connection
+- ✅ **WebSocket (WSS)** - Secure Signaling
+- ✅ **HTTPS** - Required for WebRTC
+- ✅ **LiveKit Cloud / Local** - Flexible deployment
 
-**Features Planned:**
+**Features Implemented:**
 - Professional-grade ASR (Whisper accuracy)
-- Real-time transcription
+- Real-time transcription via DataChannel
 - Low-latency audio streaming
-- Better multi-language support
-- Cloud-based processing
-- Advanced pronunciation analytics
-- Session recording (optional)
-- Multi-participant support (future)
+- Hybrid Fallback (Auto Mode)
+- Local Privacy Option
 
 **Advantages over Web Speech API:**
 - ✅ More accurate transcription
@@ -153,6 +147,7 @@ Start → Calibration (VAD) →
 - **npm** - Package manager
 - **Git** - Version control
 - **VS Code** - Development environment
+- **Python 3.12** - Backend environment
 
 ### **Browser APIs (Modes 1-3):**
 - **Web Speech API** (`SpeechRecognition`)
@@ -166,13 +161,13 @@ Start → Calibration (VAD) →
 
 | Feature              | Modes 1-3 (Web Speech API) | Mode 4 (LiveKit + Whisper) |
 | -------------------- | -------------------------- | -------------------------- |
-| **ASR Engine**       | Browser built-in           | OpenAI Whisper             |
+| **ASR Engine**       | Browser built-in           | OpenAI Whisper (Local)     |
 | **Accuracy**         | Good (~85-90%)             | Excellent (~95-98%)        |
 | **Latency**          | Low (~100-200ms)           | Medium (~300-500ms)        |
 | **Browser Support**  | Chrome, Edge, Safari       | All (via WebRTC)           |
-| **Offline Support**  | ❌ No                       | ❌ No                       |
-| **Cost**             | ✅ Free                     | 💰 API costs                |
-| **Setup Complexity** | ✅ Simple                   | ⚠️ Complex                  |
+| **Offline Support**  | ❌ No                       | ✅ Yes (Local Backend)      |
+| **Cost**             | ✅ Free                     | ✅ Free (Local) / Cloud $   |
+| **Setup Complexity** | ✅ Simple                   | ⚠️ Medium                   |
 | **Languages**        | Limited (15+)              | Extensive (99+)            |
 | **Customization**    | ❌ None                     | ✅ High                     |
 | **Infrastructure**   | ✅ None needed              | ⚠️ Server required          |
@@ -200,22 +195,23 @@ frontend/src/
 │       └── ResultsScreen.jsx        ← Final scores
 ```
 
-### **Mode 4 (Future):**
+### **Mode 4 (Implemented):**
 ```
 frontend/src/
 ├── hooks/
-│   └── useLiveKit.js                ← LiveKit integration (NEW)
-├── services/
-│   └── whisperService.js            ← Whisper API calls (NEW)
+│   ├── useLiveKit.js                ← LiveKit Client hook
+│   └── useUnifiedASR.js             ← Master Abstraction (Native vs Hybrid)
+├── utils/
+│   ├── asrService.js                ← Decision Engine (Auto Mode)
+│   └── tokenService.js              ← Backend Auth
 ├── components/
 │   └── screens/
-│       └── AdvancedPracticeScreen.jsx   ← LiveKit UI (NEW)
+│       └── AdvancedPracticeScreen.jsx   ← Mode Selection UI
 backend/
-├── livekit/
-│   ├── server.js                    ← LiveKit server config (NEW)
-│   └── tokenGenerator.js            ← Auth tokens (NEW)
-└── whisper/
-    └── transcriptionService.js      ← Whisper integration (NEW)
+├── main.py                          ← FastAPI Gateway
+├── asr_worker.py                    ← LiveKit Agent (Whisper)
+├── start_backend.ps1                ← Startup Script
+└── requirements.txt                 ← Python Dependencies
 ```
 
 ---
@@ -228,10 +224,10 @@ backend/
 - ✅ Free and fast
 - ✅ Great for MVP and testing
 
-**Future Enhancement (Mode 4):**
-- 🔲 Production-grade with LiveKit + Whisper
-- 🔲 Requires backend infrastructure
-- 🔲 Better accuracy and features
-- 🔲 Scalable for commercial use
+**New Implementation (Mode 4):**
+- ✅ Production-grade with LiveKit + Faster-Whisper
+- ✅ Secure Local Backend
+- ✅ Better accuracy and features
+- ✅ Scalable for commercial use
 
 **Both approaches coexist** - users can choose based on needs! 🚀
