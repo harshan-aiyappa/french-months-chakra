@@ -569,6 +569,16 @@ function GameUnit() {
         );
         break;
       case "playing":
+        // Safety check: Ensure currentActivity exists
+        if (!currentActivity) {
+          content = (
+            <Box textAlign="center" p={8}>
+              <Text>Loading activity...</Text>
+            </Box>
+          );
+          break;
+        }
+
         if (currentMode === 'advanced-practice') {
           content = (
             <AdvancedGameScreen

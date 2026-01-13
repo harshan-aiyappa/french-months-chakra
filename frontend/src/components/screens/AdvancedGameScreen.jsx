@@ -11,7 +11,10 @@ import {
     useColorMode,
     useColorModeValue,
     Badge,
-    Container
+    Container,
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink
 } from '@chakra-ui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import VoiceVisualizer from '../ui/VoiceVisualizer';
@@ -72,6 +75,31 @@ const AdvancedGameScreen = ({
         >
             <Container maxW="container.lg" h="full" p={6} pt={10}>
                 <VStack h="full" justify="space-between" spacing={8}>
+
+                    {/* BREADCRUMB NAVIGATION */}
+                    <Breadcrumb
+                        w="full"
+                        fontSize="sm"
+                        color={subTextColor}
+                        separator={<MaterialSymbol icon="chevron_right" fontSize="16px" />}
+                    >
+                        <BreadcrumbItem>
+                            <BreadcrumbLink href="/dashboard" _hover={{ color: accentColor }}>
+                                Dashboard
+                            </BreadcrumbLink>
+                        </BreadcrumbItem>
+                        <BreadcrumbItem>
+                            <BreadcrumbLink href="/advanced-practice" _hover={{ color: accentColor }}>
+                                Advanced Practice
+                            </BreadcrumbLink>
+                        </BreadcrumbItem>
+                        <BreadcrumbItem isCurrentPage>
+                            <BreadcrumbLink color={color} fontWeight="semibold">
+                                {selectedAsrMode === 'hybrid' ? 'Hybrid ASR' :
+                                    selectedAsrMode === 'native' ? 'Native ASR' : 'Auto Mode'}
+                            </BreadcrumbLink>
+                        </BreadcrumbItem>
+                    </Breadcrumb>
 
                     {/* TOP BAR */}
                     <Flex w="full" justify="space-between" align="center">

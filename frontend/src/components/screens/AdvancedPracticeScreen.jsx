@@ -44,10 +44,8 @@ const AdvancedPracticeScreen = () => {
 
         const routeName = asrModeRouteMap[asrMode] || 'autoASR';
 
-        // Dispatch Redux action for state consistency
-        dispatch(startGame({ mode: 'advanced-practice', asrMode }));
-
         // Navigate to dedicated ASR route
+        // GameUnit will initialize based on URL params
         navigate(`/advanced-practice/${routeName}`);
     };
 
