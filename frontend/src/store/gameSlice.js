@@ -75,7 +75,7 @@ export const gameSlice = createSlice({
 
             // Generate Activity Queue
             let data = [...UNIT_DATA];
-            if (mode === 'speech') {
+            if (mode === 'speech' || mode === 'advanced-practice') {
                 data = UNIT_DATA.filter((a) => a.type === 'SPEAKING');
             } else if (mode === 'mcq') {
                 data = UNIT_DATA.filter((a) => a.type === 'MCQ');

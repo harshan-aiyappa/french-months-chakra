@@ -33,7 +33,7 @@ const AdvancedPracticeScreen = () => {
 
     const handleStartPractice = () => {
         // Navigate to practice with selected ASR mode
-        navigate('/practice', { state: { asrMode } });
+        navigate('/practice/advanced-practice', { state: { asrMode } });
     };
 
     const asrModes = [
