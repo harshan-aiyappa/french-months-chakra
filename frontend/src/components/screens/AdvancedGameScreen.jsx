@@ -33,30 +33,39 @@ const AdvancedGameScreen = ({
     currentIndex,
     total,
     onSkip, // optional
-    activeEngine
+    activeEngine,
+    showToast
 }) => {
     // Force specific theme or just use a very distinct dark style
     // consistently for "Pro" mode regardless of system theme?
     // Let's stick to a "Dark Tech" theme for Advanced Mode
 
-    const bg = useColorModeValue("gray.50", "gray.900");
+    useEffect(() => {
+        showToast('info', 'Advanced Practice Ready', 'High-fidelity audio engine initialized.');
+    }, [showToast]);
+
+    const bg = useColorModeValue("white", "gray.900");
     const color = useColorModeValue("gray.800", "white");
+    const shadow = useColorModeValue("xl", "dark-lg");
+    const border = useColorModeValue("1px solid", "none");
+    const borderColor = useColorModeValue("gray.100", "transparent");
     const accentColor = "brand.500";
     const subTextColor = useColorModeValue("gray.500", "whiteAlpha.600");
 
     return (
         <Box
-            w="100vw"
-            h="calc(100vh - 80px)"
+            w="full"
+            minH="calc(100vh - 120px)"
             bg={bg}
             color={color}
+            boxShadow={shadow}
+            border={border}
+            borderColor={borderColor}
+            borderRadius="3xl"
+            position="relative"
             overflow="hidden"
-            position="fixed"
-            top="0"
-            left="0"
-            zIndex="1000" // Overlay everything
         >
-            <Container maxW="container.lg" h="full" p={6}>
+            <Container maxW="container.lg" h="full" p={6} pt={10}>
                 <VStack h="full" justify="space-between" spacing={8}>
 
                     {/* TOP BAR */}

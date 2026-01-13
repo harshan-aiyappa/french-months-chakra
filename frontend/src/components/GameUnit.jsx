@@ -528,6 +528,7 @@ function GameUnit() {
               onExit={handleExit}
               currentIndex={currentIndex}
               total={total}
+              showToast={showToast}
             />
           );
         } else if (currentActivity.type === "MCQ") {

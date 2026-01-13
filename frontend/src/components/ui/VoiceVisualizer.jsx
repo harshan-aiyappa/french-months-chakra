@@ -205,14 +205,23 @@ const VoiceVisualizer = ({ isListening }) => {
                     ))
                 )
             ) : (
-                // Idle State
+                // Idle State - Pulsing low bars
                 Array.from({ length: NUM_BARS }).map((_, i) => (
-                    <Box
+                    <motion.div
                         key={`idle-${i}`}
-                        w="6px"
-                        h="4px"
-                        bg="gray.300"
-                        borderRadius="full"
+                        animate={{ height: ["10%", "15%", "10%"] }}
+                        transition={{
+                            duration: 1.5,
+                            repeat: Infinity,
+                            delay: i * 0.1,
+                            ease: "easeInOut"
+                        }}
+                        style={{
+                            width: '6px',
+                            background: 'linear-gradient(to top, #a78bfa, #22d3ee)',
+                            borderRadius: '4px',
+                            opacity: 0.3
+                        }}
                     />
                 ))
             )}
