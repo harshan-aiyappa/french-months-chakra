@@ -39,15 +39,17 @@ const AdvancedGameScreen = ({
     // consistently for "Pro" mode regardless of system theme?
     // Let's stick to a "Dark Tech" theme for Advanced Mode
 
-    const bgGradient = "linear(to-br, gray.900, gray.800)";
-    const accentColor = "cyan.400";
+    const bg = useColorModeValue("gray.50", "gray.900");
+    const color = useColorModeValue("gray.800", "white");
+    const accentColor = "brand.500";
+    const subTextColor = useColorModeValue("gray.500", "whiteAlpha.600");
 
     return (
         <Box
             w="100vw"
             h="calc(100vh - 80px)"
-            bg="gray.900"
-            color="white"
+            bg={bg}
+            color={color}
             overflow="hidden"
             position="fixed"
             top="0"
@@ -63,27 +65,36 @@ const AdvancedGameScreen = ({
                             <IconButton
                                 icon={<MaterialSymbol icon="close" />}
                                 variant="ghost"
-                                color="whiteAlpha.700"
-                                _hover={{ bg: 'whiteAlpha.200' }}
+                                color={subTextColor}
+                                _hover={{ bg: useColorModeValue('blackAlpha.50', 'whiteAlpha.200') }}
                                 onClick={onExit}
                                 aria-label="Exit"
                             />
-                            <Text fontSize="sm" color="whiteAlpha.600" letterSpacing="widest" textTransform="uppercase">
+                            <Text fontSize="sm" color={subTextColor} letterSpacing="widest" textTransform="uppercase">
                                 Advanced Practice
                             </Text>
                         </HStack>
 
-                        <HStack spacing={4}>
-                            <Badge
-                                variant="subtle"
-                                colorScheme={activeEngine === 'hybrid' ? 'purple' : 'blue'}
-                                fontSize="xs"
-                                px={2}
-                            >
-                                {activeEngine === 'hybrid' ? 'LIVEKIT + WHISPER' : 'NATIVE ASR'}
-                            </Badge>
-                            <Text fontSize="sm" fontWeight="bold" color="whiteAlpha.800">
-                                {currentIndex + 1} <Text as="span" color="whiteAlpha.400">/</Text> {total}
+                        <HStack spacing={2}>
+                            {activeEngine === 'hybrid' ? (
+                                <>
+                                    <Badge display="flex" alignItems="center" px={2} py={1} borderRadius="md" colorScheme="purple" variant="subtle">
+                                        <MaterialSymbol icon="cloud_sync" fontSize="16px" style={{ marginRight: '4px' }} />
+                                        LiveKit
+                                    </Badge>
+                                    <Badge display="flex" alignItems="center" px={2} py={1} borderRadius="md" colorScheme="green" variant="subtle">
+                                        <MaterialSymbol icon="psychology" fontSize="16px" style={{ marginRight: '4px' }} />
+                                        Whisper AI
+                                    </Badge>
+                                </>
+                            ) : (
+                                <Badge display="flex" alignItems="center" px={2} py={1} borderRadius="md" colorScheme="blue" variant="subtle">
+                                    <MaterialSymbol icon="mic" fontSize="16px" style={{ marginRight: '4px' }} />
+                                    Native ASR
+                                </Badge>
+                            )}
+                            <Text fontSize="sm" fontWeight="bold" color={color} ml={2}>
+                                {currentIndex + 1} <Text as="span" color={subTextColor}>/</Text> {total}
                             </Text>
                         </HStack>
                     </Flex>
@@ -100,13 +111,13 @@ const AdvancedGameScreen = ({
                             <Heading
                                 fontSize={{ base: "5xl", md: "7xl" }}
                                 fontWeight="900"
-                                bgGradient={`linear(to-r, white, ${accentColor})`}
+                                bgGradient={`linear(to-r, ${useColorModeValue('brand.600', 'white')}, ${accentColor})`}
                                 bgClip="text"
                                 filter="drop-shadow(0 0 20px rgba(0,255,255,0.3))"
                             >
                                 {month.question}
                             </Heading>
-                            <Text fontSize="xl" color="whiteAlpha.600" fontFamily="monospace">
+                            <Text fontSize="xl" color={subTextColor} fontFamily="monospace">
                                 /{month.pronunciation}/
                             </Text>
                         </VStack>
@@ -119,7 +130,7 @@ const AdvancedGameScreen = ({
                                 w="300px" h="300px"
                                 borderRadius="full"
                                 border="1px solid"
-                                borderColor="whiteAlpha.100"
+                                borderColor={useColorModeValue('gray.200', 'whiteAlpha.100')}
                                 opacity={isListening ? 1 : 0.2}
                                 transition="opacity 0.5s"
                             />
@@ -146,7 +157,7 @@ const AdvancedGameScreen = ({
                                                 fontSize="40px"
                                                 color={feedback.type === 'correct' ? 'green.400' : 'red.400'}
                                             />
-                                            <Text fontSize="lg" fontWeight="medium" color="whiteAlpha.900">
+                                            <Text fontSize="lg" fontWeight="medium" color={color}>
                                                 {feedback.message}
                                             </Text>
                                         </VStack>
@@ -157,7 +168,7 @@ const AdvancedGameScreen = ({
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                     >
-                                        <Text color="whiteAlpha.500">
+                                        <Text color={subTextColor}>
                                             {isListening ? "Listening..." : "Tap microphone to start"}
                                         </Text>
                                     </motion.div>
