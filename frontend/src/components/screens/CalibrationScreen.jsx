@@ -30,15 +30,28 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
 
   useEffect(() => {
+    let isMounted = true;
+    let localStream = null;
+    let localContext = null;
+    let localAnimationId = null;
+
     let calibrationStart = Date.now();
     let noiseSamples = [];
 
     const initAudio = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        if (!isMounted) {
+          stream.getTracks().forEach(track => track.stop());
+          return;
+        }
+
+        localStream = stream;
         streamRef.current = stream;
 
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        localContext = audioContext;
         audioContextRef.current = audioContext;
 
         const analyser = audioContext.createAnalyser();
@@ -51,49 +64,46 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
         processAudio();
       } catch (err) {
         console.error("Audio init error:", err);
-        showToast('error', 'Mic Check Failed', 'Could not access microphone. Verify permissions.');
+        if (isMounted) {
+          showToast('error', 'Mic Check Failed', 'Could not access microphone. Verify permissions.');
+        }
       }
     };
 
     const processAudio = () => {
-      if (!analyserRef.current) return;
+      if (!analyserRef.current || !isMounted) return;
 
       const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
       analyserRef.current.getByteFrequencyData(dataArray);
 
       const average = dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length;
-      setDbLevel(average);
+      if (isMounted) setDbLevel(average);
 
       const elapsed = Date.now() - calibrationStart;
       const progressPercent = Math.min((elapsed / CALIBRATION_TIME) * 100, 100);
-      setProgress(progressPercent);
+      if (isMounted) setProgress(progressPercent);
 
       if (average > SILENCE_THRESHOLD) {
-        setIsTooLoud(true);
+        if (isMounted) setIsTooLoud(true);
         calibrationStart = Date.now();
         noiseSamples = [];
       } else {
-        setIsTooLoud(false);
+        if (isMounted) setIsTooLoud(false);
         noiseSamples.push(average);
       }
 
       if (elapsed < CALIBRATION_TIME) {
-        animationRef.current = requestAnimationFrame(processAudio);
+        localAnimationId = requestAnimationFrame(processAudio);
+        animationRef.current = localAnimationId;
       } else {
         finishCalibration(noiseSamples);
       }
     };
 
     const finishCalibration = (samples) => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
+      // Logic handled by main cleanup or transition, but we can stop tracks here too if we want
+      // Actually, standard behavior is to just notify parent. 
+      // Parent will unmount us, triggering cleanup.
 
       const avgNoise = samples.reduce((a, b) => a + b, 0) / samples.length;
       const threshold = Math.max(avgNoise * 2.5, 30);
@@ -105,15 +115,22 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
     initAudio();
 
     return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
+      isMounted = false;
+      if (localStream) {
+        localStream.getTracks().forEach(track => {
+          track.stop();
+          track.enabled = false;
+        });
       }
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close().catch(e => console.warn("Error closing AudioContext:", e));
+      if (localContext) {
+        localContext.close().catch(e => console.warn(e));
       }
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+      if (localAnimationId) {
+        cancelAnimationFrame(localAnimationId);
       }
+      // Clear refs suitable
+      streamRef.current = null;
+      audioContextRef.current = null;
     };
   }, [onCalibrationComplete, showToast]);
 
