@@ -70,16 +70,15 @@ const AppLayout = ({ children, activeView, onNavigate }) => {
 
     return (
         <Flex h="100vh" w="full" bg={bgColor} overflow="hidden" pos="relative" fontFamily="Inter, sans-serif">
-            {/* Background Orbs - using standard CSS/Box for these absolute positioned elements */}
-            <Box className="organic-blob blob-1" />
-            <Box className="organic-blob blob-2" />
-            <Box className="organic-blob blob-3" />
+            {/* Background Orbs Removed */}
 
             {/* Sidebar - Hidden on mobile */}
             <Box
                 as="aside"
                 w={isSidebarCollapsed ? "80px" : "280px"}
-                className="glass-nav"
+                bg={useColorModeValue('white', 'gray.900')}
+                borderRight="1px solid"
+                borderColor={useColorModeValue('gray.200', 'whiteAlpha.100')}
                 h="full"
                 transition="width 0.3s ease"
                 px={4}
@@ -92,16 +91,7 @@ const AppLayout = ({ children, activeView, onNavigate }) => {
                 <VStack spacing={8} align="stretch" h="full">
                     {/* Logo */}
                     <Flex align="center" px={2} gap={3}>
-                        <Flex
-                            bg="brand.500"
-                            borderRadius="xl"
-                            p={2}
-                            align="center"
-                            justify="center"
-                            minW="40px"
-                        >
-                            <MaterialSymbol icon="graphic_eq" color="white" />
-                        </Flex>
+                        <Image src="/assets/favicon1.png" boxSize="40px" alt="Vocalis Logo" />
                         {!isSidebarCollapsed && (
                             <Box overflow="hidden" whiteSpace="nowrap">
                                 <Text color={useColorModeValue('gray.900', 'white')} fontSize="lg" fontWeight="bold" lineHeight="tight">Vocalis</Text>
@@ -120,14 +110,14 @@ const AppLayout = ({ children, activeView, onNavigate }) => {
                             onClick={() => onNavigate('dashboard')}
                             isCollapsed={isSidebarCollapsed}
                         />
-                        <SidebarItem
+                        {/* <SidebarItem
                             icon="workspace_premium"
                             label="Advanced"
                             id="advanced"
                             isActive={activeView === 'advanced'}
                             onClick={() => onNavigate('advanced-practice')}
                             isCollapsed={isSidebarCollapsed}
-                        />
+                        /> */}
                         {/* Lessons - Integrated into Dashboard */}
                         {/* <SidebarItem
                             id="lessons"
@@ -191,7 +181,7 @@ const AppLayout = ({ children, activeView, onNavigate }) => {
             </Box>
 
             {/* Main Content */}
-            <Flex flex="1" direction="column" overflow="hidden" pos="relative" zIndex={10}>
+            <Flex flex="1" direction="column" overflowY="auto" pos="relative" zIndex={10}>
                 {/* Top Bar */}
                 <Flex
                     as="header"
@@ -202,8 +192,9 @@ const AppLayout = ({ children, activeView, onNavigate }) => {
                     position="sticky"
                     top={0}
                     zIndex={40}
-                    bg={useColorModeValue('rgba(255,255,255,0.8)', 'rgba(19, 17, 33, 0.3)')}
-                    backdropFilter="blur(16px)"
+                    bg={useColorModeValue('white', 'gray.900')}
+                    borderBottom="1px solid"
+                    borderColor={useColorModeValue('gray.200', 'whiteAlpha.100')}
                 >
                     <Box w="full" maxW="md">
                         <InputGroup>
@@ -223,17 +214,6 @@ const AppLayout = ({ children, activeView, onNavigate }) => {
                     </Box>
 
                     <HStack spacing={6}>
-                        <IconButton
-                            variant="ghost"
-                            icon={<MaterialSymbol icon="notifications" />}
-                            color={useColorModeValue('gray.600', 'gray.400')}
-                            _hover={{ color: useColorModeValue('gray.900', 'white'), bg: useColorModeValue('gray.100', 'whiteAlpha.100') }}
-                            borderRadius="xl"
-                            aria-label="Notifications"
-                            position="relative"
-                        >
-                            <Box pos="absolute" top={2} right={2} boxSize="8px" bg="red.500" borderRadius="full" border="2px solid" borderColor={useColorModeValue('white', 'gray.900')} />
-                        </IconButton>
 
                         <Box h="24px" w="1px" bg={useColorModeValue('gray.200', 'whiteAlpha.100')} />
 
@@ -248,7 +228,8 @@ const AppLayout = ({ children, activeView, onNavigate }) => {
                             </VStack>
                             <Box pos="relative">
                                 <Image
-                                    src={user?.avatar || "https://lh3.googleusercontent.com/aida-public/AB6AXuB_Nt5kMW_7Tco5Td_4BEjfnlk9S8T8kM80B21f9HORCjCABHXb56qDQxxjtYIgZoIISFLHuGQh1Wur5m2wXe79eJmz5nFe4NXuycPet-lEfQIGh1-giFMY6CRNpluMxGO6hgJdA_LBXp1PYW8YPCX29hIFVRC6pDg1hLkJ3NyzuznUxPmaxeZrUBBgbP7hP6kJ7YAAZvadvwEEyUbyHIaxSKTrS4PrbdsmsvDuDTc1IOVFHGHRKyYO-SLLB6POYFOThKK2A3Jzk9Bx"}
+                                    src={user?.avatar || "/assets/personIcon.png"}
+                                    onError={(e) => e.target.src = "/assets/personIcon.png"}
                                     boxSize="40px"
                                     borderRadius="xl"
                                     objectFit="cover"
@@ -262,7 +243,7 @@ const AppLayout = ({ children, activeView, onNavigate }) => {
                     </HStack>
                 </Flex>
 
-                <Box flex="1" p={{ base: 6, md: 10 }} maxW="1400px" mx="auto" w="full">
+                <Box flex="1" p={{ base: 4, md: 6 }} maxW="1400px" mx="auto" w="full">
                     {children}
                 </Box>
             </Flex>

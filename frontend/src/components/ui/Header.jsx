@@ -1,57 +1,52 @@
 import React from 'react';
-import { Box, Flex, Heading, Text, Progress, Image } from '@chakra-ui/react';
+import { Box, Flex, Heading, Text, Progress, Image, useColorModeValue } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import ThemeToggle from './ThemeToggle';
 
-const Header = ({ score, total, progress }) => {
+const Header = ({ score, total, progress, onExit }) => {
   const logoSrc = '/assets/favicon1.png';
+  const bg = useColorModeValue('white', 'gray.800');
+  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
 
+  // Minimal Header - Navigation Only
   return (
     <Box
       as={motion.header}
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      textAlign="center"
-      w="100%"
-      p={{ base: 3, md: 4 }}
-      bg="whiteAlpha.100"
-      backdropFilter="blur(10px)"
-      borderRadius="2xl"
-      border="1px solid"
-      borderColor="whiteAlpha.300"
-      boxShadow="glass"
+      w="full"
+      maxW="1200px"
+      mx="auto"
+      mt={{ base: 2, md: 4 }}
       mb={{ base: 2, md: 4 }}
-      position="relative"
+      px={{ base: 2, md: 4 }}
+      display="flex"
+      justifyContent="space-between"
+      alignItems="center"
     >
-      <Box position="absolute" top={{ base: 2, md: 4 }} right={{ base: 2, md: 4 }} zIndex="docked">
-        <ThemeToggle />
-      </Box>
-
-      <Flex justify="center" align="center" mb={{ base: 2, md: 3 }}>
-        <motion.div whileHover={{ rotate: 10, scale: 1.1 }}>
-          <Image src={logoSrc} alt="Lingotran Logo" boxSize={{ base: "30px", md: "40px" }} mr={3} borderRadius="xl" />
-        </motion.div>
-        <Box textAlign="left">
-          <Heading as="h1" size={{ base: "sm", md: "md" }} color="text" letterSpacing="tight">Speech Training Unit</Heading>
-          <Text fontSize={{ base: "2xs", md: "xs" }} color="textMuted" fontWeight="medium">
-            <Text as="span" color="brand.500" fontWeight="bold">Vocalis</Text> by Lingotran
-          </Text>
+      {/* Left: Exit/Back */}
+      {onExit ? (
+        <Box
+          as="button"
+          onClick={onExit}
+          p={2}
+          borderRadius="full"
+          transition="all 0.2s"
+          _hover={{ bg: 'blackAlpha.100' }}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          color="gray.500"
+        >
+          <Box as="span" className="material-symbols-outlined" fontSize="24px">
+            arrow_back
+          </Box>
         </Box>
-      </Flex>
-      <Progress
-        value={progress}
-        size="xs"
-        colorScheme="brand"
-        borderRadius="full"
-        mb={2}
-        hasStripe
-        isAnimated
-      />
-      <Flex justify="space-between" align="center">
-        <Text color="textMuted" fontSize={{ base: "2xs", md: "xs" }} fontWeight="semibold">Progress</Text>
-        <Text fontWeight="bold" color="brand.600" fontSize={{ base: "xs", md: "sm" }}>Accuracy: {score}/{total}</Text>
-      </Flex>
+      ) : <Box w="40px" />}
+
+      {/* Right: Empty for now (Removed ThemeToggle as requested to keep minimal) */}
+      <Box w="40px" />
     </Box>
   );
 };

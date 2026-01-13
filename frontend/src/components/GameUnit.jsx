@@ -34,7 +34,7 @@
 // React & Hooks
 import React, { useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   Container,
   Box,
@@ -109,6 +109,11 @@ function GameUnit() {
 
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { modeId } = useParams();
+
+  // Prioritize URL param, fallback to state, then default
+  const passedMode = modeId || location.state?.mode || 'mixed';
   const passedAsrMode = location.state?.asrMode || 'native';
 
   // Redux selectors
@@ -152,9 +157,9 @@ function GameUnit() {
     initASR();
 
     if (gameState === "start") {
-      dispatch(startGame({ mode: "MIX", asrMode: passedAsrMode })); // Default to MIX mode
+      dispatch(startGame({ mode: passedMode, asrMode: passedAsrMode }));
     }
-  }, [gameState, dispatch, passedAsrMode, asrMode]);
+  }, [gameState, dispatch, passedMode, passedAsrMode, asrMode]);
 
   // iOS Safari AudioContext fix: Resume AudioContext on first interaction
   useEffect(() => {
@@ -319,9 +324,10 @@ function GameUnit() {
   );
 
   const handleNextActivity = useCallback(() => {
+    console.log("[Game] Moving to next activity...");
+    resetFeedback(); // Ensure feedback is cleared for the next card
     dispatch(nextActivity());
-  }, [dispatch]);
-
+  }, [dispatch, resetFeedback]);
 
 
   const handleNoSpeech = useCallback(() => {
@@ -336,7 +342,6 @@ function GameUnit() {
       );
       dispatch(incrementRetry());
       resetFeedback();
-      // We STAY in "playing" state
     } else if (retryCount === 1) {
       // Second failure: Trigger re-calibration (BEST APPROACH criteria)
       showToast(
@@ -345,7 +350,7 @@ function GameUnit() {
         "Let's recalibrate to make sure I can hear you clearly."
       );
       dispatch(triggerRecalibration());
-      dispatch(incrementRetry()); // Progress to final retry attempt
+      dispatch(incrementRetry());
     } else {
       // Final failure: Move on
       showToast(
@@ -407,18 +412,13 @@ function GameUnit() {
   // Real backend connection for Hybrid ASR
   const startListening = useCallback(async () => {
     try {
-      // Only fetch token if in Hybrid/Auto mode (UnifiedASR handles the logic internally, 
-      // but we pass credentials just in case)
+      // Only fetch token if in Hybrid/Auto mode
       let options = {};
-
-      // Hardcoded URL for now as per user instruction, or fetched from env
       const liveKitUrl = "wss://kimo-zg71lj4i.livekit.cloud";
 
       if (determinedAsrMode === 'hybrid' || asrMode === 'hybrid' || asrMode === 'auto') {
-        // Generate a random participant name for uniqueness
         const participantIdentity = `user-${Math.floor(Math.random() * 10000)}`;
         const roomName = "vocalis-practice-room";
-
         const token = await fetchLiveKitToken(roomName, participantIdentity);
         options = { url: liveKitUrl, token };
       }
@@ -427,7 +427,6 @@ function GameUnit() {
     } catch (err) {
       console.error("Failed to start listening:", err);
       showToast("error", "Connection Failed", "Could not connect to ASR server. Falling back to native if possible.");
-      // Fallback or retry logic could go here
     }
   }, [startUnifiedListening, determinedAsrMode, asrMode, showToast]);
 
@@ -448,17 +447,16 @@ function GameUnit() {
     dispatch(startGame(mode));
   }, [dispatch]);
 
-
   const handleMCQAnswer = (isCorrect) => {
+    console.log("[Game] MCQ Answer received:", isCorrect);
     const status = isCorrect ? "correct" : "incorrect";
     dispatch(submitResult({
       ...currentActivity,
       status,
       transcript: isCorrect ? "Correct" : "Incorrect",
     }));
-    setTimeout(() => {
-      dispatch(nextActivity());
-    }, 1000);
+    // Instant transition on 'Continue' click
+    dispatch(nextActivity());
   };
 
   const handleCalibrationComplete = useCallback((newThreshold) => {
@@ -501,7 +499,13 @@ function GameUnit() {
       case "playing":
         if (currentActivity.type === "MCQ") {
           content = (
-            <MCQScreen activity={currentActivity} onAnswer={handleMCQAnswer} />
+            <MCQScreen
+              activity={currentActivity}
+              onAnswer={handleMCQAnswer}
+              onExit={handleExit}
+              currentIndex={currentIndex}
+              total={total}
+            />
           );
         } else {
           content = (
@@ -518,6 +522,9 @@ function GameUnit() {
               showToast={showToast}
               dynamicThreshold={dynamicThreshold}
               onRetry={handleRetry}
+              onExit={handleExit}
+              currentIndex={currentIndex}
+              total={total}
             />
           );
         }
@@ -546,9 +553,22 @@ function GameUnit() {
     );
   };
 
+  // Cleanup on unmount (e.g. browser back button, route change)
+  useEffect(() => {
+    return () => {
+      console.log("[Game] ASR Cleanup Triggered (Unmount/Stop).");
+      if (stopListening) stopListening();
+    };
+  }, [stopListening]);
+
+  const handleExit = () => {
+    console.log("[Game] User requested exit. Stopping ASR/Recording.");
+    if (stopListening) stopListening();
+    navigate('/dashboard');
+  };
+
   return (
     <VStack spacing={{ base: 3, md: 5 }} w="100%" h="full">
-      <Header score={score} total={total} progress={progress} />
       <Box as="main" w="100%" flex="1" minH="500px">
         {renderContent()}
       </Box>

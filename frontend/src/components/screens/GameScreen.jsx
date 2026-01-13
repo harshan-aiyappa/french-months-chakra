@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import VoiceVisualizer from '../ui/VoiceVisualizer';
 import {
   Box,
   Flex,
@@ -9,9 +10,7 @@ import {
   HStack,
   Icon,
   useColorModeValue,
-  Progress,
-  CircularProgress,
-  CircularProgressLabel
+  IconButton
 } from '@chakra-ui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -44,207 +43,265 @@ const GameScreen = ({
   nextPrompt,
   feedback,
   showNextButton,
+  showToast,
   dynamicThreshold,
-  onRetry
+  onRetry,
+  onExit,       // New
+  currentIndex, // New
+  total,        // New
 }) => {
   // Determine the word to display
   const wordKey = month.question || month.word || "Janvier"; // Fallback
   const ipa = month.ipa || "/ʒɑ̃.vje/"; // Fallback/Placeholder
 
-  const [shouldShowRetry, setShouldShowRetry] = useState(false);
-
   // Theme colors
-  const cardBg = useColorModeValue('white', 'whiteAlpha.50');
-  const headingColor = useColorModeValue('gray.900', 'white');
-  const textColor = useColorModeValue('gray.600', 'gray.400');
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const headingColor = useColorModeValue('gray.900', 'white'); // Original headingColor
+  const textColor = useColorModeValue('gray.600', 'gray.400'); // Original textColor
   const ipaColor = useColorModeValue('gray.500', 'gray.400');
-  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
+  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100'); // Original borderColor
+  const engineBadgeBg = useColorModeValue('brand.50', 'whiteAlpha.100');
+  const buttonBg = useColorModeValue('brand.50', 'whiteAlpha.200');
+  const buttonHoverBg = useColorModeValue('brand.100', 'whiteAlpha.300');
+  const feedbackBgSuccess = useColorModeValue('green.50', 'whiteAlpha.100');
+  const feedbackBgError = useColorModeValue('red.50', 'whiteAlpha.100');
+  const feedbackTextMain = useColorModeValue('gray.700', 'white');
+  // Hook definitions for UI colors
 
   return (
-    <Flex direction="column" align="center" justify="center" w="full" maxW="1200px" mx="auto" minH="70vh" pos="relative">
-      {/* Ambient Background Glows (if dark mode mostly) */}
-      <Box position="absolute" top="-10%" left="-10%" w="50%" h="50%" bg="brand.500" opacity="0.1" filter="blur(120px)" borderRadius="full" pointerEvents="none" />
-      <Box position="absolute" bottom="-10%" right="-10%" w="40%" h="40%" bg="cyan.400" opacity="0.1" filter="blur(120px)" borderRadius="full" pointerEvents="none" />
+    <Flex direction="column" align="center" justify="center" w="full" maxW="1200px" mx="auto" minH={{ base: "auto", lg: "70vh" }} py={{ base: 8, lg: 0 }} pos="relative">
 
-      {/* Progress Bar Section (Mock for now, can be passed via props) */}
-      <Box w="full" maxW="640px" mb={8}>
-        <Flex justify="space-between" align="flex-end" mb={2}>
-          <Text color="gray.400" fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wider">
-            Pronunciation Task
-          </Text>
-          <Text color="white" fontSize="xs" fontWeight="bold">
-            Step {month.index !== undefined ? month.index + 1 : 1}
-          </Text>
-        </Flex>
-        <Box h="1.5" w="full" bg="whiteAlpha.100" borderRadius="full" overflow="hidden">
-          <Box h="full" bg="brand.500" borderRadius="full" w="65%" />
-        </Box>
-      </Box>
 
-      {/* Central Glass Card */}
+
+
+      {/* Central Card */}
       <Box
-        className="glass-card"
         w="full"
-        maxW="640px"
+        maxW="600px" // Changed from 640px
         borderRadius="3xl"
-        p={{ base: 8, md: 12 }}
+        p={{ base: 6, md: 8 }} // Changed from 10
         display="flex"
         flexDirection="column"
         alignItems="center"
         textAlign="center"
-        boxShadow="xl"
+        boxShadow="2xl"
         position="relative"
         overflow="hidden"
-        bg={cardBg}
         border="1px solid"
         borderColor={borderColor}
       >
-        {/* Subtle Gradient Overlay */}
-        <Box position="absolute" inset="0" bgGradient="linear(to-b, brand.500, transparent)" opacity="0.05" pointerEvents="none" />
 
-        <Text color="brand.500" fontWeight="semibold" fontSize="sm" textTransform="uppercase" letterSpacing="0.2em" mb={4}>
+        {/* Intregrated Header: Exit & Progress */}
+        <Flex w="full" justify="space-between" align="center" mb={6}>
+          <IconButton
+            icon={<MaterialSymbol icon="close" fontSize="24px" />}
+            onClick={onExit}
+            variant="ghost"
+            color="gray.400"
+            _hover={{ color: 'red.500', bg: 'red.50' }}
+            rounded="full"
+            aria-label="Exit Practice"
+          />
+
+          <Text
+            fontSize="sm"
+            fontWeight="bold"
+            color="gray.400"
+            letterSpacing="wide"
+          >
+            {currentIndex + 1} / {total}
+          </Text>
+        </Flex>
+
+        <Text color="brand.500" fontWeight="bold" fontSize="xs" textTransform="uppercase" letterSpacing="widest" mb={2}>
           Pronounce this word
         </Text>
 
-        <Heading as="h1" color={headingColor} fontSize={{ base: "4xl", md: "6xl", lg: "7xl" }} fontWeight="bold" letterSpacing="tight" mb={4}>
+        <Heading as="h1" color={headingColor} fontSize={{ base: "5xl", md: "7xl" }} fontWeight="800" letterSpacing="-0.02em" lineHeight="1" mb={2}>
           {wordKey}
         </Heading>
 
-        <Text color={ipaColor} fontSize={{ base: "xl", md: "2xl" }} fontWeight="medium" mb={8} fontFamily="serif" fontStyle="italic">
+        <Text color={ipaColor} fontSize={{ base: "2xl", md: "3xl" }} fontWeight="medium" mb={10} fontFamily="serif" fontStyle="italic" opacity="0.8">
           {ipa}
         </Text>
 
-        <Flex gap={4} direction="column" align="center">
+        <VStack spacing={6}>
           <Button
-            variant="unstyled"
-            display="flex"
-            alignItems="center"
-            gap={2}
-            px={6}
-            py={3}
-            className="glass"
-            _hover={{ bg: 'whiteAlpha.100' }}
-            borderRadius="xl"
-            transition="all 0.2s"
+            size="lg"
+            rounded="full"
+            bg={buttonBg}
+            color="brand.600"
+            fontWeight="bold"
+            fontSize="md"
+            px={8}
+            h="14"
+            leftIcon={<MaterialSymbol icon="volume_up" fontSize="24px" />}
+            _hover={{
+              bg: buttonHoverBg,
+              transform: 'translateY(-2px)',
+              boxShadow: 'lg'
+            }}
+            _active={{
+              transform: 'translateY(0)',
+              bg: buttonBg
+            }}
+            transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+            boxShadow="md"
             onClick={() => {
-              // Play audio logic here if available
-              console.log("Play audio");
+              if (!wordKey) return;
+              const u = new SpeechSynthesisUtterance(wordKey);
+              u.lang = "fr-FR";
+              window.speechSynthesis.speak(u);
             }}
           >
-            <MaterialSymbol icon="volume_up" color="#6366F1" />
-            <Text fontSize="sm" fontWeight="bold" color={textColor}>Listen to Native</Text>
+            Listen to Native
           </Button>
 
           {/* ASR Engine Indicator */}
           {activeEngine && (
-            <HStack spacing={2} p={1} px={3} borderRadius="full" bg={useColorModeValue('brand.50', 'whiteAlpha.100')} border="1px solid" borderColor="brand.200">
-              <MaterialSymbol icon={activeEngine === 'hybrid' ? 'high_quality' : 'mic'} fontSize="14px" color="brand.500" />
-              <Text fontSize="10px" fontWeight="bold" color="brand.600" textTransform="uppercase" letterSpacing="wider">
+            <HStack
+              spacing={2}
+              p={2}
+              px={4}
+              mt={4}
+              borderRadius="full"
+              bg={engineBadgeBg}
+              border="1px solid"
+              borderColor="brand.200"
+              boxShadow="sm"
+            >
+              <MaterialSymbol icon={activeEngine === 'hybrid' ? 'high_quality' : 'mic'} fontSize="16px" color="brand.500" />
+              <Text fontSize="xs" fontWeight="bold" color="brand.600" textTransform="uppercase" letterSpacing="wider">
                 {activeEngine === 'hybrid' ? 'Hybrid ASR (Whisper)' : 'Native ASR (Browser)'}
               </Text>
             </HStack>
           )}
-        </Flex>
+        </VStack>
 
         {/* Feedback Panel */}
+
         <AnimatePresence>
           {feedback?.type && (
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              style={{ width: '100%', marginTop: '2.5rem' }}
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              style={{ width: '100%', marginTop: '2rem' }}
             >
               <Flex
                 direction="column"
                 align="center"
-                justify="space-between"
-                gap={4}
+                justify="center"
+                gap={3}
                 borderRadius="2xl"
-                bg="whiteAlpha.50"
-                p={4}
+                bg={feedback.type === 'correct' ? feedbackBgSuccess : feedbackBgError}
+                p={5}
                 border="1px solid"
-                borderColor={feedback.type === 'correct' ? 'green.500' : 'red.400'}
+                borderColor={feedback.type === 'correct' ? 'green.200' : 'red.200'}
+                boxShadow="sm"
               >
-                <Flex direction="column" gap={1}>
-                  <Text color={feedback.type === 'correct' ? 'green.400' : 'red.400'} fontSize="sm" fontWeight="bold" textTransform="uppercase" tracking="wider">
-                    {feedback.type === 'correct' ? 'Excellent!' : 'Try Again'}
+                <HStack spacing={2}>
+                  <MaterialSymbol
+                    icon={feedback.type === 'correct' ? 'check_circle' : 'error'}
+                    fontSize="20px"
+                    color={feedback.type === 'correct' ? 'green.500' : 'red.500'}
+                    fill={1}
+                  />
+                  <Text
+                    color={feedback.type === 'correct' ? 'green.600' : 'red.600'}
+                    fontSize="xs"
+                    fontWeight="800"
+                    textTransform="uppercase"
+                    letterSpacing="widest"
+                  >
+                    {feedback.type === 'correct' ? 'Excellent' : 'Try Again'}
                   </Text>
-                  <Text color="white" fontSize="md">
-                    {feedback.message}
-                  </Text>
-                </Flex>
+                </HStack>
+
+                <Text
+                  color={feedbackTextMain}
+                  fontSize="md"
+                  textAlign="center"
+                  lineHeight="1.5"
+                  fontWeight="medium"
+                >
+                  {feedback.message}
+                </Text>
               </Flex>
             </motion.div>
           )}
         </AnimatePresence>
-      </Box>
 
-      {/* Waveform Visualizer */}
-      <Flex w="full" maxW="400px" h="24" mt={12} align="center" justify="center" gap={1.5}>
-        {[4, 8, 12, 16, 20, 24, 16, 20, 14, 10, 6, 3].map((h, i) => (
-          <Box
-            key={i}
-            w="1.5"
-            h={`${h * (isListening ? 1.5 : 1)}px`}
-            bg={isListening ? (i % 2 === 0 ? "brand.400" : "cyan.400") : "whiteAlpha.200"}
-            borderRadius="full"
-            transition="height 0.1s ease-in-out"
-            animation={isListening ? `pulse 0.5s infinite ${i * 0.1}s alternate` : 'none'}
-          />
-        ))}
-      </Flex>
+        {/* Footer / Controls Section */}
+        <Box w="full" mt={10} pt={6} borderTop="1px solid" borderColor="gray.100">
 
-      {/* Footer Control Area */}
-      <Flex p={10} direction="column" align="center" w="full">
-        <Box position="relative" role="group">
-          {isListening && (
-            <Box position="absolute" inset="0" bg="brand.500" borderRadius="full" filter="blur(20px)" opacity="0.4" animation="pulse 1.5s infinite" />
-          )}
-          <Button
-            onClick={isListening ? stopListening : startListening}
-            size="lg"
-            w="24"
-            h="24"
-            borderRadius="full"
-            bgGradient="linear(to-tr, brand.500, cyan.400)"
-            _hover={{ transform: 'scale(1.05)' }}
-            _active={{ transform: 'scale(0.95)' }}
-            boxShadow="0 0 40px rgba(89, 76, 230, 0.4)"
-            className="mic-glow"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <MaterialSymbol icon={isListening ? "mic_off" : "mic"} fontSize="40px" color="white" />
-          </Button>
+          <Box w="full" h="1px" bg={useColorModeValue('gray.100', 'whiteAlpha.100')} my={6} />
+
+          {/* Voice Activity Visualizer (VAD) */}
+          <Flex w="full" h="16" align="center" justify="center" mb={6}>
+            <VoiceVisualizer isListening={isListening} />
+          </Flex>
+
+          {/* Action Row */}
+          <Flex w="full" align="center" justify="center" position="relative" mt={8}>
+
+            <VStack spacing={2} display="flex" flexDirection="column" alignItems="center">
+              <Box position="relative" role="group">
+                {isListening && (
+                  <Box position="absolute" inset="0" bg="brand.500" borderRadius="full" filter="blur(20px)" opacity="0.4" animation="pulse 1.5s infinite" />
+                )}
+                <Button
+                  onClick={isListening ? stopListening : startListening}
+                  size="lg"
+                  w="20"
+                  h="20"
+                  borderRadius="full"
+                  bgGradient="linear(to-tr, brand.500, brand.600)"
+                  _hover={{ transform: 'scale(1.05)', boxShadow: 'xl' }}
+                  _active={{ transform: 'scale(0.95)' }}
+                  boxShadow="lg"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <MaterialSymbol icon={isListening ? "mic_off" : "mic"} fontSize="32px" color="white" />
+                </Button>
+              </Box>
+              <Text color={isListening ? "brand.500" : "gray.400"} fontWeight="bold" letterSpacing="widest" fontSize="10px" textTransform="uppercase" visibility={isListening || isConnecting ? "visible" : "hidden"} className="animate-pulse">
+                {isConnecting ? "Connecting..." : "Listening..."}
+              </Text>
+            </VStack>
+
+            {/* Next Button (Absolute Right) */}
+            <AnimatePresence>
+              {showNextButton && (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  style={{ position: 'absolute', right: 0 }}
+                >
+                  <Button
+                    bg="gray.900"
+                    _hover={{ bg: 'black', transform: 'translateY(-2px)' }}
+                    color="white"
+                    size="md"
+                    px={6}
+                    borderRadius="xl"
+                    fontWeight="bold"
+                    fontSize="sm"
+                    boxShadow="md"
+                    rightIcon={<MaterialSymbol icon="arrow_forward" fontSize="18px" />}
+                    onClick={nextPrompt}
+                  >
+                    Next
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </Flex>
         </Box>
-
-        <Text mt={6} color="cyan.400" fontWeight="bold" letterSpacing="widest" fontSize="xs" textTransform="uppercase" visibility={isListening || isConnecting ? "visible" : "hidden"} className="animate-pulse">
-          {isConnecting ? "Establishing Connection..." : "Listening..."}
-        </Text>
-
-        <HStack mt={12} spacing={8}>
-          {/* Previous Button (Optional/Mock) */}
-          {/* Next Button */}
-          {showNextButton && (
-            <Button
-              bg="brand.500"
-              _hover={{ bg: 'brand.400' }}
-              color="white"
-              px={8}
-              py={6}
-              borderRadius="xl"
-              fontWeight="bold"
-              rightIcon={<MaterialSymbol icon="arrow_forward" fontSize="lg" />}
-              onClick={nextPrompt}
-            >
-              Next Task
-            </Button>
-          )}
-        </HStack>
-      </Flex>
-    </Flex>
+      </Box >
+    </Flex >
   );
 };
 

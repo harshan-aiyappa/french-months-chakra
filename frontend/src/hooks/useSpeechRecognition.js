@@ -32,7 +32,7 @@
 //
 // ============================================================================
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 // ============================================================================
 // MAIN HOOK
@@ -43,15 +43,21 @@ const useSpeechRecognition = ({ onResult, onNoSpeech, onError, onStart, onSpeech
   // STATE & REFS
   // ========================================================================
 
-  const [isListening, setIsListening] = useState(false);
+  const [isListening, setIsListeningState] = useState(false);
   const [error, setError] = useState(null);
   const recognitionRef = useRef(null);
+  const isListeningRef = useRef(false);
+
+  // Helper to sync state and ref
+  const setIsListening = (state) => {
+    isListeningRef.current = state;
+    setIsListeningState(state);
+  };
 
   // ========================================================================
   // CALLBACK REFS (Avoid re-initialization)
   // ========================================================================
 
-  // Use refs for callbacks to avoid re-initializing the recognition engine when they change
   const callbacks = useRef({ onResult, onNoSpeech, onError, onStart, onSpeechStart });
   useEffect(() => {
     callbacks.current = { onResult, onNoSpeech, onError, onStart, onSpeechStart };
@@ -67,7 +73,7 @@ const useSpeechRecognition = ({ onResult, onNoSpeech, onError, onStart, onSpeech
     if (!recognitionRef.current) {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
-      recognition.interimResults = false; // Disabled for faster final transcript processing
+      recognition.interimResults = false;
       recognition.lang = 'fr-FR';
 
       recognition.onstart = () => {
@@ -117,13 +123,14 @@ const useSpeechRecognition = ({ onResult, onNoSpeech, onError, onStart, onSpeech
 
     return () => {
       if (recognitionRef.current) {
-        recognitionRef.current.stop();
+        recognitionRef.current.abort();
       }
     };
   }, []);
 
   const startListening = useCallback(() => {
-    if (recognitionRef.current && !isListening) {
+    // Check ref instead of state to avoid dependency loop
+    if (recognitionRef.current && !isListeningRef.current) {
       try {
         recognitionRef.current.start();
       } catch (err) {
@@ -132,16 +139,21 @@ const useSpeechRecognition = ({ onResult, onNoSpeech, onError, onStart, onSpeech
         if (callbacks.current.onError) callbacks.current.onError('start-failed');
       }
     }
-  }, [isListening]);
+  }, []);
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
-      setIsListening(false);
+      // onend will handle state update
     }
   }, []);
 
-  return { isListening, error, startListening, stopListening };
+  return useMemo(() => ({
+    isListening,
+    error,
+    startListening,
+    stopListening
+  }), [isListening, error, startListening, stopListening]);
 };
 
 export default useSpeechRecognition;

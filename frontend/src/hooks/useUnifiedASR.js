@@ -26,6 +26,11 @@ const useUnifiedASR = ({ onResult, onError, onStart, selectedMode = 'native' }) 
         }
     });
 
+    const nativeEngineRef = useRef(nativeEngine);
+    useEffect(() => {
+        nativeEngineRef.current = nativeEngine;
+    }, [nativeEngine]);
+
     // --- HYBRID ENGINE ---
     const hybridEngine = useLiveKit({
         onResult: (text) => {
@@ -38,6 +43,11 @@ const useUnifiedASR = ({ onResult, onError, onStart, selectedMode = 'native' }) 
             if (activeEngine === ASR_ENGINE_TYPES.HYBRID && onStart) onStart();
         }
     });
+
+    const hybridEngineRef = useRef(hybridEngine);
+    useEffect(() => {
+        hybridEngineRef.current = hybridEngine;
+    }, [hybridEngine]);
 
     /**
      * Start Listening Logic
@@ -79,13 +89,31 @@ const useUnifiedASR = ({ onResult, onError, onStart, selectedMode = 'native' }) 
     /**
      * Stop Listening Logic
      */
+    const activeEngineRef = useRef(null);
+
+    useEffect(() => {
+        activeEngineRef.current = activeEngine;
+    }, [activeEngine]);
+
+    // ...
+
+    /**
+     * Stop Listening Logic
+     */
     const stopListening = useCallback(async () => {
-        if (activeEngine === ASR_ENGINE_TYPES.HYBRID) {
-            await hybridEngine.stopHybridASR();
-        } else {
-            nativeEngine.stopListening();
+        // Using ref to avoid dependency on activeEngine or engine instances
+        const currentEngine = activeEngineRef.current;
+
+        if (currentEngine === ASR_ENGINE_TYPES.HYBRID) {
+            const engine = hybridEngineRef.current;
+            if (engine && engine.stopHybridASR) await engine.stopHybridASR();
         }
-    }, [activeEngine, hybridEngine, nativeEngine]);
+
+        // Always try to stop native just in case
+        const nEngine = nativeEngineRef.current;
+        if (nEngine && nEngine.stopListening) nEngine.stopListening();
+
+    }, []);
 
     const isListening = activeEngine === ASR_ENGINE_TYPES.HYBRID
         ? hybridEngine.isTranscribing

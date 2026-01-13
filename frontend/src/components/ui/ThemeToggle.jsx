@@ -3,7 +3,7 @@ import { IconButton, useColorMode, useColorModeValue } from '@chakra-ui/react';
 
 // Material Symbol Helper
 const MaterialSymbol = ({ icon, fontSize = "24px", ...props }) => (
-    <span className="material-symbols-outlined" style={{ fontSize, ...props }}>
+    <span className="material-symbols-outlined" style={{ fontSize }} {...props}>
         {icon}
     </span>
 );

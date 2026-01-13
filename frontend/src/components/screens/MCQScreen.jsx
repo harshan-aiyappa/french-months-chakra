@@ -7,7 +7,10 @@ import {
   Button,
   SimpleGrid,
   useColorModeValue,
-  Icon
+  Icon,
+  VStack,
+  HStack,
+  IconButton // NEW
 } from '@chakra-ui/react';
 
 // Material Symbol Helper
@@ -17,7 +20,7 @@ const MaterialSymbol = ({ icon, className, fontSize = "24px", ...props }) => (
   </Box>
 );
 
-const MCQScreen = ({ activity, onAnswer }) => {
+const MCQScreen = ({ activity, onAnswer, onExit, currentIndex, total }) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -30,14 +33,16 @@ const MCQScreen = ({ activity, onAnswer }) => {
   // Theme colors
   const headingColor = useColorModeValue('gray.900', 'white');
   const textColor = useColorModeValue('gray.600', 'gray.400');
-  const cardBg = useColorModeValue('white', 'whiteAlpha.50');
+  const cardBgColor = useColorModeValue('white', 'gray.800');
+  const cardBg = cardBgColor; // Fallback for HMR safety/caching issues
+  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
 
   const handleCheck = () => {
     if (!selectedOption) return;
     setIsSubmitted(true);
     // In a real app, you might show feedback before moving on
     // For now, passing the result up
-    const isCorrect = selectedOption === correctAnswer;
+    // const isCorrect = selectedOption === correctAnswer;
     // setTimeout(() => onAnswer(isCorrect), 1000); 
     // Or wait for user to click "Next"
   };
@@ -51,7 +56,7 @@ const MCQScreen = ({ activity, onAnswer }) => {
     if (!isSubmitted) {
       return selectedOption === option
         ? { borderColor: 'brand.500', bg: useColorModeValue('brand.50', 'whiteAlpha.100'), shadow: 'md' }
-        : { borderColor: useColorModeValue('gray.200', 'transparent'), bg: cardBg };
+        : { borderColor: useColorModeValue('gray.200', 'transparent'), bg: cardBgColor };
     }
 
     if (option === correctAnswer) {
@@ -63,179 +68,175 @@ const MCQScreen = ({ activity, onAnswer }) => {
     return { borderColor: 'transparent', opacity: 0.5 };
   };
 
+  // Rededigned Unified Layout
   return (
-    <Flex direction="column" align="center" justify="center" minH="80vh" w="full" maxW="840px" mx="auto" px={{ base: 4, md: 6 }}>
-      {/* Header / Progress */}
-      <Box w="full" mb={8}>
-        <Flex justify="space-between" align="end" mb={3}>
-          <Box>
-            <Heading fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color={headingColor}>Phonetic Matching Unit</Heading>
-            <Text fontSize="sm" color={textColor}>Advanced Pronunciation Course</Text>
-          </Box>
-          <Box textAlign="right">
-            <Text fontSize="lg" fontWeight="bold" color="brand.500">65%</Text>
-            <Text fontSize="xs" color="gray.400">Question {activity.index !== undefined ? activity.index + 1 : 1} of 12</Text>
-          </Box>
-        </Flex>
-        <Box h="2.5" w="full" bg="gray.200" borderRadius="full" overflow="hidden">
-          <Box h="full" bg="brand.500" w="65%" boxShadow="0 0 10px rgba(89,76,230,0.3)" />
-        </Box>
-      </Box>
+    <Flex direction="column" align="center" justify="center" minH="80vh" w="full" px={4}>
 
-      {/* Question Card */}
+      {/* Unified Main Card */}
       <Box
         w="full"
-        borderRadius="2xl"
+        maxW="640px"
+        bg={cardBgColor}
+        borderRadius="3xl"
+        p={{ base: 6, md: 8 }} // Tighter padding like GameScreen
+        boxShadow="2xl"
+        border="1px solid"
+        borderColor={borderColor}
+        position="relative"
         overflow="hidden"
-        p={1}
-        boxShadow="xl"
-        bg={glassBg}
-        backdropFilter="blur(16px)"
-        mb={6}
       >
-        <Box
-          bgImage="linear-gradient(0deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 100%), url('https://lh3.googleusercontent.com/aida-public/AB6AXuBv3f5KyfeDGzf_SYIIdPVaOLxYuo61TdKye5OhBeKHgiSLzSLFK5Yq6uLXdgwevXnYYTfEDm7OXoR5gaJYdXxOF_PMWxoECpcbAtNWGf3xIUm8-nHPQvBbi2zD0gtgkhN5cr3fgYk4VTRh0zlBhsjUKdEC1kf0aQjI5w3TBMl5gcasQTAwSp_Qift9PhD67V4q0nPXjBIZkE8i0r0GPq2aBh6p_nWWMf7OW6aOyKE5oSQcEAXXRY8uBUTYUZqzLE8-K9tjhMhPC1Mg')"
-          bgSize="cover"
-          bgPos="center"
-          minH="260px"
-          borderRadius="xl"
-          p={8}
-          display="flex"
-          flexDirection="column"
-          justifyContent="flex-end"
-        >
-          <Flex align="center" gap={3} mb={5}>
-            <Flex boxSize="10" bg="indigo.50" borderRadius="full" align="center" justify="center">
-              <MaterialSymbol icon="graphic_eq" color="#594ce6" fontSize="20px" />
-            </Flex>
-            <Text fontSize="xs" fontWeight="bold" textTransform="uppercase" letterSpacing="widest" color="brand.600">
-              Listening Challenge
+        <VStack spacing={6} w="full">
+
+          {/* Integrated Header: Exit & Progress */}
+          <Flex w="full" justify="space-between" align="center" mb={2}>
+            <IconButton
+              icon={<MaterialSymbol icon="close" fontSize="24px" />}
+              onClick={onExit}
+              variant="ghost"
+              color="gray.400"
+              _hover={{ color: 'red.500', bg: 'red.50' }}
+              rounded="full"
+              aria-label="Exit Practice"
+            />
+
+            <Text
+              fontSize="sm"
+              fontWeight="bold"
+              color="gray.400"
+              letterSpacing="wide"
+            >
+              {currentIndex + 1} / {total}
             </Text>
           </Flex>
 
-          <Box>
-            <Heading fontSize="3xl" fontWeight="bold" lineHeight="tight" color="slate.900">
-              Identify the correct phonetic transcription for: <Text as="span" color="brand.600" fontStyle="italic">'{word}'</Text>
+
+          {/* Header Section */}
+          <VStack spacing={4} textAlign="center">
+            <Flex boxSize="12" bg="brand.50" borderRadius="full" align="center" justify="center" color="brand.500">
+              <MaterialSymbol icon="quiz" fontSize="28px" />
+            </Flex>
+            <Heading fontSize={{ base: "2xl", md: "3xl" }} fontWeight="800" color={headingColor} lineHeight="1.2">
+              Which IPA matches <br />
+              <Text as="span" color="brand.500" fontStyle="italic">'{word}'</Text>?
             </Heading>
-            <Text fontSize="lg" fontWeight="medium" color="slate.600" mt={2}>
-              Listen to the native pronunciation and select the matching IPA symbols.
+            <Text fontSize="md" color={textColor}>
+              Select the correct phonetic notation.
             </Text>
+          </VStack>
+
+          {/* Audio Playback Controls */}
+          <HStack spacing={4}>
+            <Button
+              leftIcon={<MaterialSymbol icon="volume_up" fontSize="22px" />}
+              size="md"
+              bg="brand.500"
+              color="white"
+              borderRadius="full"
+              px={6}
+              _hover={{ bg: 'brand.600', transform: 'translateY(-2px)', boxShadow: 'lg' }}
+              _active={{ transform: 'translateY(0)' }}
+              boxShadow="md"
+              onClick={() => {
+                const u = new SpeechSynthesisUtterance(word);
+                u.lang = "en-US"; // Or dynamic language if available
+                window.speechSynthesis.speak(u);
+              }}
+            >
+              Play Sound
+            </Button>
+          </HStack>
+
+          {/* Options List */}
+          <VStack w="full" spacing={3}>
+            {options.map((option, idx) => {
+              const style = getOptionStyle(option);
+              return (
+                <Button
+                  key={idx}
+                  w="full"
+                  h="auto"
+                  py={4}
+                  px={6}
+                  justifyContent="space-between"
+                  bg={style.bg || "transparent"} // Explicit fallback
+                  border="2px solid"
+                  borderColor={style.borderColor}
+                  borderRadius="xl"
+                  _hover={{ borderColor: 'brand.400', bg: useColorModeValue('brand.50', 'whiteAlpha.100') }}
+                  onClick={() => !isSubmitted && setSelectedOption(option)}
+                  transition="all 0.2s"
+                  position="relative"
+                >
+                  <HStack>
+                    <Box
+                      boxSize="8"
+                      borderRadius="full"
+                      border="2px solid"
+                      color="gray.400"
+                      fontSize="xs"
+                      fontWeight="bold"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      bg={selectedOption === option ? "brand.500" : "transparent"}
+                      borderColor={selectedOption === option ? "brand.500" : "gray.200"}
+                    >
+                      {selectedOption === option ? <MaterialSymbol icon="check" color="white" fontSize="16px" /> : String.fromCharCode(65 + idx)}
+                    </Box>
+                    <Text fontSize="lg" fontWeight="semibold" color={headingColor} ml={2}>
+                      {option}
+                    </Text>
+                  </HStack>
+
+                  {/* Result Icon */}
+                  {isSubmitted && (
+                    <Box>
+                      {option === correctAnswer ? (
+                        <MaterialSymbol icon="check_circle" color="green.500" fontSize="24px" />
+                      ) : selectedOption === option ? (
+                        <MaterialSymbol icon="cancel" color="red.500" fontSize="24px" />
+                      ) : null}
+                    </Box>
+                  )}
+                </Button>
+              );
+            })}
+          </VStack>
+
+          {/* Footer Actions */}
+          <Box w="full" pt={6} borderTop="1px solid" borderColor={borderColor}>
+            <Flex justify="space-between" align="center" w="full">
+              <Button variant="ghost" color="gray.400" fontSize="sm" onClick={() => onAnswer(false)}>
+                Skip
+              </Button>
+
+              <Button
+                size="lg"
+                bg="brand.500"
+                color="white"
+                px={8}
+                borderRadius="xl"
+                boxShadow="lg"
+                _hover={{ bg: 'brand.600', transform: 'translateY(-2px)' }}
+                isLoading={false}
+                rightIcon={<MaterialSymbol icon={isSubmitted ? "arrow_forward" : "check"} />}
+                onClick={isSubmitted ? handleNext : handleCheck}
+                isDisabled={!selectedOption && !isSubmitted}
+              >
+                {isSubmitted ? "Continue" : "Check Answer"}
+              </Button>
+            </Flex>
           </Box>
 
-          <Flex gap={4} mt={6}>
-            <Button
-              leftIcon={<MaterialSymbol icon="play_circle" />}
-              bg="brand.500"
-              color="white"
-              borderRadius="full"
-              px={6}
-              _hover={{ bg: 'brand.600' }}
-              shadow="lg"
-            >
-              Listen Again
-            </Button>
-            <Button
-              leftIcon={<MaterialSymbol icon="slow_motion_video" />}
-              bg="white"
-              color="slate.700"
-              borderRadius="full"
-              px={6}
-              border="1px solid"
-              borderColor="indigo.100"
-              _hover={{ bg: 'gray.50' }}
-            >
-              0.5x Speed
-            </Button>
-          </Flex>
-        </Box>
+        </VStack>
       </Box>
 
-      {/* Options Grid */}
-      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} w="full">
-        {options.map((option, idx) => (
-          <Button
-            key={idx}
-            h="auto"
-            py={6}
-            px={6}
-            justifyContent="space-between"
-            bg="white"
-            borderRadius="2xl"
-            border="1px solid"
-            borderColor="indigo.50"
-            _hover={{ transform: 'translateY(-2px)', shadow: 'md', borderColor: 'brand.200' }}
-            onClick={() => !isSubmitted && setSelectedOption(option)}
-            sx={{ ...getOptionStyle(option), transition: 'all 0.3s' }}
-          >
-            <Flex direction="column" align="flex-start" gap={1}>
-              <Text fontSize="10px" fontWeight="bold" textTransform="uppercase" letterSpacing="widest" color="gray.400">
-                Option {String.fromCharCode(65 + idx)}
-              </Text>
-              <Text fontSize="2xl" fontWeight="semibold" color="slate.800">
-                {option}
-              </Text>
-            </Flex>
-
-            <Flex
-              boxSize="8"
-              borderRadius="full"
-              border="2px solid"
-              borderColor={isSubmitted && option === correctAnswer ? 'green.400' : 'indigo.50'}
-              bg="white"
-              align="center"
-              justify="center"
-            >
-              {isSubmitted ? (
-                option === correctAnswer ? <MaterialSymbol icon="check" color="green.500" fontSize="16px" /> :
-                  (selectedOption === option ? <MaterialSymbol icon="close" color="red.500" fontSize="16px" /> : null)
-              ) : (
-                selectedOption === option && <Box boxSize="3" bg="brand.500" borderRadius="full" />
-              )}
-            </Flex>
-          </Button>
-        ))}
-      </SimpleGrid>
-
-      {/* Actions */}
-      <Flex mt={8} w="full" justify="center" gap={4}>
-        {!isSubmitted ? (
-          <>
-            <Button variant="ghost" color="gray.500" fontWeight="bold" onClick={() => onAnswer(false)}>Skip Question</Button>
-            <Button
-              bg="brand.500"
-              color="white"
-              size="lg"
-              px={10}
-              borderRadius="xl"
-              boxShadow="xl"
-              _hover={{ bg: 'brand.600', transform: 'translateY(-2px)' }}
-              onClick={handleCheck}
-              isDisabled={!selectedOption}
-            >
-              Check Answer
-            </Button>
-          </>
-        ) : (
-          <Button
-            bg="brand.500"
-            color="white"
-            size="lg"
-            px={10}
-            borderRadius="xl"
-            boxShadow="xl"
-            _hover={{ bg: 'brand.600', transform: 'translateY(-2px)' }}
-            onClick={handleNext}
-            rightIcon={<MaterialSymbol icon="arrow_forward" />}
-          >
-            Continue
-          </Button>
-        )}
+      {/* Hint Text outside card */}
+      <Flex align="center" gap={2} mt={6} color="gray.400" fontSize="xs">
+        <MaterialSymbol icon="info" fontSize="16px" />
+        <Text>Tip: Select the option that best matches the audio.</Text>
       </Flex>
 
-      <Flex align="center" gap={2} mt={6} color="gray.400" fontSize="sm">
-        <MaterialSymbol icon="lightbulb" fontSize="18px" color="brand.400" />
-        <Text>Tip: The symbol /ʃ/ represents the 'sh' sound in English.</Text>
-      </Flex>
     </Flex>
   );
 };

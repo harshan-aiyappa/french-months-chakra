@@ -26,7 +26,8 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
   // Theme colors
   const headingColor = useColorModeValue('gray.900', 'white');
   const textColor = useColorModeValue('gray.600', 'gray.400');
-  const cardBg = useColorModeValue('white', 'whiteAlpha.50');
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
 
   useEffect(() => {
     let calibrationStart = Date.now();
@@ -107,8 +108,8 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
       }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().catch(e => console.warn("Error closing AudioContext:", e));
       }
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
@@ -119,15 +120,17 @@ const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
   return (
     <Center h="full" w="full" p={6}>
       <Box
-        className="glass-card"
         p={{ base: 6, md: 10 }}
         borderRadius="3xl"
         textAlign="center"
-        maxW="500px"
+        maxW="640px" // Matched to GameScreen
         w="full"
         position="relative"
         overflow="hidden"
         bg={cardBg}
+        boxShadow="2xl"
+        border="1px solid"
+        borderColor={borderColor}
       >
         <Box
           position="absolute"

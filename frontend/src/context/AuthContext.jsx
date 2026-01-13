@@ -12,8 +12,19 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const storedUser = localStorage.getItem('vocalis_user');
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
-            setIsAuthenticated(true);
+            try {
+                const parsed = JSON.parse(storedUser);
+                // Sanitize legacy avatar URLs
+                if (parsed.avatar && (parsed.avatar.includes('cloudinary') || parsed.avatar.includes('bit.ly'))) {
+                    parsed.avatar = '/assets/personIcon.png';
+                    localStorage.setItem('vocalis_user', JSON.stringify(parsed));
+                }
+                setUser(parsed);
+                setIsAuthenticated(true);
+            } catch (e) {
+                console.error("Failed to parse user data", e);
+                localStorage.removeItem('vocalis_user');
+            }
         }
         setIsLoading(false);
     }, []);
@@ -27,7 +38,7 @@ export const AuthProvider = ({ children }) => {
                     id: '1',
                     name: 'Demo User',
                     email: email,
-                    avatar: 'https://bit.ly/dan-abramov'
+                    avatar: '/assets/personIcon.png'
                 };
                 setUser(mockUser);
                 setIsAuthenticated(true);

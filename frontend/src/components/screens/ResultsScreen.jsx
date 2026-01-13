@@ -99,8 +99,8 @@ const ResultsScreen = ({ results, restartGame }) => {
 
   return (
     <Flex direction="column" align="center" justify="center" minH="80vh" w="full" maxW="1000px" mx="auto" p={{ base: 4, md: 6 }}>
-      {/* Main Glass Card */}
-      <Box w="full" className="glass-card" borderRadius="2xl" overflow="hidden" position="relative" display="flex" flexDirection="column" bg={useColorModeValue('white', 'whiteAlpha.50')}>
+      {/* Main Card */}
+      <Box w="full" borderRadius="3xl" overflow="hidden" position="relative" display="flex" flexDirection="column" bg={useColorModeValue('white', 'gray.800')} boxShadow="2xl" border="1px solid" borderColor={borderColor}>
 
         {/* Header Section */}
         <Box p={{ base: 6, md: 8 }} pb={4} textAlign="center" borderBottom="1px solid" borderColor={borderColor}>
@@ -135,7 +135,7 @@ const ResultsScreen = ({ results, restartGame }) => {
 
         {/* Scrollable Content: Word Breakdown */}
         <Box flex="1" overflowY="auto" p={8} pt={0} maxH="400px" className="no-scrollbar">
-          <Heading fontSize="xl" fontWeight="bold" color="white" position="sticky" top={0} bg="transparent" py={6} backdropFilter="blur(8px)" zIndex={20}>
+          <Heading fontSize="xl" fontWeight="bold" color={headingColor} position="sticky" top={0} bg={useColorModeValue('white', 'gray.800')} py={6} zIndex={20}>
             Word Breakdown
           </Heading>
           <VStack spacing={3} pb={8} align="stretch">
@@ -152,15 +152,13 @@ const ResultsScreen = ({ results, restartGame }) => {
         </Box>
 
         {/* Footer Actions */}
-        <Flex p={8} borderTop="1px solid" borderColor="whiteAlpha.50" gap={4}>
+        <Flex p={8} borderTop="1px solid" borderColor={borderColor} gap={4}>
           <Button
             flex="1"
             py={7}
-            bg="whiteAlpha.50"
-            color="white"
-            _hover={{ bg: 'whiteAlpha.100' }}
-            border="1px solid"
-            borderColor="whiteAlpha.100"
+            variant="ghost"
+            color="brand.600"
+            _hover={{ bg: 'brand.50' }}
             borderRadius="xl"
             fontSize="md"
             fontWeight="semibold"
@@ -172,13 +170,13 @@ const ResultsScreen = ({ results, restartGame }) => {
           <Button
             flex="1.5"
             py={7}
-            bgGradient="linear(to-r, brand.500, #7c3aed)"
+            bg="brand.500"
             color="white"
-            _hover={{ opacity: 0.9, transform: 'translateY(-1px)' }}
+            _hover={{ bg: 'brand.600', transform: 'translateY(-1px)' }}
             borderRadius="xl"
             fontSize="md"
             fontWeight="bold"
-            boxShadow="0 4px 20px rgba(89,76,230,0.4)"
+            boxShadow="lg"
             rightIcon={<MaterialSymbol icon="arrow_forward" />}
             onClick={() => window.location.reload()} // Mock dashboard return for now
           >
