@@ -1,5 +1,6 @@
 import os
 import logging
+from datetime import timedelta
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -75,7 +76,7 @@ async def get_token(request: ConnectionRequest):
             ))
         
         # Expire tokens quickly for better security (e.g., 2 hours)
-        token.ttl = 7200 
+        token.ttl = timedelta(seconds=7200) 
         
         logger.info(f"[TOKEN SUCCESS] Generated for '{request.participant_identity}' → Room '{request.room_name}' (TTL: {token.ttl}s)")
         return {"token": token.to_jwt()}
