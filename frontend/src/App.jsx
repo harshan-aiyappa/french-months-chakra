@@ -1,9 +1,9 @@
 // ============================================================================
-// FRENCH MONTHS PRONUNCIATION APP - Main Application Component
+// VOCALIS - Main Application Component
 // ============================================================================
 //
 // PURPOSE:
-// Interactive pronunciation training app for learning French month names.
+// Interactive pronunciation training app (Vocalis) for learning French month names.
 // Uses speech recognition (ASR) and voice activity detection (VAD) to provide
 // real-time feedback on pronunciation accuracy.
 //
@@ -49,17 +49,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Globe, CheckCircle, XCircle } from "lucide-react";
 
 // Components
-import Header from "./components/Header";
-import StartScreen from "./components/StartScreen";
-import GameScreen from "./components/GameScreen";
-import ResultsScreen from "./components/ResultsScreen";
+// Components
+import Header from "./components/ui/Header";
+import StartScreen from "./components/screens/StartScreen";
+import GameScreen from "./components/screens/GameScreen";
+import ResultsScreen from "./components/screens/ResultsScreen";
 import useSpeechRecognition from "./hooks/useSpeechRecognition";
 import { UNIT_DATA } from "./constants";
-import MCQScreen from "./components/MCQScreen";
+import MCQScreen from "./components/screens/MCQScreen";
 import evaluatePronunciation from "./utils/pronunciationEvaluator";
-import CalibrationScreen from "./components/CalibrationScreen";
-import NeuralBackground from "./components/NeuralBackground";
-import DeveloperAttribution from "./components/DeveloperAttribution";
+import CalibrationScreen from "./components/screens/CalibrationScreen";
+import NeuralBackground from "./components/ui/NeuralBackground";
+import DeveloperAttribution from "./components/ui/DeveloperAttribution";
 import { ERROR_MAP } from "./constants/errors";
 
 // Utils

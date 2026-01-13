@@ -4,7 +4,8 @@ import { ChakraProvider, ColorModeScript } from '@chakra-ui/react';
 import { Provider } from 'react-redux';
 import { store } from './store';
 import App from './App';
-import theme from './theme';
+import theme from './styles/theme';
+import './styles/index.css'; // Importing global styles
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

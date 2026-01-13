@@ -4,7 +4,7 @@ import { CheckCircleIcon } from '@chakra-ui/icons';
 import { Zap, Mic, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useDispatch } from 'react-redux';
-import { setMode as setReduxMode } from '../store/gameSlice';
+import { setMode as setReduxMode } from '../../store/gameSlice';
 
 const MotionBox = motion.create(Box);
 
@@ -106,15 +106,19 @@ const StartScreen = ({ onBegin }) => {
 
       <Box>
         <Heading
-          as="h1"
-          size={{ base: "xl", md: "2xl" }}
+          as={motion.h1}
+          variants={itemVariants}
+          initial="hidden"
+          animate="visible"
+          transition={{ delay: 0.5, duration: 0.8 }}
+          size="2xl"
           fontWeight="black"
-          color="text"
-          mb={2}
-          bgGradient="linear(to-r, brand.500, brand.600)"
+          letterSpacing="tight"
+          bgGradient="linear(to-r, brand.300, accent.400)"
           bgClip="text"
+          textShadow="0 0 20px rgba(99, 102, 241, 0.3)"
         >
-          French Months
+          Vocalis
         </Heading>
         <Text
           fontSize={{ base: "md", md: "lg" }}
