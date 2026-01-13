@@ -148,33 +148,32 @@ const AdvancedGameScreen = ({
 
 
                     {/* MAIN CONTENT CENTER */}
-                    <VStack spacing={10} flex="1" justify="center" w="full">
+                    <VStack spacing={6} flex="1" justify="center" w="full">
 
                         {/* The Prompt Word */}
-                        <VStack spacing={2}>
-                            <Text fontSize="sm" color={accentColor} fontWeight="bold" letterSpacing="widest" textTransform="uppercase">
+                        <VStack spacing={1}>
+                            <Text fontSize="xs" color={accentColor} fontWeight="bold" letterSpacing="widest" textTransform="uppercase">
                                 Say this word
                             </Text>
                             <Heading
-                                fontSize={{ base: "5xl", md: "7xl" }}
-                                fontWeight="900"
+                                fontSize={{ base: "4xl", md: "5xl" }}
+                                fontWeight="800"
                                 bgGradient={`linear(to-r, ${useColorModeValue('brand.600', 'white')}, ${accentColor})`}
                                 bgClip="text"
-                                filter="drop-shadow(0 0 20px rgba(0,255,255,0.3))"
                             >
                                 {month.question}
                             </Heading>
-                            <Text fontSize="xl" color={subTextColor} fontFamily="monospace">
-                                /{month.pronunciation}/
+                            <Text fontSize="md" color={subTextColor} fontStyle="italic">
+                                {month.pronunciation}
                             </Text>
                         </VStack>
 
-                        {/* Visualizer / Interaction Zone */}
-                        <Box w="full" h="200px" position="relative" display="flex" alignItems="center" justifyContent="center">
+                        {/* Visualizer Section */}
+                        <Box position="relative" display="flex" alignItems="center" justifyContent="center" w="full">
                             {/* Visualizer Background Ring */}
                             <Box
                                 position="absolute"
-                                w="300px" h="300px"
+                                w="200px" h="200px"
                                 borderRadius="full"
                                 border="1px solid"
                                 borderColor={useColorModeValue('gray.200', 'whiteAlpha.100')}
@@ -183,7 +182,7 @@ const AdvancedGameScreen = ({
                             />
 
                             {/* Actual Visualizer */}
-                            <Box h="100px" w="full" maxW="400px" display="flex" alignItems="center" justifyContent="center">
+                            <Box h="80px" w="full" maxW="350px" display="flex" alignItems="center" justifyContent="center">
                                 {activeEngine === 'hybrid' && liveKitRoom ? (
                                     <BarVisualizer
                                         state={{ participant: liveKitRoom.localParticipant, source: Track.Source.Microphone }}
@@ -197,7 +196,7 @@ const AdvancedGameScreen = ({
                         </Box>
 
                         {/* Feedback / Instructions */}
-                        <Box h="100px" textAlign="center">
+                        <Box h="60px" textAlign="center">
                             <AnimatePresence mode="wait">
                                 {feedback.message ? (
                                     <motion.div
