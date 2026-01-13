@@ -1,138 +1,239 @@
-import React, { useState, useEffect } from 'react';
-import { Box, VStack, Heading, Text, Button, Spinner, HStack, Icon } from '@chakra-ui/react';
+import React, { useEffect, useState } from 'react';
+import {
+  Box,
+  Flex,
+  Heading,
+  Text,
+  Button,
+  VStack,
+  HStack,
+  Icon,
+  useColorModeValue,
+  Progress,
+  CircularProgress,
+  CircularProgressLabel
+} from '@chakra-ui/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaMicrophone, FaArrowRight } from 'react-icons/fa';
-import MicVisualizer from '../ui/MicVisualizer';
-import Feedback from '../ui/Feedback';
 
-const GameScreenComponent = ({
-  month, isListening, startListening, stopListening, nextPrompt, feedback, showNextButton, showToast,
-  dynamicThreshold, onRetry
+// Material Symbol Helper
+const MaterialSymbol = ({ icon, className, fontSize = "24px", ...props }) => (
+  <Box as="span" className={`material-symbols-outlined ${className || ''}`} fontSize={fontSize} {...props}>
+    {icon}
+  </Box>
+);
+
+const WaveformBar = ({ height, delay, isActive }) => (
+  <Box
+    w="1.5"
+    h={height}
+    bg={isActive ? "vocalis.cyan" : "whiteAlpha.300"}
+    borderRadius="full"
+    animation={isActive ? `pulse-height 0.5s ease-in-out infinite alternate ${delay}s` : undefined}
+    transition="all 0.2s"
+    className="waveform-bar"
+  />
+);
+
+const GameScreen = ({
+  month, // Current activity/word data
+  isListening,
+  startListening,
+  stopListening,
+  nextPrompt,
+  feedback,
+  showNextButton,
+  dynamicThreshold,
+  onRetry
 }) => {
-  const [micError, setMicError] = useState(null);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  // Determine the word to display
+  const wordKey = month.question || month.word || "Janvier"; // Fallback
+  const ipa = month.ipa || "/ʒɑ̃.vje/"; // Fallback/Placeholder
 
-  useEffect(() => { setMicError(null); }, [month]);
+  const [shouldShowRetry, setShouldShowRetry] = useState(false);
+
+  // Theme colors
+  const cardBg = useColorModeValue('white', 'whiteAlpha.50');
+  const headingColor = useColorModeValue('gray.900', 'white');
+  const textColor = useColorModeValue('gray.600', 'gray.400');
+  const ipaColor = useColorModeValue('gray.500', 'gray.400');
+  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
 
   return (
-    <VStack spacing={{ base: 3, md: 6 }} align="stretch" py={{ base: 1, md: 2 }}>
-      <motion.div
-        key={month.question}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-      >
-        <Box
-          className={isSpeaking ? 'vad-speaking' : ''}
-          p={{ base: 5, md: 8, lg: 10 }}
-          bg="card"
-          borderRadius="3xl"
-          border="1px"
-          borderColor="border"
-          textAlign="center"
-          boxShadow={isSpeaking ? 'none' : 'xl'}
-          transition="all 0.3s ease-in-out"
-          position="relative"
-          overflow="hidden"
-        >
-          <Box position="absolute" top={0} left={0} right={0} h="4px" bg="brand.500" />
-          <Heading as="h2" size={{ base: "xl", md: "2xl" }} color="text" fontWeight="black" letterSpacing="tight">
-            {month.question}
-          </Heading>
-          <Text fontSize={{ base: "lg", md: "lg" }} fontWeight="semibold" color="brand.500" mt={2} letterSpacing="wide" textTransform="uppercase">
-            {month.pronunciation}
-          </Text>
-        </Box>
-      </motion.div>
+    <Flex direction="column" align="center" justify="center" w="full" maxW="1200px" mx="auto" minH="70vh" pos="relative">
+      {/* Ambient Background Glows (if dark mode mostly) */}
+      <Box position="absolute" top="-10%" left="-10%" w="50%" h="50%" bg="brand.500" opacity="0.1" filter="blur(120px)" borderRadius="full" pointerEvents="none" />
+      <Box position="absolute" bottom="-10%" right="-10%" w="40%" h="40%" bg="cyan.400" opacity="0.1" filter="blur(120px)" borderRadius="full" pointerEvents="none" />
 
-      <VStack spacing={4} align="center">
-        <MicVisualizer
-          isListening={isListening}
-          setIsSpeaking={setIsSpeaking}
-          setMicError={setMicError}
-          dynamicThreshold={dynamicThreshold}
-          onSilence={isListening && stopListening ? stopListening : undefined}
-        />
-        <Text my={1} color={micError ? 'error.500' : 'textMuted'} h="18px" fontWeight="bold" fontSize={{ base: "2xs", md: "2xs" }} textTransform="uppercase" letterSpacing="widest">
-          {micError || (isListening ? (isSpeaking ? 'Voice Detected...' : 'Listening...') : 'Ready to Capture')}
+      {/* Progress Bar Section (Mock for now, can be passed via props) */}
+      <Box w="full" maxW="640px" mb={8}>
+        <Flex justify="space-between" align="flex-end" mb={2}>
+          <Text color="gray.400" fontSize="xs" fontWeight="semibold" textTransform="uppercase" letterSpacing="wider">
+            Pronunciation Task
+          </Text>
+          <Text color="white" fontSize="xs" fontWeight="bold">
+            Step {month.index !== undefined ? month.index + 1 : 1}
+          </Text>
+        </Flex>
+        <Box h="1.5" w="full" bg="whiteAlpha.100" borderRadius="full" overflow="hidden">
+          <Box h="full" bg="brand.500" borderRadius="full" w="65%" />
+        </Box>
+      </Box>
+
+      {/* Central Glass Card */}
+      <Box
+        className="glass-card"
+        w="full"
+        maxW="640px"
+        borderRadius="3xl"
+        p={{ base: 8, md: 12 }}
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        textAlign="center"
+        boxShadow="xl"
+        position="relative"
+        overflow="hidden"
+        bg={cardBg}
+        border="1px solid"
+        borderColor={borderColor}
+      >
+        {/* Subtle Gradient Overlay */}
+        <Box position="absolute" inset="0" bgGradient="linear(to-b, brand.500, transparent)" opacity="0.05" pointerEvents="none" />
+
+        <Text color="brand.500" fontWeight="semibold" fontSize="sm" textTransform="uppercase" letterSpacing="0.2em" mb={4}>
+          Pronounce this word
         </Text>
 
-        {!showNextButton ? (
-          <Button
-            leftIcon={!isListening ? <Icon as={FaMicrophone} /> : null}
-            size={{ base: "sm", md: "md" }}
-            h={{ base: "45px", md: "55px" }}
-            w="100%"
-            maxW="240px"
-            onClick={startListening}
-            isDisabled={!!micError || isListening}
-            as={motion.button}
-            whileHover={{ scale: 1.05, boxShadow: "0 20px 25px -5px rgba(99, 102, 241, 0.3)" }}
-            whileTap={{ scale: 0.95 }}
-            bg="brand.500"
-            color="white"
-            borderRadius="2xl"
-            _hover={{ bg: 'brand.600' }}
-            _active={{ bg: 'brand.700' }}
-            fontSize="lg"
-            fontWeight="black"
-            boxShadow="lg"
-            aria-label="Start speaking practice"
-          >
-            <AnimatePresence mode="wait">
-              {isListening ? (<motion.div key="spinner" initial={{ opacity: 0 }} animate={{ opacity: 1 }}> <Spinner size="sm" thickness="3px" mr={2} /> Listening... </motion.div>)
-                : (<motion.span key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }}> Start Practice </motion.span>)}
-            </AnimatePresence>
-          </Button>
-        ) : (
-          <HStack spacing={4} w="100%" justify="center">
-            <Button
-              leftIcon={<Icon as={FaMicrophone} />}
-              size={{ base: "sm", md: "md" }}
-              h={{ base: "42px", md: "50px" }}
-              w="100%"
-              maxW="140px"
-              onClick={onRetry}
-              variant="outline"
-              colorScheme="brand"
-              borderRadius="xl"
-              fontWeight="bold"
-              fontSize="lg"
-              aria-label="Retry pronunciation"
-            >
-              Retry
-            </Button>
-            <Button
-              rightIcon={<Icon as={FaArrowRight} />}
-              size={{ base: "sm", md: "md" }}
-              h={{ base: "42px", md: "50px" }}
-              w="100%"
-              maxW="140px"
-              onClick={nextPrompt}
-              bg="brand.500"
-              color="white"
-              _hover={{ bg: 'brand.600' }}
-              borderRadius="xl"
-              fontWeight="bold"
-              fontSize="lg"
-              aria-label="Continue to next task"
-            >
-              Continue
-            </Button>
-          </HStack>
-        )}
-      </VStack>
+        <Heading as="h1" color={headingColor} fontSize={{ base: "4xl", md: "6xl", lg: "7xl" }} fontWeight="bold" letterSpacing="tight" mb={4}>
+          {wordKey}
+        </Heading>
 
-      <Box minH={{ base: '70px', md: '60px' }} mt={1}>
-        <Feedback
-          message={feedback.message}
-          type={feedback.type}
-          highlightedPhrase={feedback.highlightedPhrase}
-        />
+        <Text color={ipaColor} fontSize={{ base: "xl", md: "2xl" }} fontWeight="medium" mb={8} fontFamily="serif" fontStyle="italic">
+          {ipa}
+        </Text>
+
+        <Flex gap={4}>
+          <Button
+            variant="unstyled"
+            display="flex"
+            alignItems="center"
+            gap={2}
+            px={6}
+            py={3}
+            className="glass"
+            _hover={{ bg: 'whiteAlpha.100' }}
+            borderRadius="xl"
+            transition="all 0.2s"
+            onClick={() => {
+              // Play audio logic here if available
+              console.log("Play audio");
+            }}
+          >
+            <MaterialSymbol icon="volume_up" color="#6366F1" />
+            <Text fontSize="sm" fontWeight="bold">Listen to Native</Text>
+          </Button>
+        </Flex>
+
+        {/* Feedback Panel */}
+        <AnimatePresence>
+          {feedback?.type && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              style={{ width: '100%', marginTop: '2.5rem' }}
+            >
+              <Flex
+                direction="column"
+                align="center"
+                justify="space-between"
+                gap={4}
+                borderRadius="2xl"
+                bg="whiteAlpha.50"
+                p={4}
+                border="1px solid"
+                borderColor={feedback.type === 'correct' ? 'green.500' : 'red.400'}
+              >
+                <Flex direction="column" gap={1}>
+                  <Text color={feedback.type === 'correct' ? 'green.400' : 'red.400'} fontSize="sm" fontWeight="bold" textTransform="uppercase" tracking="wider">
+                    {feedback.type === 'correct' ? 'Excellent!' : 'Try Again'}
+                  </Text>
+                  <Text color="white" fontSize="md">
+                    {feedback.message}
+                  </Text>
+                </Flex>
+              </Flex>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </Box>
-    </VStack>
+
+      {/* Waveform Visualizer */}
+      <Flex w="full" maxW="400px" h="24" mt={12} align="center" justify="center" gap={1.5}>
+        {[4, 8, 12, 16, 20, 24, 16, 20, 14, 10, 6, 3].map((h, i) => (
+          <Box
+            key={i}
+            w="1.5"
+            h={`${h * (isListening ? 1.5 : 1)}px`}
+            bg={isListening ? (i % 2 === 0 ? "brand.400" : "cyan.400") : "whiteAlpha.200"}
+            borderRadius="full"
+            transition="height 0.1s ease-in-out"
+            animation={isListening ? `pulse 0.5s infinite ${i * 0.1}s alternate` : 'none'}
+          />
+        ))}
+      </Flex>
+
+      {/* Footer Control Area */}
+      <Flex p={10} direction="column" align="center" w="full">
+        <Box position="relative" role="group">
+          {isListening && (
+            <Box position="absolute" inset="0" bg="brand.500" borderRadius="full" filter="blur(20px)" opacity="0.4" animation="pulse 1.5s infinite" />
+          )}
+          <Button
+            onClick={isListening ? stopListening : startListening}
+            size="lg"
+            w="24"
+            h="24"
+            borderRadius="full"
+            bgGradient="linear(to-tr, brand.500, cyan.400)"
+            _hover={{ transform: 'scale(1.05)' }}
+            _active={{ transform: 'scale(0.95)' }}
+            boxShadow="0 0 40px rgba(89, 76, 230, 0.4)"
+            className="mic-glow"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <MaterialSymbol icon={isListening ? "mic_off" : "mic"} fontSize="40px" color="white" />
+          </Button>
+        </Box>
+
+        <Text mt={6} color="cyan.400" fontWeight="bold" letterSpacing="widest" fontSize="xs" textTransform="uppercase" visibility={isListening ? "visible" : "hidden"} className="animate-pulse">
+          Listening...
+        </Text>
+
+        <HStack mt={12} spacing={8}>
+          {/* Previous Button (Optional/Mock) */}
+          {/* Next Button */}
+          {showNextButton && (
+            <Button
+              bg="brand.500"
+              _hover={{ bg: 'brand.400' }}
+              color="white"
+              px={8}
+              py={6}
+              borderRadius="xl"
+              fontWeight="bold"
+              rightIcon={<MaterialSymbol icon="arrow_forward" fontSize="lg" />}
+              onClick={nextPrompt}
+            >
+              Next Task
+            </Button>
+          )}
+        </HStack>
+      </Flex>
+    </Flex>
   );
 };
 
-const GameScreen = React.memo(GameScreenComponent);
 export default GameScreen;

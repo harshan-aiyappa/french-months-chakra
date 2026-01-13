@@ -125,6 +125,13 @@ function GameUnit() {
   // EFFECTS
   // ========================================================================
 
+  // Auto-start game when component mounts (skip StartScreen since mode selected on Dashboard)
+  useEffect(() => {
+    if (gameState === "start") {
+      dispatch(startGame({ mode: "MIX" })); // Default to MIX mode
+    }
+  }, [gameState, dispatch]);
+
   // iOS Safari AudioContext fix: Resume AudioContext on first interaction
   useEffect(() => {
     const resumeAudio = () => {
@@ -483,32 +490,12 @@ function GameUnit() {
   };
 
   return (
-    <Container
-      w="100%"
-      maxW={{ base: "100%", sm: "90%", md: "container.sm", lg: "container.md" }}
-      minH={{ base: "auto", md: "400px" }}
-      maxH="calc(100vh - 100px)"
-      bg="card"
-      borderRadius={{ base: "xl", md: "3xl" }}
-      boxShadow="2xl"
-      p={{ base: 3, md: 6, lg: 8 }}
-      pb={{ base: 12, md: 8 }}
-      border="1px"
-      borderColor="border"
-      overflowY="auto"
-      css={{
-        '&::-webkit-scrollbar': { width: '4px' },
-        '&::-webkit-scrollbar-track': { background: 'transparent' },
-        '&::-webkit-scrollbar-thumb': { background: '#CBD5E1', borderRadius: '4px' },
-      }}
-    >
-      <VStack spacing={{ base: 3, md: 5 }} w="100%">
-        <Header score={score} total={total} progress={progress} />
-        <Box as="main" w="100%" minH="380px" flex="1">
-          {renderContent()}
-        </Box>
-      </VStack>
-    </Container>
+    <VStack spacing={{ base: 3, md: 5 }} w="100%" h="full">
+      <Header score={score} total={total} progress={progress} />
+      <Box as="main" w="100%" flex="1" minH="500px">
+        {renderContent()}
+      </Box>
+    </VStack>
   );
 }
 

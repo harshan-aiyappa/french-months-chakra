@@ -1,275 +1,162 @@
 import React from 'react';
-import { VStack, Heading, Text, Button, Icon, Box, SimpleGrid, Image, Badge, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Code, List, ListItem, ListIcon } from '@chakra-ui/react';
-import { CheckCircleIcon } from '@chakra-ui/icons';
-import { Zap, Mic, FileText } from 'lucide-react';
+import {
+  Box,
+  Flex,
+  Heading,
+  Text,
+  SimpleGrid,
+  Button,
+  Icon,
+  VStack,
+  HStack,
+  useColorModeValue
+} from '@chakra-ui/react';
 import { motion } from 'framer-motion';
-import { useDispatch } from 'react-redux';
-import { setMode as setReduxMode } from '../../store/gameSlice';
 
+// Helper for Material Symbols
+const MaterialSymbol = ({ icon, className, fontSize = "24px", ...props }) => (
+  <Box as="span" className={`material-symbols-outlined ${className || ''}`} fontSize={fontSize} {...props}>
+    {icon}
+  </Box>
+);
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
-};
-
-const MotionBox = motion.create(Box);
-
-const ModeCard = ({ mode, isSelected, onClick, delay }) => (
-  <MotionBox
-    initial={{ opacity: 0, y: 20, scale: 0.9 }}
-    animate={{ opacity: 1, y: 0, scale: 1 }}
-    transition={{ delay, type: "spring", stiffness: 200, damping: 20 }}
-    whileHover={{ scale: 1.05, y: -5 }}
-    whileTap={{ scale: 0.95 }}
+const ModeCard = ({ icon, title, description, isActive, onClick }) => (
+  <Box
     onClick={onClick}
+    className={`glass-card ${isActive ? 'card-active' : ''}`}
+    p={8}
+    borderRadius="xl"
     cursor="pointer"
-    p={4}
-    bg={isSelected ? 'brand.500' : 'card'}
-    borderRadius="2xl"
-    border="2px solid"
-    borderColor={isSelected ? 'brand.500' : 'border'}
-    boxShadow={isSelected ? '0 10px 30px -5px rgba(99, 102, 241, 0.4)' : '0 1px 2px 0 rgba(0, 0, 0, 0.05)'}
-    _hover={{
-      borderColor: isSelected ? 'brand.600' : 'brand.300',
-      boxShadow: isSelected ? '0 15px 35px -5px rgba(99, 102, 241, 0.5)' : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-    }}
-    position="relative"
-    overflow="hidden"
+    display="flex"
+    flexDirection="column"
+    alignItems="center"
+    textAlign="center"
+    transition="all 0.3s"
+    _hover={{ transform: 'translateY(-4px)', bg: 'white', shadow: 'xl' }}
+    role="group"
   >
-    <VStack spacing={2}>
-      <Icon
-        as={mode.IconComponent}
-        boxSize={8}
-        color={isSelected ? 'white' : 'brand.500'}
-        strokeWidth={2}
+    <Flex
+      boxSize="16"
+      borderRadius="full"
+      bg={isActive ? 'brand.50' : 'gray.100'}
+      align="center"
+      justify="center"
+      mb={6}
+      transition="colors 0.3s"
+      _groupHover={{ bg: 'brand.50' }}
+    >
+      <MaterialSymbol
+        icon={icon}
+        fontSize="36px"
+        color={isActive || 'var(--chakra-colors-gray-400)'}
+        className={isActive ? 'text-primary' : 'group-hover:text-primary'}
+        style={{ color: isActive ? '#594ce6' : undefined }}
       />
-      <Text
-        fontSize="md"
-        fontWeight="bold"
-        color={isSelected ? 'white' : 'text'}
-      >
-        {mode.label}
-      </Text>
-      <Text
-        fontSize="2xs"
-        color={isSelected ? 'whiteAlpha.900' : 'textMuted'}
-        textAlign="center"
-      >
-        {mode.description}
-      </Text>
-    </VStack>
-  </MotionBox>
+    </Flex>
+    <Heading fontSize="xl" fontWeight="bold" mb={3} color="slate.900">
+      {title}
+    </Heading>
+    <Text color="slate.600" fontSize="sm" lineHeight="relaxed">
+      {description}
+    </Text>
+  </Box>
 );
 
 const StartScreen = ({ onBegin }) => {
-  const dispatch = useDispatch();
-  const [mode, setMode] = React.useState('mixed');
-
-  const modes = [
-    {
-      id: 'mixed',
-      label: 'Mix Mode',
-      IconComponent: Zap,
-      description: 'Speaking + Quiz challenges'
-    },
-    {
-      id: 'speech',
-      label: 'Speaking',
-      IconComponent: Mic,
-      description: 'Pronunciation practice only'
-    },
-    {
-      id: 'mcq',
-      label: 'Quiz',
-      IconComponent: FileText,
-      description: 'Multiple choice only'
-    },
-  ];
+  const [selectedMode, setSelectedMode] = React.useState('mixed');
 
   return (
-    <VStack spacing={{ base: 5, md: 7 }} textAlign="center" py={{ base: 2, md: 4 }} px={{ base: 2, md: 4 }}>
-      <motion.div
-        initial={{ scale: 0.5, opacity: 0, rotate: -15 }}
-        animate={{ scale: 1, opacity: 1, rotate: 0 }}
-        transition={{
-          type: "spring",
-          stiffness: 260,
-          damping: 20,
-          duration: 0.8
-        }}
-      >
-        <Box
-          p={{ base: 3, md: 4 }}
-          bg="brand.50"
-          _dark={{ bg: 'whiteAlpha.200' }}
-          borderRadius="full"
-          display="inline-block"
-          boxShadow="inner"
-        >
-          <Image src="/assets/favicon1.png" boxSize={{ base: "50px", md: "65px" }} />
-        </Box>
-      </motion.div>
-
-      <Box>
-        <Heading
-          as={motion.h1}
-          variants={itemVariants}
-          initial="hidden"
-          animate="visible"
-          transition={{ delay: 0.5, duration: 0.8 }}
-          size="2xl"
-          fontWeight="black"
-          letterSpacing="tight"
-          bgGradient="linear(to-r, brand.300, accent.400)"
-          bgClip="text"
-          textShadow="0 0 20px rgba(99, 102, 241, 0.3)"
-        >
-          Vocalis
+    <Flex direction="column" align="center" justify="center" px={4} py={8} w="full" maxW="1200px" mx="auto">
+      <Box textAlign="center" mb={12}>
+        <Heading fontSize="40px" fontWeight="bold" letterSpacing="tight" mb={3} color="slate.900">
+          Ready to refine your voice?
         </Heading>
-        <Text
-          fontSize={{ base: "md", md: "lg" }}
-          color="textMuted"
-          maxW="md"
-          mx="auto"
-          lineHeight="tall"
-          fontWeight="medium"
-        >
-          Master pronunciation through interactive challenges
+        <Text fontSize="lg" color="slate.600" maxW="lg" mx="auto">
+          Select your preferred practice mode to begin. Each session is tailored to your vocal profile.
         </Text>
       </Box>
 
-      <Box w="100%" maxW="lg">
-        <Text
-          fontSize="xs"
+      <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} w="full" mb={16}>
+        <ModeCard
+          icon="dynamic_feed"
+          title="Mixed"
+          description="The Full Experience. Balance pronunciation, comprehension, and real-time feedback."
+          isActive={selectedMode === 'mixed'}
+          onClick={() => setSelectedMode('mixed')}
+        />
+        <ModeCard
+          icon="mic_external_on"
+          title="Speaking Only"
+          description="Focus on Fluency. High-intensity speech practice and deep phoneme analysis."
+          isActive={selectedMode === 'speaking'}
+          onClick={() => setSelectedMode('speaking')}
+        />
+        <ModeCard
+          icon="psychology"
+          title="Quiz Only"
+          description="Test Your Knowledge. Rapid-fire listening, grammar checks, and vocabulary challenges."
+          isActive={selectedMode === 'quiz'}
+          onClick={() => setSelectedMode('quiz')}
+        />
+      </SimpleGrid>
+
+      <Flex direction="column" align="center" gap={6}>
+        <Button
+          bgGradient="linear(to-r, brand.500, #7c71f5)"
+          color="white"
+          h="16"
+          px={10}
+          borderRadius="full"
+          fontSize="lg"
           fontWeight="bold"
-          color="textMuted"
-          textTransform="uppercase"
-          letterSpacing="wider"
-          mb={3}
+          gap={3}
+          transition="all 0.2s"
+          _hover={{ transform: 'scale(1.05)' }}
+          _active={{ transform: 'scale(0.95)' }}
+          boxShadow="0 4px 20px rgba(89, 76, 230, 0.3)"
+          onClick={() => onBegin(selectedMode)}
         >
-          Choose Your Mode
-        </Text>
-        <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={3} w="100%">
-          {modes.map((m, i) => (
-            <ModeCard
-              key={m.id}
-              mode={m}
-              isSelected={mode === m.id}
-              onClick={() => {
-                setMode(m.id);
-                dispatch(setReduxMode(m.id));
-              }}
-              delay={0.6 + i * 0.1}
-            />
-          ))}
-        </SimpleGrid>
+          <MaterialSymbol icon="play_circle" />
+          Start Practice
+        </Button>
+      </Flex>
+
+      <Box w="full" maxW="3xl" mt={20}>
+        <Box className="glass" borderRadius="xl" overflow="hidden" boxShadow="sm" bg="whiteAlpha.400" border="1px solid" borderColor="whiteAlpha.500">
+          <Flex px={6} py={4} align="center" justify="space-between" borderBottom="1px solid" borderColor="brand.50">
+            <Flex align="center" gap={3}>
+              <MaterialSymbol icon="developer_board" color="brand.500" />
+              <Text fontSize="sm" fontWeight="bold" textTransform="uppercase" letterSpacing="wider" color="slate.900">
+                Industry-Standard Architecture
+              </Text>
+            </Flex>
+            <MaterialSymbol icon="expand_more" color="gray.400" />
+          </Flex>
+          <SimpleGrid columns={{ base: 1, md: 2 }} gap={8} p={6}>
+            <Flex gap={4}>
+              <MaterialSymbol icon="bolt" color="brand.500" />
+              <Box>
+                <Heading fontSize="sm" fontWeight="bold" mb={1} color="slate.900">LiveKit Integration</Heading>
+                <Text fontSize="xs" color="slate.600">Low-latency global WebRTC infrastructure for instantaneous feedback.</Text>
+              </Box>
+            </Flex>
+            <Flex gap={4}>
+              <MaterialSymbol icon="graphic_eq" color="brand.500" />
+              <Box>
+                <Heading fontSize="sm" fontWeight="bold" mb={1} color="slate.900">OpenAI Whisper</Heading>
+                <Text fontSize="xs" color="slate.600">High-fidelity transcription engine for nuanced pronunciation mapping.</Text>
+              </Box>
+            </Flex>
+          </SimpleGrid>
+        </Box>
       </Box>
 
-      <VStack spacing={2} w="100%" maxW="xs">
-        {[
-          { text: "Smart mic calibration", icon: CheckCircleIcon },
-          { text: "Real-time feedback", icon: CheckCircleIcon },
-          { text: "Adaptive difficulty", icon: CheckCircleIcon },
-        ].map((item, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.9 + i * 0.1, type: "spring" }}
-            style={{ width: '100%' }}
-          >
-            <Box
-              bg="card"
-              p={2.5}
-              borderRadius="lg"
-              border="1px solid"
-              borderColor="border"
-              w="100%"
-            >
-              <Box display="flex" alignItems="center" gap={2}>
-                <Icon as={item.icon} color="success.500" boxSize={4} />
-                <Text fontSize="sm" fontWeight="medium" color="text">{item.text}</Text>
-              </Box>
-            </Box>
-          </motion.div>
-        ))}
-      </VStack>
-
-      <Button
-        size={{ base: "md", md: "lg" }}
-        h={{ base: "50px", md: "60px" }}
-        w="100%"
-        maxW="280px"
-        onClick={() => onBegin(mode)}
-        as={motion.button}
-        whileHover={{ scale: 1.05, boxShadow: "0 20px 30px -5px rgba(99, 102, 241, 0.5)" }}
-        whileTap={{ scale: 0.95 }}
-        bg="brand.500"
-        color="white"
-        fontSize={{ base: "lg", md: "xl" }}
-        fontWeight="black"
-        borderRadius="2xl"
-        _hover={{ bg: 'brand.600' }}
-        aria-label="Begin Speech Training Unit"
-        boxShadow="lg"
-      >
-        Start Learning →
-      </Button>
-
-      <Accordion allowToggle w="100%" maxW="lg" mt={2}>
-        <AccordionItem border="none" bg="whiteAlpha.500" borderRadius="xl" _dark={{ bg: 'whiteAlpha.100' }}>
-          <h2>
-            <AccordionButton _hover={{ bg: 'whiteAlpha.200' }} borderRadius="xl" px={4} py={3}>
-              <Box flex="1" textAlign="left" fontWeight="bold" fontSize="xs" color="textMuted" letterSpacing="wide" textTransform="uppercase">
-                ⚙️ &nbsp; Industry-Standard Architecture
-              </Box>
-              <AccordionIcon color="textMuted" />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
-            <VStack align="stretch" spacing={3}>
-              <Text fontSize="sm" color="text">
-                We use the <b>production-proven approach</b> trusted by Google Meet, Zoom, and Teams — powered by open-source tech.
-              </Text>
-
-              <Box>
-                <Text fontSize="xs" fontWeight="bold" color="textMuted" mb={1} textTransform="uppercase">The Standard Flow</Text>
-                <Code p={3} borderRadius="md" w="100%" display="block" fontSize="2xs" lineHeight="tall" colorScheme="gray">
-                  Mic (Web/iOS) → WebRTC (LiveKit)<br />
-                  → Noise Calibration (1s) → RMS Gate<br />
-                  → VAD (webrtcvad) → Chunking (2.5s)<br />
-                  → Whisper ASR (Base Model)<br />
-                  → Partial + Final Transcripts
-                </Code>
-              </Box>
-
-              <SimpleGrid columns={2} spacing={2}>
-                <Box p={2} bg="bg" borderRadius="md" border="1px solid" borderColor="border">
-                  <Text fontSize="2xs" color="textMuted" fontWeight="bold">TRANSPORT</Text>
-                  <Text fontSize="xs" fontWeight="semibold">LiveKit (WebRTC)</Text>
-                </Box>
-                <Box p={2} bg="bg" borderRadius="md" border="1px solid" borderColor="border">
-                  <Text fontSize="2xs" color="textMuted" fontWeight="bold">ASR MODEL</Text>
-                  <Text fontSize="xs" fontWeight="semibold">Whisper (OpenAI)</Text>
-                </Box>
-                <Box p={2} bg="bg" borderRadius="md" border="1px solid" borderColor="border">
-                  <Text fontSize="2xs" color="textMuted" fontWeight="bold">DETECTION</Text>
-                  <Text fontSize="xs" fontWeight="semibold">webrtcvad + RMS</Text>
-                </Box>
-                <Box p={2} bg="bg" borderRadius="md" border="1px solid" borderColor="border">
-                  <Text fontSize="2xs" color="textMuted" fontWeight="bold">APPROACH</Text>
-                  <Text fontSize="xs" fontWeight="semibold">Server-Side Norm.</Text>
-                </Box>
-              </SimpleGrid>
-
-              <Text fontSize="xs" color="textMuted" fontStyle="italic">
-                Solves iOS dropouts, frequency shifts, and false triggers by moving processing to the server.
-              </Text>
-            </VStack>
-          </AccordionPanel>
-        </AccordionItem>
-      </Accordion>
-    </VStack>
+      <Box p={8} textAlign="center">
+        <Text fontSize="xs" letterSpacing="widest" textTransform="uppercase" fontWeight="medium" color="slate.400">
+          Vocalis Engine v2.4.0 — Premium Speech Analysis
+        </Text>
+      </Box>
+    </Flex>
   );
 };
 

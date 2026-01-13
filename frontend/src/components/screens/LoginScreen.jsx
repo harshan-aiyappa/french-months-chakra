@@ -1,213 +1,284 @@
-
 import React, { useState } from 'react';
 import {
     Box,
-    Button,
-    FormControl,
-    FormLabel,
-    Input,
+    Flex,
     VStack,
     Heading,
     Text,
-    useToast,
-    Container,
+    Button,
+    Input,
+    FormControl,
+    FormLabel,
     InputGroup,
+    InputLeftElement,
     InputRightElement,
     IconButton,
-    Flex,
+    Checkbox,
+    Link,
+    Icon,
     Image,
+    useToast,
+    Container,
     Divider,
-    HStack
+    HStack,
+    SimpleGrid,
+    useColorModeValue
 } from '@chakra-ui/react';
-import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
-import { motion } from 'framer-motion';
+
 import { useAuth } from '../../context/AuthContext';
 import VantaBackground from '../ui/VantaBackground';
+
+const MaterialSymbol = ({ icon, className, ...props }) => (
+    <Box as="span" className={`material-symbols-outlined ${className || ''}`} {...props}>
+        {icon}
+    </Box>
+);
 
 const LoginScreen = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const { login } = useAuth();
+    const [isLoading, setIsLoading] = useState(false);
     const toast = useToast();
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        if (!email || !password) {
-            toast({
-                title: 'Error',
-                description: 'Please enter both email and password.',
-                status: 'error',
-                duration: 3000,
-                isClosable: true,
-            });
-            return;
-        }
-
-        setIsSubmitting(true);
+        setIsLoading(true);
         try {
             await login(email, password);
-            // AuthContext will update state and App will rerender
         } catch (error) {
             toast({
-                title: 'Login Failed',
-                description: 'Something went wrong.',
-                status: 'error',
+                title: "Login Failed",
+                description: "Check your credentials and try again.",
+                status: "error",
                 duration: 3000,
                 isClosable: true,
             });
         } finally {
-            setIsSubmitting(false);
+            setIsLoading(false);
         }
     };
 
     return (
-        <Box minH="100vh" position="relative" overflow="hidden">
-            <VantaBackground />
+        <Flex minH="100vh" w="full" bg={useColorModeValue('#e8f4f8', '#131121')} color={useColorModeValue('gray.800', 'white')} overflow="hidden" fontFamily="Inter, sans-serif">
 
-            <Container maxW="container.xl" h="100vh" display="flex" alignItems="center" justifyContent="center">
-                <Flex
-                    w="full"
-                    maxW="1000px"
-                    h={{ base: "auto", md: "600px" }}
-                    bg="card"
-                    borderRadius="3xl"
-                    boxShadow="2xl"
-                    overflow="hidden"
-                    flexDirection={{ base: "column", md: "row" }}
-                    zIndex="10"
-                    border="1px solid"
-                    borderColor="whiteAlpha.300"
-                >
-                    {/* Left Side - Branding */}
-                    <Box
-                        flex="1"
-                        bgGradient="linear(to-br, brand.600, brand.800)"
-                        p={12}
-                        display="flex"
-                        flexDirection="column"
-                        justifyContent="space-between"
-                        position="relative"
-                        overflow="hidden"
-                    >
-                        {/* Abstract Shapes */}
-                        <Box position="absolute" top="-20%" left="-20%" boxSize="300px" bg="whiteAlpha.100" borderRadius="full" filter="blur(50px)" />
-                        <Box position="absolute" bottom="-10%" right="-10%" boxSize="200px" bg="accent.400" opacity="0.3" borderRadius="full" filter="blur(40px)" />
+            {/* Left Side: Branding & Immersive Elements */}
+            <Box
+                display={{ base: "none", lg: "flex" }}
+                w="50%"
+                flexDir="column"
+                position="relative"
+                overflow="hidden"
+                bgGradient="linear(to-br, #7dd3fc, #38bdf8, #0ea5e9)"
+                borderRight="1px solid"
+                borderColor={useColorModeValue('cyan.200', 'whiteAlpha.50')}
+            >
+                {/* Content Container */}
+                <Flex position="relative" zIndex={10} flexDir="column" justify="space-between" h="full" p={16} color="white">
+                    {/* Top Brand */}
+                    <Box>
+                        <Flex align="center" gap={3} mb={12}>
+                            <Flex boxSize="40px" bg="white" borderRadius="lg" align="center" justify="center" boxShadow="0 0 20px rgba(255,255,255,0.3)">
+                                <MaterialSymbol icon="graphic_eq" fontSize="24px" color="#0ea5e9" />
+                            </Flex>
+                            <Heading fontSize="3xl" fontWeight="bold" letterSpacing="tight">Vocalis</Heading>
+                        </Flex>
 
-                        <Box zIndex="1">
-                            <HStack mb={6}>
-                                <Box p={2} bg="whiteAlpha.200" borderRadius="lg">
-                                    <Image src="/assets/favicon1.png" boxSize="32px" />
-                                </Box>
-                                <Text color="white" fontWeight="bold" fontSize="lg" letterSpacing="wide">VOCALIS</Text>
-                            </HStack>
-
-                            <Heading color="white" size="2xl" mb={4} lineHeight="shorter">
-                                Master your <br /> pronunciation.
-                            </Heading>
-                            <Text color="whiteAlpha.800" fontSize="lg">
-                                Join thousands of learners improving their accent with AI-powered feedback.
-                            </Text>
-                        </Box>
-
-                        <Box zIndex="1">
-                            <HStack spacing={4} mt={8}>
-                                <Box p={3} bg="whiteAlpha.200" borderRadius="xl" backdropFilter="blur(10px)">
-                                    <Text color="white" fontWeight="bold" fontSize="2xl">24+</Text>
-                                    <Text color="whiteAlpha.800" fontSize="xs">Modules</Text>
-                                </Box>
-                                <Box p={3} bg="whiteAlpha.200" borderRadius="xl" backdropFilter="blur(10px)">
-                                    <Text color="white" fontWeight="bold" fontSize="2xl">98%</Text>
-                                    <Text color="whiteAlpha.800" fontSize="xs">Accuracy</Text>
-                                </Box>
-                            </HStack>
-                        </Box>
+                        <Heading fontSize="6xl" fontWeight="bold" lineHeight="1.1" mb={6} maxW="md">
+                            Master your <Text as="span" color="white" textShadow="0 2px 20px rgba(255,255,255,0.3)">pronunciation</Text>.
+                        </Heading>
+                        <Text color="blue.50" fontSize="xl" maxW="sm" fontWeight="light">
+                            The world's most advanced AI-driven speech analysis platform.
+                        </Text>
                     </Box>
 
-                    {/* Right Side - Form */}
-                    <Box flex="1" p={{ base: 8, md: 12 }} bg="card" display="flex" flexDirection="column" justifyContent="center">
+                    {/* Stats Grid */}
+                    <SimpleGrid columns={2} spacing={6} maxW="lg">
+                        <Box bg="whiteAlpha.200" backdropFilter="blur(10px)" p={6} borderRadius="2xl" border="1px solid" borderColor="whiteAlpha.300" transition="transform 0.3s" _hover={{ transform: 'translateY(-4px)' }} display="flex" flexDirection="column" gap={2}>
+                            <Flex justify="space-between" align="start">
+                                <Text color="blue.50" fontSize="sm" fontWeight="medium">Accuracy Rate</Text>
+                                <MaterialSymbol icon="verified" className="text-white text-xl" color="white" />
+                            </Flex>
+                            <Text fontSize="3xl" fontWeight="bold">98.4%</Text>
+                            <Flex align="center" gap={1} fontSize="xs" fontWeight="medium" color="emerald.200">
+                                <MaterialSymbol icon="trending_up" fontSize="12px" />
+                                <Text>+2.1% this week</Text>
+                            </Flex>
+                        </Box>
 
-                        <VStack align="start" spacing={1} mb={8}>
-                            <Heading size="lg" color="text">Welcome Back</Heading>
-                            <Text color="textMuted">Please enter your details to sign in.</Text>
-                        </VStack>
+                        <Box bg="whiteAlpha.200" backdropFilter="blur(10px)" p={6} mt={8} borderRadius="2xl" border="1px solid" borderColor="whiteAlpha.300" transition="transform 0.3s" _hover={{ transform: 'translateY(-4px)' }} display="flex" flexDirection="column" gap={2}>
+                            <Flex justify="space-between" align="start">
+                                <Text color="blue.50" fontSize="sm" fontWeight="medium">AI Analysis</Text>
+                                <MaterialSymbol icon="psychology" color="white" />
+                            </Flex>
+                            <Text fontSize="3xl" fontWeight="bold">Real-time</Text>
+                            <Text color="blue.100" fontSize="xs" fontWeight="medium">Latency &lt; 40ms</Text>
+                        </Box>
+                    </SimpleGrid>
 
-                        <form onSubmit={handleLogin} style={{ width: '100%' }}>
-                            <VStack spacing={5}>
+                    {/* Footer */}
+                    <Text color="blue.100" fontSize="sm">
+                        © 2024 Vocalis by Lingotran. All rights reserved.
+                    </Text>
+                </Flex>
+            </Box>
+
+            {/* Right Side: Form */}
+            <Flex flex={1} align="center" justify="center" p={{ base: 6, sm: 12 }} position="relative" bg={useColorModeValue('white', '#131121')}>
+
+                <Box w="full" maxW="440px" zIndex={10}>
+                    <Box className="glass-card" p={{ base: 8, sm: 10 }} borderRadius="3xl" w="full" bg={useColorModeValue('white', 'whiteAlpha.50')} boxShadow="xl">
+                        {/* Mobile Branding */}
+                        <Flex display={{ lg: "none" }} align="center" justify="center" gap={2} mb={8}>
+                            <Flex boxSize="32px" bg="brand.500" borderRadius="md" align="center" justify="center">
+                                <MaterialSymbol icon="graphic_eq" fontSize="18px" color="white" />
+                            </Flex>
+                            <Heading fontSize="xl" fontWeight="bold" color={useColorModeValue('gray.900', 'white')}>Vocalis</Heading>
+                        </Flex>
+
+                        <Box mb={10} textAlign={{ base: "center", lg: "left" }}>
+                            <Heading fontSize="3xl" fontWeight="bold" mb={2} color={useColorModeValue('gray.900', 'white')}>Welcome Back</Heading>
+                            <Text color={useColorModeValue('gray.600', '#9995c6')} fontSize="sm">Log in to continue your journey to fluency.</Text>
+                        </Box>
+
+                        {/* Social Buttons */}
+                        <SimpleGrid columns={2} spacing={4} mb={8}>
+                            <Button
+                                variant="outline"
+                                h="auto"
+                                py={3}
+                                px={4}
+                                borderRadius="xl"
+                                fontSize="sm"
+                                fontWeight="medium"
+                                gap={2}
+                                borderColor={useColorModeValue('gray.200', 'whiteAlpha.200')}
+                                bg={useColorModeValue('white', 'whiteAlpha.50')}
+                                _hover={{ bg: useColorModeValue('gray.50', 'whiteAlpha.100') }}
+                            >
+                                <Image src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKB29yuepQ4iV9ZfTrOjKlOmzXw0ExPqiRN4Wnfg3Vu_A_ccSh11j820Xu0Sdm9gqRN49oVWnrvw5P1afE5lL27uwnbZkbaVQDNdY4STkRr7le2K0Mqr7NeuTr4fp4376np0W0M1UlChqBZETpZ6MFqa04wA9uMVKrPClPmMLfj4EErl1X9VGT86hv5IMYdCIiiPRMoox-bo5GacpJlVGYo9PcC4wBzfzMEV1Vyeq1ZPu_t58D7ROOjmEA8lBPdp1nqYpnkZ4HyEIe" boxSize="16px" alt="Google" />
+                                Google
+                            </Button>
+                            <Button
+                                variant="outline"
+                                h="auto"
+                                py={3}
+                                px={4}
+                                borderRadius="xl"
+                                fontSize="sm"
+                                fontWeight="medium"
+                                gap={2}
+                                borderColor={useColorModeValue('gray.200', 'whiteAlpha.200')}
+                                bg={useColorModeValue('white', 'whiteAlpha.50')}
+                                _hover={{ bg: useColorModeValue('gray.50', 'whiteAlpha.100') }}
+                            >
+                                <MaterialSymbol icon="ios" fontSize="18px" />
+                                Apple
+                            </Button>
+                        </SimpleGrid>
+
+                        <Flex align="center" py={4} mb={6}>
+                            <Divider borderColor={useColorModeValue('gray.200', 'whiteAlpha.100')} />
+                            <Text px={4} color={useColorModeValue('gray.400', 'whiteAlpha.300')} fontSize="xs" fontWeight="bold" textTransform="uppercase" letterSpacing="widest" whiteSpace="nowrap">Or with email</Text>
+                            <Divider borderColor={useColorModeValue('gray.200', 'whiteAlpha.100')} />
+                        </Flex>
+
+                        <form onSubmit={handleLogin}>
+                            <VStack spacing={5} align="stretch">
                                 <FormControl>
-                                    <FormLabel color="textMuted" fontSize="sm">Email Address</FormLabel>
-                                    <Input
-                                        type="email"
-                                        placeholder="you@example.com"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        size="lg"
-                                        borderRadius="xl"
-                                        focusBorderColor="brand.500"
-                                        _placeholder={{ color: 'gray.400' }}
-                                    />
+                                    <FormLabel fontSize="sm" fontWeight="medium" color={useColorModeValue('gray.700', 'whiteAlpha.700')} ml={1}>Email Address</FormLabel>
+                                    <Box position="relative" className="group">
+                                        <Box position="absolute" insetY={0} left={0} pl={4} display="flex" alignItems="center" pointerEvents="none">
+                                            <MaterialSymbol icon="mail" color={useColorModeValue('#94a3b8', 'rgba(255,255,255,0.3)')} />
+                                        </Box>
+                                        <Input
+                                            type="email"
+                                            placeholder="name@company.com"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            pl={10}
+                                            py={6}
+                                            bg={useColorModeValue('gray.50', 'whiteAlpha.50')}
+                                            border="1px solid"
+                                            borderColor={useColorModeValue('gray.200', 'whiteAlpha.100')}
+                                            borderRadius="xl"
+                                            _focus={{ ring: 0, borderColor: 'brand.500', boxShadow: '0 0 0 1px var(--chakra-colors-brand-500)', bg: useColorModeValue('white', 'whiteAlpha.100') }}
+                                            _placeholder={{ color: useColorModeValue('gray.400', 'whiteAlpha.200') }}
+                                            color={useColorModeValue('gray.900', 'white')}
+                                        />
+                                    </Box>
                                 </FormControl>
 
                                 <FormControl>
-                                    <FormLabel color="textMuted" fontSize="sm">Password</FormLabel>
-                                    <InputGroup size="lg">
+                                    <Flex justify="space-between" align="center" ml={1} mb={1}>
+                                        <FormLabel fontSize="sm" fontWeight="medium" color={useColorModeValue('gray.700', 'whiteAlpha.700')} m={0}>Password</FormLabel>
+                                        <Link fontSize="xs" color="brand.500" _hover={{ color: 'brand.600' }} fontWeight="medium" href="#">Forgot?</Link>
+                                    </Flex>
+                                    <Box position="relative" className="group">
+                                        <Box position="absolute" insetY={0} left={0} pl={4} display="flex" alignItems="center" pointerEvents="none">
+                                            <MaterialSymbol icon="lock" color={useColorModeValue('#94a3b8', 'rgba(255,255,255,0.3)')} />
+                                        </Box>
                                         <Input
-                                            type={showPassword ? 'text' : 'password'}
+                                            type="password"
                                             placeholder="••••••••"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
+                                            pl={10}
+                                            py={6}
+                                            bg={useColorModeValue('gray.50', 'whiteAlpha.50')}
+                                            border="1px solid"
+                                            borderColor={useColorModeValue('gray.200', 'whiteAlpha.100')}
                                             borderRadius="xl"
-                                            focusBorderColor="brand.500"
-                                            _placeholder={{ color: 'gray.400' }}
+                                            _focus={{ ring: 0, borderColor: 'brand.500', boxShadow: '0 0 0 1px var(--chakra-colors-brand-500)', bg: useColorModeValue('white', 'whiteAlpha.100') }}
+                                            _placeholder={{ color: useColorModeValue('gray.400', 'whiteAlpha.200') }}
+                                            color={useColorModeValue('gray.900', 'white')}
                                         />
-                                        <InputRightElement width="4.5rem">
-                                            <IconButton
-                                                h="1.75rem"
-                                                size="sm"
-                                                onClick={() => setShowPassword(!showPassword)}
-                                                icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                                                variant="ghost"
-                                                colorScheme="brand"
-                                            />
-                                        </InputRightElement>
-                                    </InputGroup>
+                                    </Box>
                                 </FormControl>
+
+                                <Flex align="center" mt={2}>
+                                    <Checkbox
+                                        colorScheme="brand"
+                                        defaultChecked
+                                        sx={{
+                                            'span.chakra-checkbox__control': {
+                                                borderRadius: '4px',
+                                                bg: useColorModeValue('white', 'whiteAlpha.50'),
+                                                borderColor: useColorModeValue('gray.300', 'whiteAlpha.200')
+                                            }
+                                        }}
+                                    >
+                                        <Text fontSize="sm" color={useColorModeValue('gray.600', 'whiteAlpha.500')} ml={1}>Remember me</Text>
+                                    </Checkbox>
+                                </Flex>
 
                                 <Button
                                     type="submit"
-                                    colorScheme="brand"
-                                    size="lg"
+                                    mt={4}
                                     w="full"
-                                    isLoading={isSubmitting}
-                                    loadingText="Signing in..."
+                                    py={7}
+                                    bgGradient="linear(to-r, brand.500, #7c72ff)"
+                                    _hover={{ opacity: 0.9 }}
                                     borderRadius="xl"
-                                    bgGradient="linear(to-r, brand.500, brand.600)"
-                                    _hover={{ bgGradient: "linear(to-r, brand.600, brand.700)", boxShadow: 'lg' }}
+                                    boxShadow="0 4px 20px rgba(89,76,230,0.4)"
+                                    color="white"
+                                    fontWeight="bold"
+                                    isLoading={isLoading}
+                                    loadingText="Login to Vocalis"
                                 >
-                                    Sign In
+                                    Login to Vocalis
                                 </Button>
-
-                                <HStack w="full" justify="space-between" pt={2}>
-                                    <Divider w="30%" />
-                                    <Text fontSize="xs" color="textMuted" whiteSpace="nowrap">OR CONTINUE WITH</Text>
-                                    <Divider w="30%" />
-                                </HStack>
-
-                                <Button w="full" variant="outline" borderRadius="xl" leftIcon={<Text fontSize="md">G</Text>}>
-                                    Google
-                                </Button>
-
                             </VStack>
                         </form>
 
-                        <Text mt={8} textAlign="center" fontSize="sm" color="textMuted">
-                            Don't have an account? <Button variant="link" colorScheme="brand" size="sm">Sign up</Button>
+                        <Text mt={8} textAlign="center" fontSize="sm" color={useColorModeValue('gray.600', '#9995c6')}>
+                            Don't have an account? <Link color={useColorModeValue('brand.500', 'white')} fontWeight="bold" _hover={{ color: 'brand.600' }} ml={1}>Create account</Link>
                         </Text>
                     </Box>
-                </Flex>
-            </Container>
-        </Box>
+                </Box>
+            </Flex>
+        </Flex>
     );
 };
 

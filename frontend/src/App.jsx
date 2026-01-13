@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import AppLayout from './components/layout/AppLayout';
 import LoginScreen from './components/screens/LoginScreen';
@@ -7,8 +7,14 @@ import GameUnit from './components/GameUnit';
 import DeveloperAttribution from './components/ui/DeveloperAttribution';
 import { Box, Spinner, Center } from '@chakra-ui/react';
 
-const AppRoot = () => {
+import DashboardHome from './components/screens/DashboardHome';
+import StatsScreen from './components/screens/StatsScreen';
+import SettingsScreen from './components/screens/SettingsScreen';
+
+const AppContent = () => {
   const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -27,9 +33,21 @@ const AppRoot = () => {
     );
   }
 
+  // Get current route for active state
+  const currentPath = location.pathname;
+  const activeView = currentPath === '/practice' ? 'practice'
+    : currentPath === '/settings' ? 'settings'
+      : 'dashboard';
+
   return (
-    <AppLayout>
-      <GameUnit />
+    <AppLayout activeView={activeView} onNavigate={(view) => navigate(`/${view}`)}>
+      <Routes>
+        <Route path="/dashboard" element={<DashboardHome />} />
+        <Route path="/practice" element={<GameUnit />} />
+        <Route path="/settings" element={<SettingsScreen />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
     </AppLayout>
   );
 };
@@ -37,7 +55,9 @@ const AppRoot = () => {
 function App() {
   return (
     <AuthProvider>
-      <AppRoot />
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
     </AuthProvider>
   );
 }

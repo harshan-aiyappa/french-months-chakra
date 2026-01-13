@@ -1,175 +1,193 @@
 import React from 'react';
-import { VStack, Heading, Text, Button, Box, HStack, SimpleGrid, Divider } from '@chakra-ui/react';
-import { motion } from 'framer-motion';
-import { CheckCircleIcon, WarningIcon, CloseIcon, ArrowForwardIcon, RepeatIcon } from '@chakra-ui/icons';
-import confetti from 'canvas-confetti';
+import {
+  Box,
+  Flex,
+  Heading,
+  Text,
+  Button,
+  VStack,
+  HStack,
+  Icon,
+  SimpleGrid,
+  useColorModeValue,
+  CircularProgress,
+  CircularProgressLabel
+} from '@chakra-ui/react';
 
-const MotionBox = motion.create(Box);
-
-const StatCard = ({ label, value, color = "slate.800" }) => (
-  <MotionBox
-    p={{ base: 3, md: 4 }}
-    bg="card"
-    border="1px solid"
-    borderColor="border"
-    boxShadow="xl"
-    borderRadius="2xl"
-    textAlign="center"
-    variants={{ hidden: { opacity: 0, scale: 0.9 }, visible: { opacity: 1, scale: 1 } }}
-    whileHover={{
-      translateY: -8,
-      scale: 1.02,
-      boxShadow: '0 20px 25px -5px rgba(99, 102, 241, 0.2), 0 10px 10px -5px rgba(99, 102, 241, 0.1)',
-      borderColor: 'brand.300'
-    }}
-    transition={{ type: "spring", stiffness: 400, damping: 10 }}
-  >
-    <Text fontSize={{ base: "2xs", md: "xs" }} color="textMuted" fontWeight="bold" textTransform="uppercase" mb={2}>{label}</Text>
-    <Heading size={{ base: "lg", md: "xl" }} color={color} fontWeight="black">{value}</Heading>
-  </MotionBox>
+const MaterialSymbol = ({ icon, fontSize = "24px", ...props }) => (
+  <Box as="span" className={`material-symbols-outlined`} fontSize={fontSize} {...props}>
+    {icon}
+  </Box>
 );
 
-const ResultItem = ({ result }) => {
-  const getIcon = (status) => {
-    if (status === 'correct') return <CheckCircleIcon color="success.500" boxSize={5} />;
-    if (status === 'partial') return <WarningIcon color="warning.500" boxSize={5} />;
-    if (status === 'skipped') return <ArrowForwardIcon color="slate.400" boxSize={5} />;
-    return <CloseIcon color="error.500" boxSize={5} />;
-  };
+const ResultCard = ({ word, ipa, score, isCorrect }) => {
+  const cardBg = useColorModeValue('white', 'whiteAlpha.50');
+  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.50');
+  const wordColor = useColorModeValue('gray.900', 'white');
+  const ipaColor = useColorModeValue('gray.500', 'whiteAlpha.400');
+  const labelColor = useColorModeValue('gray.400', 'whiteAlpha.400');
 
   return (
-    <HStack
-      w="100%"
-      bg="card"
-      p={{ base: 3, md: 4 }}
+    <Flex
+      align="center"
+      justify="space-between"
+      p={4}
       borderRadius="xl"
+      bg={cardBg}
       border="1px solid"
-      borderColor="border"
-      boxShadow="sm"
+      borderColor={borderColor}
+      _hover={{ bg: useColorModeValue('gray.50', 'whiteAlpha.100') }}
+      transition="all 0.2s"
     >
-      <Box w={{ base: "24px", md: "30px" }} flexShrink={0}>{getIcon(result.status)}</Box>
-      <Box flex="1">
-        <HStack justify="space-between">
-          <Text fontWeight="bold" color="text" fontSize={{ base: "sm", md: "md" }}>{result.question} → {result.answer}</Text>
-          <Text fontSize={{ base: "3xs", md: "xs" }} fontWeight="bold" color="textMuted" textTransform="uppercase">
-            {result.type}
-          </Text>
-        </HStack>
-        <Text fontSize={{ base: "xs", md: "sm" }} color="textMuted" mt={1}>
-          {result.transcript ? (
-            <>You said: <Text as="span" fontWeight="semibold" color="text">"{result.transcript}"</Text></>
-          ) : 'No response detected'}
-        </Text>
-      </Box>
-    </HStack>
+      <Flex align="center" gap={4}>
+        <Flex
+          boxSize="10"
+          borderRadius="lg"
+          bg={isCorrect ? useColorModeValue('green.50', 'green.900') : useColorModeValue('red.50', 'red.900')}
+          align="center"
+          justify="center"
+        >
+          <MaterialSymbol
+            icon={isCorrect ? 'check_circle' : 'cancel'}
+            color={isCorrect ? '#10B981' : '#F43F5E'}
+          />
+        </Flex>
+        <Box>
+          <Text fontWeight="semibold" color={wordColor}>{word}</Text>
+          <Text fontSize="xs" color={ipaColor} fontStyle="italic">{ipa}</Text>
+        </Box>
+      </Flex>
+
+      <Flex align="center" gap={6}>
+        <Box textAlign="right">
+          <Text fontSize="10px" color={labelColor} fontWeight="bold" textTransform="uppercase" letterSpacing="widest">Score</Text>
+          <Text fontWeight="bold" color={isCorrect ? '#10B981' : '#F43F5E'}>{score}%</Text>
+        </Box>
+        <Button
+          size="sm"
+          variant="ghost"
+          colorScheme="brand"
+          rightIcon={<MaterialSymbol icon="replay" fontSize="16px" />}
+        >
+          Retry
+        </Button>
+      </Flex>
+    </Flex>
   );
 };
 
 const ResultsScreen = ({ results, restartGame }) => {
-  const correct = results.filter(r => r.status === 'correct').length;
-  const partial = results.filter(r => r.status === 'partial').length;
-  const incorrect = results.length - correct - partial;
-  const percentage = results.length > 0 ? Math.round((correct / results.length) * 100) : 0;
+  // Calculate stats
+  const totalQuestions = results.length;
+  // Mock data if results are empty for visual check
+  const mockResults = results.length > 0 ? results : [
+    { word: 'Enchanté', ipa: '[ɑ̃.ʃɑ̃.te]', score: 98, status: 'correct' },
+    { word: "S'il vous plaît", ipa: '[si vu ple]', score: 95, status: 'correct' },
+    { word: 'Bibliothèque', ipa: '[bi.bli.jɔ.tɛk]', score: 64, status: 'incorrect' },
+    { word: 'Délicieux', ipa: '[de.li.sjø]', score: 91, status: 'correct' },
+    { word: 'Au revoir', ipa: '[o ʁə.vwaʁ]', score: 89, status: 'partial' },
+  ];
 
-  React.useEffect(() => {
-    if (percentage >= 70) {
-      const duration = 3 * 1000;
-      const end = Date.now() + duration;
+  const totalWords = mockResults.length;
+  const masteredWords = mockResults.filter(r => r.status === 'correct').length;
+  const scorePercentage = Math.round((masteredWords / totalWords) * 100);
 
-      const frame = () => {
-        confetti({
-          particleCount: 2,
-          angle: 60,
-          spread: 55,
-          origin: { x: 0 },
-          colors: ['#6366F1', '#10B981']
-        });
-        confetti({
-          particleCount: 2,
-          angle: 120,
-          spread: 55,
-          origin: { x: 1 },
-          colors: ['#6366F1', '#10B981']
-        });
-
-        if (Date.now() < end) {
-          requestAnimationFrame(frame);
-        }
-      };
-      frame();
-    }
-  }, [percentage]);
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.3 } },
-  };
-
-  const itemVariants = {
-    hidden: { y: 30, opacity: 0, filter: "blur(4px)" },
-    visible: {
-      y: 0,
-      opacity: 1,
-      filter: "blur(0px)",
-      transition: { type: "spring", stiffness: 300, damping: 20 }
-    },
-  };
+  // Theme colors
+  const headingColor = useColorModeValue('gray.900', 'white');
+  const textColor = useColorModeValue('gray.600', 'gray.400');
+  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.50');
 
   return (
-    <VStack as={motion.div} spacing={{ base: 6, md: 8 }} variants={containerVariants} initial="hidden" animate="visible" py={{ base: 2, md: 4 }}>
-      <VStack spacing={2} textAlign="center">
-        <Heading as="h2" size={{ base: "lg", md: "xl" }} fontWeight="black" color="text">
-          {percentage >= 85 ? "Magnifique! 🎉" : percentage >= 60 ? "Great Progress! 👍" : "Keep Practicing! 💪"}
-        </Heading>
-        <Text fontSize={{ base: "sm", md: "md" }} color="textMuted" maxW="md">
-          You've completed the French Months unit. Take a look at your stats below.
-        </Text>
-      </VStack>
+    <Flex direction="column" align="center" justify="center" minH="80vh" w="full" maxW="1000px" mx="auto" p={{ base: 4, md: 6 }}>
+      {/* Main Glass Card */}
+      <Box w="full" className="glass-card" borderRadius="2xl" overflow="hidden" position="relative" display="flex" flexDirection="column" bg={useColorModeValue('white', 'whiteAlpha.50')}>
 
-      <SimpleGrid columns={{ base: 2, md: 4 }} spacing={{ base: 3, md: 4 }} w="100%">
-        <StatCard label="Score" value={`${correct}/${results.length}`} color="brand.500" />
-        <StatCard label="Accuracy" value={`${percentage}%`} color="success.500" />
-        <StatCard label="Partial" value={partial} color="warning.500" />
-        <StatCard label="Incorrect" value={incorrect} color="error.500" />
-      </SimpleGrid>
+        {/* Header Section */}
+        <Box p={{ base: 6, md: 8 }} pb={4} textAlign="center" borderBottom="1px solid" borderColor={borderColor}>
+          <Box position="relative" display="inline-flex" mb={4}>
+            <CircularProgress value={scorePercentage} size="120px" thickness="8px" color="brand.500" trackColor={useColorModeValue('gray.100', 'whiteAlpha.100')} capIsRound>
+              <CircularProgressLabel fontSize="2xl" fontWeight="bold" color={headingColor}>
+                {scorePercentage}%
+              </CircularProgressLabel>
+            </CircularProgress>
+          </Box>
 
-      <Box w="100%">
-        <HStack justify="space-between" mb={6}>
-          <Heading size={{ base: "sm", md: "md" }} color="text">Review Summary</Heading>
-          <Text fontSize={{ base: "2xs", md: "xs" }} fontWeight="bold" bg="card" border="1px solid" borderColor="border" px={2} py={1} borderRadius="md" color="textMuted">
-            {results.length} ITEMS
+          <Heading fontSize={{ base: "3xl", md: "4xl" }} fontWeight="bold" color={headingColor} mb={2} letterSpacing="tight">
+            Magnifique!
+          </Heading>
+          <Text color={textColor} fontSize={{ base: "md", md: "lg" }}>
+            You mastered {masteredWords} out of {totalWords} phrases in this session.
           </Text>
-        </HStack>
-        <VStack w="100%" align="stretch" spacing={3}>
-          {results.map((result, idx) => (
-            <MotionBox key={idx} variants={itemVariants}>
-              <ResultItem result={result} />
-            </MotionBox>
-          ))}
-        </VStack>
-      </Box>
 
-      <Button
-        bg="brand.500"
-        color="white"
-        size={{ base: "sm", md: "md" }}
-        h={{ base: "45px", md: "55px" }}
-        w="100%"
-        maxW="xs"
-        onClick={restartGame}
-        as={motion.button}
-        whileHover={{ scale: 1.05, boxShadow: "0 15px 25px -5px rgba(99, 102, 241, 0.4)" }}
-        whileTap={{ scale: 0.95 }}
-        _hover={{ bg: 'brand.600' }}
-        leftIcon={<RepeatIcon />}
-        borderRadius="2xl"
-        fontSize={{ base: "md", md: "lg" }}
-        fontWeight="bold"
-        aria-label="Practice the unit again"
-      >
-        Practice Again
-      </Button>
-    </VStack>
+          <Box mt={8} maxW="md" mx="auto">
+            <Flex justify="space-between" mb={2}>
+              <Text fontSize="sm" fontWeight="medium" color={textColor}>Session Mastery</Text>
+              <Text fontSize="sm" fontWeight="bold" color="brand.500">{scorePercentage}%</Text>
+            </Flex>
+            <Box h="2" w="full" bg={useColorModeValue('gray.100', 'whiteAlpha.100')} borderRadius="full" overflow="hidden">
+              <Box h="full" w={`${scorePercentage}%`} bg="brand.500" borderRadius="full" boxShadow="0 0 10px rgba(89,76,230,0.5)" />
+            </Box>
+            <Text fontSize="xs" color={textColor} mt={3}>
+              You're almost there! Just a few nuances left to polish.
+            </Text>
+          </Box>
+        </Box>
+
+        {/* Scrollable Content: Word Breakdown */}
+        <Box flex="1" overflowY="auto" p={8} pt={0} maxH="400px" className="no-scrollbar">
+          <Heading fontSize="xl" fontWeight="bold" color="white" position="sticky" top={0} bg="transparent" py={6} backdropFilter="blur(8px)" zIndex={20}>
+            Word Breakdown
+          </Heading>
+          <VStack spacing={3} pb={8} align="stretch">
+            {mockResults.map((result, idx) => (
+              <ResultCard
+                key={idx}
+                word={result.word || result.question || "Unknown"}
+                ipa={result.ipa || ""}
+                score={result.score || (result.status === 'correct' ? 95 : 60)}
+                isCorrect={result.status === 'correct'}
+              />
+            ))}
+          </VStack>
+        </Box>
+
+        {/* Footer Actions */}
+        <Flex p={8} borderTop="1px solid" borderColor="whiteAlpha.50" gap={4}>
+          <Button
+            flex="1"
+            py={7}
+            bg="whiteAlpha.50"
+            color="white"
+            _hover={{ bg: 'whiteAlpha.100' }}
+            border="1px solid"
+            borderColor="whiteAlpha.100"
+            borderRadius="xl"
+            fontSize="md"
+            fontWeight="semibold"
+            onClick={restartGame}
+            leftIcon={<MaterialSymbol icon="replay" />}
+          >
+            Retry Unit
+          </Button>
+          <Button
+            flex="1.5"
+            py={7}
+            bgGradient="linear(to-r, brand.500, #7c3aed)"
+            color="white"
+            _hover={{ opacity: 0.9, transform: 'translateY(-1px)' }}
+            borderRadius="xl"
+            fontSize="md"
+            fontWeight="bold"
+            boxShadow="0 4px 20px rgba(89,76,230,0.4)"
+            rightIcon={<MaterialSymbol icon="arrow_forward" />}
+            onClick={() => window.location.reload()} // Mock dashboard return for now
+          >
+            Back to Dashboard
+          </Button>
+        </Flex>
+
+      </Box>
+    </Flex>
   );
 };
 

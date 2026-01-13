@@ -1,148 +1,213 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { VStack, Heading, Text, Center, CircularProgress, HStack, Box, useToken } from '@chakra-ui/react';
+import { VStack, Heading, Text, Center, HStack, Box, Button, useColorModeValue } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 
-const NUM_BARS = 7;
-const CALIBRATION_TIME = 2000; // Industry standard for threshold sampling
-const CALIBRATION_SPEECH_THRESHOLD = 50; // Higher threshold during calibration
+const NUM_BARS = 24;
+const CALIBRATION_TIME = 2500; // 2.5s calibration window
+const SILENCE_THRESHOLD = 50;  // Threshold for "too loud" during calibration
 
-const MotionBar = React.memo(({ height }) => (
-  <Box
-    as={motion.div}
-    animate={{ height: `${height}%` }}
-    transition={{ type: 'tween', ease: 'linear', duration: 0.1 }}
-    w="6px"
-    minH="5px"
-    bg="textMuted"
-    borderRadius="full"
-  />
-));
+// Material Symbol Helper
+const MaterialSymbol = ({ icon, fontSize = "24px", ...props }) => (
+  <Box as="span" className={`material-symbols-outlined`} fontSize={fontSize} {...props}>
+    {icon}
+  </Box>
+);
 
 const CalibrationScreen = ({ onCalibrationComplete, showToast }) => {
-  const animationFrameRef = useRef(null);
+  const [dbLevel, setDbLevel] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [isTooLoud, setIsTooLoud] = useState(false);
+
   const streamRef = useRef(null);
   const audioContextRef = useRef(null);
-  const calibrationTimerRef = useRef(null);
+  const analyserRef = useRef(null);
+  const animationRef = useRef(null);
 
-  const [barHeights, setBarHeights] = useState(Array(NUM_BARS).fill(5));
-  const [calibrationProgress, setCalibrationProgress] = useState(0);
-
-  const showToastOnce = useCallback((...args) => { showToast(...args) }, [showToast]);
+  // Theme colors
+  const headingColor = useColorModeValue('gray.900', 'white');
+  const textColor = useColorModeValue('gray.600', 'gray.400');
+  const cardBg = useColorModeValue('white', 'whiteAlpha.50');
 
   useEffect(() => {
-    let analyser;
-    let dataArray;
-    let animationId;
+    let calibrationStart = Date.now();
+    let noiseSamples = [];
 
-    const setupAudio = async () => {
-      if (window.isSecureContext === false) {
-        showToastOnce('error', 'Insecure Context (M-5)', 'Microphone access is disabled on non-secure (HTTP) pages.');
-        return;
-      }
-
+    const initAudio = async () => {
       try {
-        const stream = window.micStream || await navigator.mediaDevices.getUserMedia({ audio: true });
-        window.micStream = stream;
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         streamRef.current = stream;
 
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioContext.state === 'suspended') {
-          await audioContext.resume();
-        }
         audioContextRef.current = audioContext;
-        analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256;
-        analyser.smoothingTimeConstant = 0.7;
+
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 64;
+        analyserRef.current = analyser;
+
         const source = audioContext.createMediaStreamSource(stream);
         source.connect(analyser);
-        dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-        showToastOnce('success', 'Microphone Ready (M-1)', 'Starting background noise calibration.');
-        calibrate();
+        processAudio();
       } catch (err) {
-        console.error("[Calibration] Error:", err);
-        showToastOnce('error', 'Mic Error (M-3)', 'Could not access microphone.');
+        console.error("Audio init error:", err);
+        showToast('error', 'Mic Check Failed', 'Could not access microphone. Verify permissions.');
       }
     };
 
-    const calibrate = () => {
-      let calibrationStart = Date.now();
-      const noiseSamples = [];
-      const sliceWidth = Math.floor(dataArray.length / NUM_BARS);
+    const processAudio = () => {
+      if (!analyserRef.current) return;
 
-      const calibrationLoop = () => {
-        const elapsed = Date.now() - calibrationStart;
-        setCalibrationProgress(Math.min(100, (elapsed / CALIBRATION_TIME) * 100));
+      const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+      analyserRef.current.getByteFrequencyData(dataArray);
 
-        analyser.getByteFrequencyData(dataArray);
-        const average = dataArray.reduce((sum, val) => sum + val, 0) / dataArray.length;
+      const average = dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length;
+      setDbLevel(average);
 
-        // Reset if it's too noisy
-        if (average > CALIBRATION_SPEECH_THRESHOLD) {
-          showToast('warning', 'Noise Detected!', 'Please stay quiet during calibration.');
-          noiseSamples.length = 0;
-          calibrationStart = Date.now();
-        }
+      const elapsed = Date.now() - calibrationStart;
+      const progressPercent = Math.min((elapsed / CALIBRATION_TIME) * 100, 100);
+      setProgress(progressPercent);
 
+      if (average > SILENCE_THRESHOLD) {
+        setIsTooLoud(true);
+        calibrationStart = Date.now();
+        noiseSamples = [];
+      } else {
+        setIsTooLoud(false);
         noiseSamples.push(average);
+      }
 
-        const newHeights = [];
-        for (let i = 0; i < NUM_BARS; i++) {
-          newHeights.push(10 + (dataArray[i * sliceWidth] / 255) * 50);
-        }
-        setBarHeights(newHeights);
-
-        if (elapsed < CALIBRATION_TIME) {
-          animationId = requestAnimationFrame(calibrationLoop);
-        } else {
-          finishCalibration();
-        }
-      };
-
-      const finishCalibration = () => {
-        cancelAnimationFrame(animationId);
-        const averageNoise = noiseSamples.length > 0
-          ? noiseSamples.reduce((sum, val) => sum + val, 0) / noiseSamples.length
-          : 15;
-        // Ensure a healthy noise floor with a standard +10 margin
-        const newThreshold = Math.max(30, averageNoise + 10);
-        showToast('success', 'Optimized!', `Background noise filtered. Threshold set to ${newThreshold.toFixed(0)}.`);
-        onCalibrationComplete(newThreshold);
-      };
-
-      calibrationLoop();
+      if (elapsed < CALIBRATION_TIME) {
+        animationRef.current = requestAnimationFrame(processAudio);
+      } else {
+        finishCalibration(noiseSamples);
+      }
     };
 
-    setupAudio();
+    const finishCalibration = (samples) => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+
+      const avgNoise = samples.reduce((a, b) => a + b, 0) / samples.length;
+      const threshold = Math.max(avgNoise * 2.5, 30);
+
+      console.log(`[Calibration] Avg Noise: ${avgNoise.toFixed(2)}, Threshold: ${threshold.toFixed(2)}`);
+      onCalibrationComplete(threshold);
+    };
+
+    initAudio();
 
     return () => {
-      cancelAnimationFrame(animationId);
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close().catch(e => console.log(e));
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [onCalibrationComplete, showToast, showToastOnce]);
+  }, [onCalibrationComplete, showToast]);
 
   return (
-    <VStack h={{ base: "200px", md: "220px" }} justify="center" spacing={4} p={6}>
-      <Heading size={{ base: "sm", md: "md" }} color="text">Calibrating Audio...</Heading>
-      <Center position="relative" h="100px" w="100px">
-        <CircularProgress
-          value={calibrationProgress}
-          size="100px"
-          thickness="4px"
-          color="brand.400"
-          trackColor="border"
-          opacity={0.3}
+    <Center h="full" w="full" p={6}>
+      <Box
+        className="glass-card"
+        p={{ base: 6, md: 10 }}
+        borderRadius="3xl"
+        textAlign="center"
+        maxW="500px"
+        w="full"
+        position="relative"
+        overflow="hidden"
+        bg={cardBg}
+      >
+        <Box
+          position="absolute"
+          top="50%" left="50%"
+          transform="translate(-50%, -50%)"
+          w="300px" h="300px"
+          bg={isTooLoud ? "red.500" : "brand.500"}
+          opacity="0.15"
+          filter="blur(60px)"
+          borderRadius="full"
+          pointerEvents="none"
+          transition="background-color 0.3s"
         />
-        <HStack spacing={1.5} h="60px" w="100px" align="center" justify="center" position="absolute">
-          {barHeights.map((height, i) => (
-            <MotionBar key={i} height={height} />
-          ))}
-        </HStack>
-      </Center>
-      <Text color="textMuted" fontSize={{ base: "xs", md: "sm" }} fontWeight="bold" letterSpacing="widest">SILENCE REQUIRED</Text>
-    </VStack>
+
+        <VStack spacing={6} position="relative" zIndex={2}>
+          <Box
+            boxSize="20"
+            borderRadius="full"
+            bg={isTooLoud ? "red.500" : "brand.500"}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            boxShadow={`0 0 ${dbLevel}px ${isTooLoud ? 'rgba(239, 68, 68, 0.4)' : 'rgba(99, 102, 241, 0.4)'}`}
+            transition="all 0.1s"
+          >
+            <MaterialSymbol
+              icon={isTooLoud ? "graphic_eq" : "mic"}
+              fontSize="40px"
+              color="white"
+            />
+          </Box>
+
+          <Box>
+            <Heading fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color={headingColor} mb={2}>
+              {isTooLoud ? "Too Noisy!" : "Calibrating Environment"}
+            </Heading>
+            <Text fontSize={{ base: "sm", md: "md" }} color={textColor}>
+              {isTooLoud
+                ? "Please stay silent. Adjusting for background noise..."
+                : "Please remain silent while we calibrate to your environment."}
+            </Text>
+          </Box>
+
+          <HStack spacing={1} h="60px" align="flex-end" w="full" justify="center">
+            {Array.from({ length: NUM_BARS }).map((_, i) => {
+              const barHeight = Math.random() * dbLevel * 0.8 + 10;
+              return (
+                <motion.div
+                  key={i}
+                  animate={{ height: `${barHeight}%` }}
+                  transition={{ duration: 0.1 }}
+                  style={{
+                    width: `${100 / NUM_BARS}%`,
+                    backgroundColor: isTooLoud ? '#EF4444' : '#6366F1',
+                    borderRadius: '4px',
+                    opacity: 0.7,
+                  }}
+                />
+              );
+            })}
+          </HStack>
+
+          <Box w="full" h="2" bg={useColorModeValue('gray.100', 'whiteAlpha.200')} borderRadius="full" overflow="hidden">
+            <motion.div
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.1 }}
+              style={{
+                height: '100%',
+                backgroundColor: isTooLoud ? '#EF4444' : '#6366F1',
+                borderRadius: '9999px',
+              }}
+            />
+          </Box>
+
+          <Text fontSize="xs" color={textColor} fontWeight="medium">
+            {Math.round(progress)}% Complete
+          </Text>
+        </VStack>
+      </Box>
+    </Center>
   );
 };
 
