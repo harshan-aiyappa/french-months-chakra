@@ -14,6 +14,22 @@ const VoiceVisualizer = ({ isListening }) => {
     const analyserRef = useRef(null);
     const animationRef = useRef(null);
 
+    // Dedicated Unmount Cleanup
+    useEffect(() => {
+        return () => {
+            // Force cleanup on unmount
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach(track => track.stop());
+            }
+            if (audioContextRef.current) {
+                audioContextRef.current.close().catch(e => console.warn(e));
+            }
+            if (animationRef.current) {
+                cancelAnimationFrame(animationRef.current);
+            }
+        };
+    }, []);
+
     useEffect(() => {
         let isMounted = true;
 
@@ -25,6 +41,7 @@ const VoiceVisualizer = ({ isListening }) => {
         }
 
         const initAudio = async () => {
+            // ... (rest of logic)
             try {
                 // Attempt to grab audio stream for visualization
                 // Note: In some browsers, running this alongside WebSpeechAPI might cause issues.
@@ -89,7 +106,7 @@ const VoiceVisualizer = ({ isListening }) => {
         };
     }, [isListening]);
 
-    const cleanupAudio = () => {
+    const cleanupAudio = async () => {
         // Stop all media tracks explicitly
         if (streamRef.current) {
             streamRef.current.getTracks().forEach(track => {
@@ -99,10 +116,14 @@ const VoiceVisualizer = ({ isListening }) => {
             streamRef.current = null;
         }
 
-        // Close Audio Context
+        // Close Audio Context Aggressively
         if (audioContextRef.current) {
-            if (audioContextRef.current.state !== 'closed') {
-                audioContextRef.current.close().catch(e => console.warn("Error closing AudioContext:", e));
+            try {
+                if (audioContextRef.current.state !== 'closed') {
+                    await audioContextRef.current.close();
+                }
+            } catch (e) {
+                console.warn("Error closing AudioContext:", e);
             }
             audioContextRef.current = null;
         }

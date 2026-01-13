@@ -113,6 +113,7 @@ const useUnifiedASR = ({ onResult, onError, onStart, selectedMode = 'native' }) 
         const nEngine = nativeEngineRef.current;
         if (nEngine && nEngine.stopListening) nEngine.stopListening();
 
+        setActiveEngine(null);
     }, []);
 
     const isListening = activeEngine === ASR_ENGINE_TYPES.HYBRID

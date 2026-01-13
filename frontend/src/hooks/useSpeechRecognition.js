@@ -143,8 +143,8 @@ const useSpeechRecognition = ({ onResult, onNoSpeech, onError, onStart, onSpeech
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
-      recognitionRef.current.stop();
-      // onend will handle state update
+      recognitionRef.current.abort();
+      setIsListening(false);
     }
   }, []);
 

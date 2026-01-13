@@ -575,6 +575,8 @@ function GameUnit() {
   const handleExit = () => {
     console.log("[Game] User requested exit. Stopping ASR/Recording.");
     if (stopListening) stopListening();
+
+    showToast("info", "Microphone Off", "Recording stopped safely.");
     navigate('/dashboard');
   };
 
