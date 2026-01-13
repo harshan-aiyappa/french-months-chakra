@@ -54,11 +54,13 @@ async def get_token(request: ConnectionRequest):
     SECURE: Generates a short-lived LiveKit Access Token.
     Optimized for high-concurrency token issuance.
     """
+    logger.info(f"[TOKEN REQUEST] User: {request.participant_identity}, Room: {request.room_name}")
+    
     api_key = os.getenv('LIVEKIT_API_KEY')
     api_secret = os.getenv('LIVEKIT_API_SECRET')
     
     if not api_key or not api_secret:
-        logger.error("LiveKit credentials missing in environment")
+        logger.error("[TOKEN FAILED] LiveKit credentials missing in environment")
         raise HTTPException(status_code=500, detail="ASR engine configuration error")
 
     try:
@@ -75,10 +77,10 @@ async def get_token(request: ConnectionRequest):
         # Expire tokens quickly for better security (e.g., 2 hours)
         token.ttl = 7200 
         
-        logger.info(f"Generated token for participant: {request.participant_identity} in room: {request.room_name}")
+        logger.info(f"[TOKEN SUCCESS] Generated for '{request.participant_identity}' → Room '{request.room_name}' (TTL: {token.ttl}s)")
         return {"token": token.to_jwt()}
     except Exception as e:
-        logger.error(f"Token generation failed: {str(e)}")
+        logger.error(f"[TOKEN ERROR] Generation failed for {request.participant_identity}: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to secure ASR connection")
 
 if __name__ == "__main__":
