@@ -33,9 +33,9 @@ const Header = ({ score, total, progress }) => {
           <Image src={logoSrc} alt="Lingotran Logo" boxSize={{ base: "30px", md: "40px" }} mr={3} borderRadius="xl" />
         </motion.div>
         <Box textAlign="left">
-          <Heading as="h1" size={{ base: "sm", md: "md" }} color="text" letterSpacing="tight">French Months Unit</Heading>
+          <Heading as="h1" size={{ base: "sm", md: "md" }} color="text" letterSpacing="tight">Speech Training Unit</Heading>
           <Text fontSize={{ base: "2xs", md: "xs" }} color="textMuted" fontWeight="medium">
-            Powered by <Text as="span" color="brand.500" fontWeight="bold">Lingotran</Text>
+            Powered by <Text as="span" color="brand.500" fontWeight="bold">Vocalis</Text>
           </Text>
         </Box>
       </Flex>

@@ -6,6 +6,12 @@ import { motion } from 'framer-motion';
 import { useDispatch } from 'react-redux';
 import { setMode as setReduxMode } from '../../store/gameSlice';
 
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+};
+
 const MotionBox = motion.create(Box);
 
 const ModeCard = ({ mode, isSelected, onClick, delay }) => (
@@ -204,7 +210,7 @@ const StartScreen = ({ onBegin }) => {
         fontWeight="black"
         borderRadius="2xl"
         _hover={{ bg: 'brand.600' }}
-        aria-label="Begin French Months Unit"
+        aria-label="Begin Speech Training Unit"
         boxShadow="lg"
       >
         Start Learning →
