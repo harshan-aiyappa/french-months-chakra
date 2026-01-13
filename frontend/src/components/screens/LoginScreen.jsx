@@ -22,7 +22,7 @@ import {
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
-import NeuralBackground from '../ui/NeuralBackground';
+import VantaBackground from '../ui/VantaBackground';
 
 const LoginScreen = () => {
     const [email, setEmail] = useState('');
@@ -64,7 +64,7 @@ const LoginScreen = () => {
 
     return (
         <Box minH="100vh" position="relative" overflow="hidden">
-            <NeuralBackground />
+            <VantaBackground />
 
             <Container maxW="container.xl" h="100vh" display="flex" alignItems="center" justifyContent="center">
                 <Flex
