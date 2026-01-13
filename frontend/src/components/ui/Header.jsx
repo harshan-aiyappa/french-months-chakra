@@ -35,7 +35,7 @@ const Header = ({ score, total, progress }) => {
         <Box textAlign="left">
           <Heading as="h1" size={{ base: "sm", md: "md" }} color="text" letterSpacing="tight">Speech Training Unit</Heading>
           <Text fontSize={{ base: "2xs", md: "xs" }} color="textMuted" fontWeight="medium">
-            Powered by <Text as="span" color="brand.500" fontWeight="bold">Vocalis</Text>
+            <Text as="span" color="brand.500" fontWeight="bold">Vocalis</Text> by Lingotran
           </Text>
         </Box>
       </Flex>
