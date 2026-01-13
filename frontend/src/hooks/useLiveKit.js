@@ -2,8 +2,6 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import {
     Room,
     RoomEvent,
-    VideoPresets,
-    Track,
     createLocalAudioTrack
 } from 'livekit-client';
 
@@ -16,6 +14,8 @@ const useLiveKit = ({ onResult, onError, onStart, onStatusChange }) => {
     const [isConnected, setIsConnected] = useState(false);
     const [isTranscribing, setIsTranscribing] = useState(false);
     const [error, setError] = useState(null);
+    const [room, setRoom] = useState(null);
+    const [localTrack, setLocalTrack] = useState(null);
 
     const roomRef = useRef(null);
     const audioTrackRef = useRef(null);
@@ -39,39 +39,44 @@ const useLiveKit = ({ onResult, onError, onStart, onStatusChange }) => {
         try {
             setIsConnecting(true);
             setError(null);
-            if (callbacks.current.onStatusChange) callbacks.current.onStatusChange('connecting', 'Establishing secure link...');
-
-            // ... (rest of logic) ...
+            if (callbacks.current.onStatusChange) {
+                callbacks.current.onStatusChange('connecting', 'Establishing secure link...');
+            }
 
             // 1. Initialize Room
-            const room = new Room({
+            const r = new Room({
                 adaptiveStream: true,
                 dynacast: true,
             });
-            roomRef.current = room;
+            roomRef.current = r;
+            setRoom(r);
 
             // 2. Setup Event Listeners
-            room.on(RoomEvent.DataReceived, (payload) => {
-                // ... handled ...
+            r.on(RoomEvent.DataReceived, (payload) => {
                 const decoder = new TextDecoder();
                 const data = JSON.parse(decoder.decode(payload));
                 if (data.type === 'transcript' && data.is_final && callbacks.current.onResult) {
+                    console.log(`[Hybrid ASR] Whisper Transcript: "${data.text}" (Final: ${data.is_final})`);
                     callbacks.current.onResult(data.text.toLowerCase().trim());
                 }
             });
 
-            room.on(RoomEvent.Disconnected, () => {
+            r.on(RoomEvent.Disconnected, () => {
                 console.log("[Hybrid ASR] Disconnected from room");
                 setIsConnected(false);
                 setIsTranscribing(false);
-                if (callbacks.current.onStatusChange) callbacks.current.onStatusChange('disconnected', 'Link Terminated');
+                if (callbacks.current.onStatusChange) {
+                    callbacks.current.onStatusChange('disconnected', 'Link Terminated');
+                }
             });
 
             // 3. Connect to Room
-            await room.connect(url, token);
+            await r.connect(url, token);
             setIsConnected(true);
-            if (callbacks.current.onStatusChange) callbacks.current.onStatusChange('connected', 'Connected to LiveKit Neural Grid');
-            console.log("[Hybrid ASR] Connected to LiveKit Room:", room.name);
+            if (callbacks.current.onStatusChange) {
+                callbacks.current.onStatusChange('connected', 'Connected to LiveKit Neural Grid');
+            }
+            console.log("[Hybrid ASR] Connected to LiveKit Room:", r.name);
 
             // 4. Capture and Publish Mic Track (WebRTC Stream)
             const audioTrack = await createLocalAudioTrack({
@@ -80,8 +85,9 @@ const useLiveKit = ({ onResult, onError, onStart, onStatusChange }) => {
                 autoGainControl: true,
             });
 
-            await room.localParticipant.publishTrack(audioTrack);
+            await r.localParticipant.publishTrack(audioTrack);
             audioTrackRef.current = audioTrack;
+            setLocalTrack(audioTrack);
 
             setIsTranscribing(true);
             if (callbacks.current.onStart) callbacks.current.onStart();
@@ -91,7 +97,9 @@ const useLiveKit = ({ onResult, onError, onStart, onStatusChange }) => {
             setError(err.message);
             setIsConnecting(false);
             if (callbacks.current.onError) callbacks.current.onError(err.message);
-            if (callbacks.current.onStatusChange) callbacks.current.onStatusChange('error', 'Connection Failed');
+            if (callbacks.current.onStatusChange) {
+                callbacks.current.onStatusChange('error', 'Connection Failed');
+            }
         } finally {
             setIsConnecting(false);
         }
@@ -111,6 +119,8 @@ const useLiveKit = ({ onResult, onError, onStart, onStatusChange }) => {
         }
         setIsConnected(false);
         setIsTranscribing(false);
+        setRoom(null);
+        setLocalTrack(null);
     }, []);
 
     return {
@@ -119,7 +129,9 @@ const useLiveKit = ({ onResult, onError, onStart, onStatusChange }) => {
         isConnecting,
         isConnected,
         isTranscribing,
-        error
+        error,
+        room,
+        localTrack
     };
 };
 

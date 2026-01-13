@@ -15,6 +15,9 @@ import {
 } from '@chakra-ui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import VoiceVisualizer from '../ui/VoiceVisualizer';
+import { BarVisualizer, LiveKitRoom } from '@livekit/components-react';
+import { Track } from 'livekit-client';
+import '@livekit/components-styles';
 
 // Custom Material Symbol
 const MaterialSymbol = ({ icon, fontSize = "24px", color, ...props }) => (
@@ -34,7 +37,8 @@ const AdvancedGameScreen = ({
     total,
     onSkip, // optional
     activeEngine,
-    showToast
+    showToast,
+    liveKitRoom
 }) => {
     // Force specific theme or just use a very distinct dark style
     // consistently for "Pro" mode regardless of system theme?
@@ -145,8 +149,16 @@ const AdvancedGameScreen = ({
                             />
 
                             {/* Actual Visualizer */}
-                            <Box h="100px" w="full" maxW="400px">
-                                <VoiceVisualizer isListening={isListening} />
+                            <Box h="100px" w="full" maxW="400px" display="flex" alignItems="center" justifyContent="center">
+                                {activeEngine === 'hybrid' && liveKitRoom ? (
+                                    <BarVisualizer
+                                        state={{ participant: liveKitRoom.localParticipant, source: Track.Source.Microphone }}
+                                        barCount={15}
+                                        options={{ barWidth: 6, minHeight: 10 }}
+                                    />
+                                ) : (
+                                    <VoiceVisualizer isListening={isListening} />
+                                )}
                             </Box>
                         </Box>
 

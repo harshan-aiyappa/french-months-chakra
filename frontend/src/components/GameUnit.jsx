@@ -403,7 +403,8 @@ function GameUnit() {
     startListening: startUnifiedListening,
     stopListening: stopUnifiedListening,
     isConnecting,
-    activeEngine
+    activeEngine,
+    liveKitRoom
   } = useUnifiedASR({
     selectedMode: asrMode,
     onResult: (transcript) => {
@@ -554,6 +555,7 @@ function GameUnit() {
               currentIndex={currentIndex}
               total={total}
               showToast={showToast}
+              liveKitRoom={liveKitRoom}
             />
           );
         } else if (currentActivity.type === "MCQ") {

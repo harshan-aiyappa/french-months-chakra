@@ -138,7 +138,9 @@ const useUnifiedASR = ({ onResult, onError, onStart, onStatusChange, selectedMod
         isListening,
         isConnecting: hybridEngine.isConnecting || isThinking,
         activeEngine,
-        error
+        error,
+        liveKitRoom: hybridEngine.room,
+        liveKitTrack: hybridEngine.localTrack
     };
 };
 
