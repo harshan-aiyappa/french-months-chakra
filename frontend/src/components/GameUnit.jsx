@@ -111,11 +111,28 @@ function GameUnit() {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
-  const { modeId } = useParams();
+  const { modeId, asrMode: asrModeParam } = useParams();
 
-  // Prioritize URL param, fallback to state, then default
-  const passedMode = modeId || location.state?.mode || 'mixed';
-  const passedAsrMode = location.state?.asrMode || 'native';
+  // Map URL-friendly ASR mode names to internal names
+  const asrModeRouteMap = {
+    'navASR': 'native',
+    'hybASR': 'hybrid',
+    'autoASR': 'auto'
+  };
+
+  // Determine mode and asrMode from route
+  let passedMode = 'mixed';
+  let passedAsrMode = 'native';
+
+  if (location.pathname.startsWith('/advanced-practice/')) {
+    // Advanced practice route: /advanced-practice/:asrMode
+    passedMode = 'advanced-practice';
+    passedAsrMode = asrModeRouteMap[asrModeParam] || 'auto';
+  } else if (modeId) {
+    // Normal practice route: /practice/:modeId
+    passedMode = modeId;
+    passedAsrMode = location.state?.asrMode || 'native';
+  }
 
   // Redux selectors
   const gameState = useSelector(selectGameStatus);
@@ -561,6 +578,7 @@ function GameUnit() {
               stopListening={stopListening}
               feedback={feedback}
               activeEngine={activeEngine}
+              selectedAsrMode={asrMode}
               onExit={handleExit}
               currentIndex={currentIndex}
               total={total}

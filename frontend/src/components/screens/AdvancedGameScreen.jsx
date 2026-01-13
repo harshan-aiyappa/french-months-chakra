@@ -37,6 +37,7 @@ const AdvancedGameScreen = ({
     total,
     onSkip, // optional
     activeEngine,
+    selectedAsrMode, // The mode selected from Redux (native/hybrid/auto)
     showToast,
     liveKitRoom
 }) => {
@@ -89,7 +90,7 @@ const AdvancedGameScreen = ({
                         </HStack>
 
                         <HStack spacing={2}>
-                            {activeEngine === 'hybrid' ? (
+                            {(selectedAsrMode === 'hybrid' || (selectedAsrMode === 'auto' && activeEngine === 'hybrid')) ? (
                                 <>
                                     <Badge display="flex" alignItems="center" px={2} py={1} borderRadius="md" colorScheme="purple" variant="subtle">
                                         <MaterialSymbol icon="cloud_sync" fontSize="16px" style={{ marginRight: '4px' }} />
@@ -100,6 +101,11 @@ const AdvancedGameScreen = ({
                                         Whisper AI
                                     </Badge>
                                 </>
+                            ) : selectedAsrMode === 'auto' && !activeEngine ? (
+                                <Badge display="flex" alignItems="center" px={2} py={1} borderRadius="md" colorScheme="cyan" variant="subtle">
+                                    <MaterialSymbol icon="auto_awesome" fontSize="16px" style={{ marginRight: '4px' }} />
+                                    Auto Mode
+                                </Badge>
                             ) : (
                                 <Badge display="flex" alignItems="center" px={2} py={1} borderRadius="md" colorScheme="blue" variant="subtle">
                                     <MaterialSymbol icon="mic" fontSize="16px" style={{ marginRight: '4px' }} />

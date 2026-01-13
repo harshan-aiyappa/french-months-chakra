@@ -46,6 +46,7 @@ const AppContent = () => {
       <Routes>
         <Route path="/dashboard" element={<DashboardHome />} />
         <Route path="/advanced-practice" element={<AdvancedPracticeScreen />} />
+        <Route path="/advanced-practice/:asrMode" element={<GameUnit />} />
         <Route path="/practice/:modeId" element={<GameUnit />} />
         <Route path="/settings" element={<SettingsScreen />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />

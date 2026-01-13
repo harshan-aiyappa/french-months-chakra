@@ -35,10 +35,20 @@ const AdvancedPracticeScreen = () => {
     const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
 
     const handleStartPractice = () => {
-        // Dispatch Redux action FIRST to set asrMode in state
+        // Map asrMode to URL-friendly route names
+        const asrModeRouteMap = {
+            'native': 'navASR',
+            'hybrid': 'hybASR',
+            'auto': 'autoASR'
+        };
+
+        const routeName = asrModeRouteMap[asrMode] || 'autoASR';
+
+        // Dispatch Redux action for state consistency
         dispatch(startGame({ mode: 'advanced-practice', asrMode }));
-        // Then navigate without state (Redux is source of truth)
-        navigate('/practice/advanced-practice');
+
+        // Navigate to dedicated ASR route
+        navigate(`/advanced-practice/${routeName}`);
     };
 
     const asrModes = [
